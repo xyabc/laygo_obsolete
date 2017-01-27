@@ -28,7 +28,7 @@ __maintainer__ = "Jaeduk Han"
 __email__ = "jdhan@eecs.berkeley.edu"
 __status__ = "Prototype"
 
-from .LayoutIO import *
+from . import LayoutIO
 from .LayoutDB import *
 from .LayoutObject import * 
 import numpy as np

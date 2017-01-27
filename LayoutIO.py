@@ -167,7 +167,7 @@ def export_GDS(db, libname, cellname, filename, layermapfile="default.layermap",
         logging.debug('ExportGDS: Structure:' + sn)
         s_export = gdsii.structure.Structure(sn)
         lib_export.append(s_export)
-        for p in s['rects'].itervalues():  # rect generation
+        for p in s['rects'].values():  # rect generation
             if p.xy.ndim == 2:
                 xy = np.expand_dims(p.xy / logical_unit, axis=0)  # extend dims for iteration
             else:
@@ -184,7 +184,7 @@ def export_GDS(db, libname, cellname, filename, layermapfile="default.layermap",
                 l = layermap[p.layer[0]][p.layer[1]]
                 s_export.append(gdsii.elements.Boundary(l[0], l[1], c))
                 logging.debug('ExportGDS: Rect:' + p.name + ' layer:' + str(l) + ' xy:' + str(c))
-        for p in s['pins'].itervalues():  # pin generation
+        for p in s['pins'].values():  # pin generation
             if p.xy.ndim == 2:
                 xy = np.expand_dims(p.xy / logical_unit, axis=0)  # extend dims for iteration
             else:
@@ -199,7 +199,7 @@ def export_GDS(db, libname, cellname, filename, layermapfile="default.layermap",
                 t.mag = pin_label_height
                 s_export.append(t)
                 logging.debug('ExportGDS: Pin:' + p.name + ' net:' + p.netname + ' layer:' + str(l) + ' xy:' + str(c))
-        for t in s['texts'].itervalues():  # text generation
+        for t in s['texts'].values():  # text generation
             if t.xy.ndim == 1:
                 xy = np.expand_dims(t.xy / logical_unit, axis=0)  # extend dims for iteration
             else:
@@ -211,7 +211,7 @@ def export_GDS(db, libname, cellname, filename, layermapfile="default.layermap",
                 _t.mag = text_height
                 s_export.append(_t)
                 logging.debug('ExportGDS: Text:' + t.name + ' text:' + t.text + ' layer:' + str(l) + ' xy:' + str(_xy))
-        for inst in s['instances'].itervalues():  # instance generation
+        for inst in s['instances'].values():  # instance generation
             if inst.xy.ndim == 1:
                 xy = np.expand_dims(inst.xy / logical_unit, axis=0)  # extend dims for iteration
             else:
@@ -277,7 +277,7 @@ def export_BAG(db, libname, cellname, prj, array_delimiter=['[', ']'], via_tech=
         rect_list = [];
         via_list = [];
         pin_list = []
-        for r in s['rects'].itervalues():  # rect generation
+        for r in s['rects'].values():  # rect generation
             if r.xy.ndim == 2:
                 xy = np.expand_dims(r.xy, axis=0)  # extend dims for iteration
             else:
@@ -292,7 +292,7 @@ def export_BAG(db, libname, cellname, prj, array_delimiter=['[', ']'], via_tech=
                 if not (_xy[0]==_xy[1]).all(): #xy0 and xy1 should not be the same
                     rect_list.append({'layer': r.layer, 'bbox': _xy.tolist()})
                     logging.debug('ExportBAG: Rect:' + r.name + ' layer:' + str(r.layer) + ' xy:' + str(_xy.tolist()))
-        for p in s['pins'].itervalues():  # pin generation
+        for p in s['pins'].values():  # pin generation
             if p.xy.ndim == 2:
                 xy = np.expand_dims(p.xy, axis=0)  # extend dims for iteration
             else:
@@ -308,7 +308,7 @@ def export_BAG(db, libname, cellname, prj, array_delimiter=['[', ']'], via_tech=
                                  'bbox': bnd.tolist()})
                 logging.debug('ExportBAG: Pin:' + p.name + ' net:' + p.netname + ' layer:' + str(p.layer) +
                               ' xy:' + str(bnd.tolist()))
-        for inst in s['instances'].itervalues():  # instance generation
+        for inst in s['instances'].values():  # instance generation
             if inst.xy.ndim == 1:
                 xy = np.expand_dims(inst.xy, axis=0)  # extend dims for iteration
             else:

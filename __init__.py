@@ -24,7 +24,7 @@
 
 """laygo package"""
 
-from .LayoutIO import *
+from . import LayoutIO
 from .LayoutDB import *
 from .LayoutObject import *
 from .BaseLayoutGenerator import *

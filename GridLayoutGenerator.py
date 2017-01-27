@@ -742,7 +742,7 @@ class GridLayoutGenerator(BaseLayoutGenerator):
         for sn in cellname:
             s = db.design[libname][sn]
             if sn.startswith(placementgrid_prefix):  # placementgrid
-                for r in s['rects'].itervalues():
+                for r in s['rects'].values():
                     if r.layer==layer_boundary: #boundary layer
                         bx1, bx2 = sorted(r.xy[:,0].tolist()) #need to be changed..
                         by1, by2 = sorted(r.xy[:,1].tolist())
@@ -755,7 +755,7 @@ class GridLayoutGenerator(BaseLayoutGenerator):
                 xwidth=[]
                 ygrid=[]
                 ywidth=[]
-                for r in s['rects'].itervalues():
+                for r in s['rects'].values():
                     if r.layer==layer_boundary: #boundary layer
                         bx1, bx2 = sorted(r.xy[:,0].tolist()) #need to be changed..
                         by1, by2 = sorted(r.xy[:,1].tolist())
@@ -781,7 +781,7 @@ class GridLayoutGenerator(BaseLayoutGenerator):
                 #via load
                 viamap=dict()
                 gdb.sel_library(libname)
-                for i in s['instances'].itervalues(): #via
+                for i in s['instances'].values(): #via
                     vcoord=gdb.get_absgrid_coord_xy(sn, i.xy)
                     if not i.cellname in viamap: viamap[i.cellname]=vcoord
                     else: viamap[i.cellname]=np.vstack((viamap[i.cellname],vcoord))
@@ -794,7 +794,7 @@ class GridLayoutGenerator(BaseLayoutGenerator):
             else: #normal template
                 #find the boundary
                 bnd=np.array(([0, 0],[0, 0]))
-                for r in s['rects'].itervalues():
+                for r in s['rects'].values():
                     if r.layer==layer_boundary: #boundary layer
                         bx1, bx2 = sorted(r.xy[:,0].tolist()) #need to be changed..
                         by1, by2 = sorted(r.xy[:,1].tolist())
@@ -803,8 +803,8 @@ class GridLayoutGenerator(BaseLayoutGenerator):
                         bnd=np.vstack([ll,ur])
                 #find pins
                 pindict=dict()
-                for t in s['texts'].itervalues():
-                    for r in s['rects'].itervalues():
+                for t in s['texts'].values():
+                    for r in s['rects'].values():
                         if r.layer==t.layer: #boundary layer
                             bx1, bx2 = sorted(r.xy[:,0].tolist()) #need to be changed..
                             by1, by2 = sorted(r.xy[:,1].tolist())
