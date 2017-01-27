@@ -1,0 +1,21 @@
+#default_laygo_config file
+metal_layers: #metal layers
+- [M0, donotuse]
+- [M1, drawing]
+- [M2, drawing]
+- [M3, drawing]
+- [M4, drawing]
+- [M5, drawing]
+- [M6, drawing]
+pin_layers: #pin layers
+- [text, text]
+- [M1, text]
+- [M2, text]
+- [M3, text]
+- [M4, text]
+- [M5, text]
+- [M6, text]
+prboundary_layer: [prBoundary, drawing] #boundary layer
+tech_lib: laygo10n
+text_layer: [text, text]
+physical_resolution: 0.001

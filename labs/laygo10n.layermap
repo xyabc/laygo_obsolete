@@ -1,0 +1,20 @@
+#technology layer information for gds export
+#you may find this in the cadence techlib directory
+#layername layerpurpose stream# datatype
+text        text    100 0
+prBoundary  drawing 101 0
+M1          drawing 1   0
+M1          text    1   1
+M2          drawing 2   0
+M2          text    2   1
+M3          drawing 3   0
+M3          text    3   1
+M4          drawing 4   0
+M4          text    4   1
+M5          drawing 5   0
+M5          text    5   1
+M6          drawing 6   0
+M6          text    6   1
+M7          drawing 7   0
+M7          text    7   1
+

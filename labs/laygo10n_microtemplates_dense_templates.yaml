@@ -1,0 +1,327 @@
+laygo10n_microtemplates_dense:
+  nmos4_fast_boundary:
+    pins: {}
+    xy:
+    - [0.0, 0.0]
+    - [0.2, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.2, 0.7]
+  nmos4_fast_center_2stack:
+    pins:
+      D0:
+        layer: [M1, text]
+        xy0: [0.35, 0.2]
+        xy1: [0.45, 0.4]
+      G0:
+        layer: [M1, text]
+        xy0: [-0.05, 0.5]
+        xy1: [0.05, 0.6]
+      G1:
+        layer: [M1, text]
+        xy0: [0.35, 0.5]
+        xy1: [0.45, 0.6]
+      S0:
+        layer: [M1, text]
+        xy0: [-0.05, 0.2]
+        xy1: [0.05, 0.4]
+    xy:
+    - [0.0, 0.0]
+    - [0.4, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.4, 0.7]
+  nmos4_fast_center_nf1_left:
+    pins:
+      D0:
+        layer: [M1, text]
+        xy0: [0.15, 0.2]
+        xy1: [0.25, 0.4]
+      G0:
+        layer: [M1, text]
+        xy0: [-0.05, 0.5]
+        xy1: [0.05, 0.6]
+      S0:
+        layer: [M1, text]
+        xy0: [-0.05, 0.2]
+        xy1: [0.05, 0.4]
+    xy:
+    - [0.0, 0.0]
+    - [0.2, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.2, 0.7]
+  nmos4_fast_center_nf1_right:
+    pins:
+      D0:
+        layer: [M1, text]
+        xy0: [0.15, 0.2]
+        xy1: [0.25, 0.4]
+      G0:
+        layer: [M1, text]
+        xy0: [0.15, 0.5]
+        xy1: [0.25, 0.6]
+      S0:
+        layer: [M1, text]
+        xy0: [-0.05, 0.2]
+        xy1: [0.05, 0.4]
+    xy:
+    - [0.0, 0.0]
+    - [0.2, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.2, 0.7]
+  nmos4_fast_center_nf2:
+    pins:
+      D0:
+        layer: [M1, text]
+        xy0: [0.15, 0.2]
+        xy1: [0.25, 0.4]
+      G0:
+        layer: [M1, text]
+        xy0: [0.15, 0.5]
+        xy1: [0.25, 0.6]
+      S0:
+        layer: [M1, text]
+        xy0: [-0.05, 0.2]
+        xy1: [0.05, 0.4]
+      S1:
+        layer: [M1, text]
+        xy0: [0.35, 0.2]
+        xy1: [0.45, 0.4]
+    xy:
+    - [0.0, 0.0]
+    - [0.4, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.4, 0.7]
+  nmos4_fast_dmy_nf2:
+    pins:
+      D0:
+        layer: [M1, text]
+        xy0: [0.35, 0.2]
+        xy1: [0.45, 0.4]
+      S0:
+        layer: [M1, text]
+        xy0: [-0.05, 0.2]
+        xy1: [0.05, 0.4]
+    xy:
+    - [0.0, 0.0]
+    - [0.4, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.4, 0.7]
+  nmos4_fast_left:
+    pins: {}
+    xy:
+    - [0.0, 0.0]
+    - [0.4, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.4, 0.7]
+  nmos4_fast_right:
+    pins: {}
+    xy:
+    - [0.0, 0.0]
+    - [0.4, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.4, 0.7]
+  nmos4_fast_space:
+    pins: {}
+    xy:
+    - [0.0, 0.0]
+    - [0.2, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.2, 0.7]
+  nmos4_fast_tap:
+    pins:
+      TAP0:
+        layer: [M1, text]
+        xy0: [0.35, 0.2]
+        xy1: [0.45, 0.4]
+      TAP1:
+        layer: [M1, text]
+        xy0: [0.55, 0.2]
+        xy1: [0.65, 0.4]
+    xy:
+    - [0.0, 0.0]
+    - [1.0, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [1.0, 0.7]
+  pmos4_fast_boundary:
+    pins: {}
+    xy:
+    - [0.0, 0.0]
+    - [0.2, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.2, 0.7]
+  pmos4_fast_center_2stack:
+    pins:
+      D0:
+        layer: [M1, text]
+        xy0: [0.35, 0.2]
+        xy1: [0.45, 0.4]
+      G0:
+        layer: [M1, text]
+        xy0: [-0.05, 05]
+        xy1: [0.05, 0.6]
+      G1:
+        layer: [M1, text]
+        xy0: [0.35, 0.5]
+        xy1: [0.45, 0.6]
+      S0:
+        layer: [M1, text]
+        xy0: [-0.05, 0.2]
+        xy1: [0.05, 0.4]
+    xy:
+    - [0.0, 0.0]
+    - [0.4, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.4, 0.7]
+  pmos4_fast_center_nf1_left:
+    pins:
+      D0:
+        layer: [M1, text]
+        xy0: [0.15, 0.2]
+        xy1: [0.25, 0.4]
+      G0:
+        layer: [M1, text]
+        xy0: [-0.05, 0.5]
+        xy1: [0.05, 0.6]
+      S0:
+        layer: [M1, text]
+        xy0: [-0.05, 0.2]
+        xy1: [0.05, 0.4]
+    xy:
+    - [0.0, 0.0]
+    - [0.2, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.2, 0.7]
+  pmos4_fast_center_nf1_right:
+    pins:
+      D0:
+        layer: [M1, text]
+        xy0: [0.15, 0.2]
+        xy1: [0.25, 0.4]
+      G0:
+        layer: [M1, text]
+        xy0: [0.15, 0.5]
+        xy1: [0.25, 0.6]
+      S0:
+        layer: [M1, text]
+        xy0: [-0.05, 0.2]
+        xy1: [0.05, 0.4]
+    xy:
+    - [0.0, 0.0]
+    - [0.2, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.2, 0.7]
+  pmos4_fast_center_nf2:
+    pins:
+      D0:
+        layer: [M1, text]
+        xy0: [0.15, 0.2]
+        xy1: [0.25, 0.4]
+      G0:
+        layer: [M1, text]
+        xy0: [0.15, 0.5]
+        xy1: [0.25, 0.6]
+      S0:
+        layer: [M1, text]
+        xy0: [-0.05, 0.2]
+        xy1: [0.05, 0.4]
+      S1:
+        layer: [M1, text]
+        xy0: [0.35, 0.2]
+        xy1: [0.45, 0.4]
+    xy:
+    - [0.0, 0.0]
+    - [0.4, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.4, 0.7]
+  pmos4_fast_dmy_nf2:
+    pins:
+      D0:
+        layer: [M1, text]
+        xy0: [0.35, 0.2]
+        xy1: [0.45, 0.4]
+      S0:
+        layer: [M1, text]
+        xy0: [-0.05, 0.2]
+        xy1: [0.05, 0.4]
+    xy:
+    - [0.0, 0.0]
+    - [0.4, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.4, 0.7]
+  pmos4_fast_left:
+    pins: {}
+    xy:
+    - [0.0, 0.0]
+    - [0.4, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.4, 0.7]
+  pmos4_fast_right:
+    pins: {}
+    xy:
+    - [0.0, 0.0]
+    - [0.4, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.4, 0.7]
+  pmos4_fast_space:
+    pins: {}
+    xy:
+    - [0.0, 0.0]
+    - [0.2, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [0.2, 0.7]
+  pmos4_fast_tap:
+    pins:
+      TAP0:
+        layer: [M1, text]
+        xy0: [0.35, 0.2]
+        xy1: [0.45, 0.4]
+      TAP1:
+        layer: [M1, text]
+        xy0: [0.55, 0.2]
+        xy1: [0.65, 0.4]
+    xy:
+    - [0.0, 0.0]
+    - [1, 0.7]
+    xy0: [0.0, 0.0]
+    xy1: [1, 0.7]
+  pwrplug_M2_M3:
+    pins: {}
+    xy:
+    - [0.0, 0.0]
+    - [1, 1.4]
+    xy0: [0.0, 0.0]
+    xy1: [1, 1.4]
+  via_M1_M2_0:
+    pins: {}
+    xy:
+    - [0, 0]
+    - [0, 0]
+    xy0: [0, 0]
+    xy1: [0, 0]
+  via_M2_M3_0:
+    pins: {}
+    xy:
+    - [0, 0]
+    - [0, 0]
+    xy0: [0, 0]
+    xy1: [0, 0]
+  via_M3_M4_0:
+    pins: {}
+    xy:
+    - [0, 0]
+    - [0, 0]
+    xy0: [0, 0]
+    xy1: [0, 0]
+  via_M4_M5_0:
+    pins: {}
+    xy:
+    - [0, 0]
+    - [0, 0]
+    xy0: [0, 0]
+    xy1: [0, 0]
+  via_M5_M6_0:
+    pins: {}
+    xy:
+    - [0, 0]
+    - [0, 0]
+    xy0: [0, 0]
+    xy1: [0, 0]
