@@ -283,12 +283,6 @@ def export_BAG(db, libname, cellname, prj, array_delimiter=['[', ']'], via_tech=
             else:
                 xy = r.xy
             for _xy in xy:
-                #bx1, bx2 = sorted(_xy[:,0].tolist()) #need to be changed..
-                #by1, by2 = sorted(_xy[:,1].tolist())
-                #ll = np.array([bx1, by1])  # lower-left
-                #ur = np.array([bx2, by2])  # upper-right
-                #bnd=np.vstack([ll,ur])
-                #rect_list.append({'layer': r.layer, 'bbox': bnd.tolist()})
                 if not (_xy[0]==_xy[1]).all(): #xy0 and xy1 should not be the same
                     rect_list.append({'layer': r.layer, 'bbox': _xy.tolist()})
                     logging.debug('ExportBAG: Rect:' + r.name + ' layer:' + str(r.layer) + ' xy:' + str(_xy.tolist()))
@@ -325,12 +319,11 @@ def export_BAG(db, libname, cellname, prj, array_delimiter=['[', ']'], via_tech=
                 x = inst.spacing[1]
                 inst_list.append({'loc': _xy, 'name': inst.name, 'lib': inst.libname,
                                   'sp_cols': eval(repr(inst.spacing[0])), 'sp_rows': eval(repr(inst.spacing[1])),
-                                  'cell': inst.cellname, 'num_cols': inst.shape[0], 'num_rows': inst.shape[1],
+                                  'cell': inst.cellname, 'num_cols': int(inst.shape[0]), 'num_rows': int(inst.shape[1]),
                                   'orient': inst.transform, 'view': 'layout'})
 
         logging.debug('ExportBAG: rect_list:' + str(rect_list))
         logging.debug('ExportBAG: inst_list:' + str(inst_list))
-        #prj.instantiate_layout(libname, sn, 'layout', via_tech, inst_list, rect_list, via_list, pin_list)
         prj.instantiate_layout(libname, 'layout', via_tech, [[sn, inst_list, rect_list, via_list, pin_list]])
 
 def export_yaml(db, libname, cellname, filename):
