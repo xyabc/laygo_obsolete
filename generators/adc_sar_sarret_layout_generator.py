@@ -127,7 +127,7 @@ def generate_sarret(laygen, objectname_pfix, templib_logic, placement_grid,
                                         pdict[idff[i].name]['O'][1] + np.array([-6, 2]), rg_m3m4)
         xy=laygen.get_rect_xy(radcout0.name, rg_m4m5, sort=True)
         rh0, radcout1 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], xy[0],
-                                   np.array([xy[1][0]-6+int(i/num_bits_row), 2]), rg_m4m5)
+                                   np.array([xy[1][0]-6+2*int(i/num_bits_row), 2]), rg_m4m5)
         laygen.create_boundary_pin_form_rect(radcout1, rg_m4m5, 'ADCOUT<' + str(num_bits - i - 1) + '>',
                                              laygen.layers['pin'][5], size=6, direction='bottom')
         #laygen.pin(name='ADCOUT<'+str(num_bits-i-1)+'>', layer=laygen.layers['pin'][3], xy=pdict[idff[i].name]['O'], gridname=rg_m3m4)
