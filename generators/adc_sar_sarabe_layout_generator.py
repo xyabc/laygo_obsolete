@@ -200,7 +200,7 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
     # space insertion if number of rows is odd
     yck=(laygen.get_template_size(name=sarclkdelay_name, gridname=pg, libname=workinglib)[1]+\
          laygen.get_template_size(name=sarclkgen_name, gridname=pg, libname=workinglib)[1])/ysp
-    for i in range(yck): #boundary cells
+    for i in range(int(yck)): #boundary cells
         if i % 2 == 0:
             devname_bnd_left += ['nmos4_fast_left', 'pmos4_fast_left']
             devname_bnd_right += ['nmos4_fast_right', 'pmos4_fast_right']
