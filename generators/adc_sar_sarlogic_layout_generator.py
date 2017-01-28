@@ -114,7 +114,7 @@ def generate_sarlogic(laygen, objectname_pfix, templib_logic, placement_grid, ro
     rsaopbv0, rsaopb0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], isaopb0_i_xy[0], np.array([x0, y0 + 3]), rg_m3m4)
     rsaombv0, rsaomb0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], isaomb0_i_xy[0], np.array([x0, y0 + 4]), rg_m3m4)
     #vplus/vminus
-    [rv0, rvplus0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], isaopb0_o_xy[0], ioai0_c_xy[0], y0 - 0, rg_m3m4)
+    [rv0, rvplus0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], isaopb0_o_xy[0], ioai0_c_xy[0], y0 - 0 + 6, rg_m3m4)
     [rv0, rvminus0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], isaomb0_o_xy[0], ioai1_c_xy[0], y0 + 1, rg_m3m4)
     #rst/sb
     rrstv0, rrst0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], ioai0_b_xy[0], np.array([x0, y0 - 2]), rg_m3m4)
