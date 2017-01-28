@@ -151,17 +151,6 @@ def generate_sarlogic_array(laygen, objectname_pfix, templib_logic, placement_gr
                                  refinstindex0=np.array([0, 0]),
                                  refinstname1=islogic[i].name, refpinname1='RST',
                                  refinstindex1=np.array([num_bits_row - 1, 0])))
-    # extsel route
-    laygen.route(None, laygen.layers['metal'][3], xy0=np.array([0, 0]), xy1=np.array([0, 0]), gridname0=rg_m3m4,
-                 refinstname0=islogic[0].name, refpinname0='EXTSEL2', refinstindex0=np.array([0, 0]),
-                 refinstname1=islogic[-1].name, refpinname1='EXTSEL2', refinstindex1=np.array([0, 0]))
-    rextsel=[]
-    for i in range(num_row):
-        rextsel.append(
-            laygen.route(None, laygen.layers['metal'][4], xy0=np.array([0, 0]), xy1=np.array([0, 0]), gridname0=rg_m4m5,
-                         refinstname0=islogic[i].name, refpinname0='EXTSEL', refinstindex0=np.array([0, 0]),
-                         refinstname1=islogic[i].name, refpinname1='EXTSEL',
-                         refinstindex1=np.array([num_bits_row - 1, 0])))
     # saopb route
     laygen.route(None, laygen.layers['metal'][3], xy0=np.array([0, 0]), xy1=np.array([0, 0]), gridname0=rg_m3m4,
                  refinstname0=islogic[0].name, refpinname0='SAOPB2', refinstindex0=np.array([0, 0]),
@@ -190,7 +179,6 @@ def generate_sarlogic_array(laygen, objectname_pfix, templib_logic, placement_gr
     rv0, rrst0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], xy[0], np.array([xy[0][0]+4, 2]), rg_m4m5)
     laygen.create_boundary_pin_form_rect(rrst0, rg_m4m5, 'RST', laygen.layers['pin'][5], size=6, direction='bottom')
     #laygen.create_boundary_pin_form_rect(rrst[0], rg_m4m5, "RST", laygen.layers['pin'][4], size=6, direction='left')
-    laygen.create_boundary_pin_form_rect(rextsel[0], rg_m4m5, "EXTSEL", laygen.layers['pin'][4], size=6, direction='left')
     laygen.create_boundary_pin_form_rect(rsaopb[0], rg_m4m5, "SAOPB", laygen.layers['pin'][4], size=6, direction='left')
     laygen.create_boundary_pin_form_rect(rsaomb[0], rg_m4m5, "SAOMB", laygen.layers['pin'][4], size=6, direction='left')
     y1 = laygen.get_template_size(name=islogic[0].cellname, gridname=rg_m4m5, libname=workinglib)[1]
@@ -203,18 +191,6 @@ def generate_sarlogic_array(laygen, objectname_pfix, templib_logic, placement_gr
                                         np.array([pdict_m4m5[islogic[i].name]['SB'][0][0]+1+i+6, 0]), rg_m4m5)
             laygen.create_boundary_pin_form_rect(rsb0, rg_m4m5, 'SB<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='bottom')
             #laygen.pin(name='SB<'+str(i*num_bits_row+j)+'>', layer=laygen.layers['pin'][4], xy=pdict2[islogic[i].name]['SB'], gridname=rg_m3m4)
-            rv0, rext_zpb0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], pdict_m4m5[islogic[i].name]['EXT_ZPB'][0],
-                                             np.array([pdict_m4m5[islogic[i].name]['EXT_ZPB'][0][0]+1+i, 0]), rg_m4m5)
-            laygen.create_boundary_pin_form_rect(rext_zpb0, rg_m4m5, 'EXT_ZPB<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='bottom')
-            #laygen.pin(name='EXT_ZPB<'+str(i*num_bits_row+j)+'>', layer=laygen.layers['pin'][4], xy=pdict2[islogic[i].name]['EXT_ZPB'], gridname=rg_m3m4)
-            rv0, rext_zmb0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], pdict_m4m5[islogic[i].name]['EXT_ZMB'][0],
-                                             np.array([pdict_m4m5[islogic[i].name]['EXT_ZMB'][0][0]+1+i, 0]), rg_m4m5)
-            laygen.create_boundary_pin_form_rect(rext_zmb0, rg_m4m5, 'EXT_ZMB<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='bottom')
-            #laygen.pin(name='EXT_ZMB<'+str(i*num_bits_row+j)+'>', layer=laygen.layers['pin'][4], xy=pdict2[islogic[i].name]['EXT_ZMB'], gridname=rg_m3m4)
-            rv0, rext_zmidb0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], pdict_m4m5[islogic[i].name]['EXT_ZMIDB'][0],
-                                             np.array([pdict_m4m5[islogic[i].name]['EXT_ZMIDB'][0][0]+1+i, 0]), rg_m4m5)
-            laygen.create_boundary_pin_form_rect(rext_zmidb0, rg_m4m5, 'EXT_ZMIDB<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='bottom')
-            #laygen.pin(name='EXT_ZMIDB<'+str(i*num_bits_row+j)+'>', layer=laygen.layers['pin'][4], xy=pdict2[islogic[i].name]['EXT_ZMIDB'], gridname=rg_m3m4)
             rv0, rzp0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], pdict_m4m5[islogic[i].name]['ZP'][0],
                                         np.array([pdict_m4m5[islogic[i].name]['ZP'][0][0]+1+i, y2]), rg_m4m5)
             laygen.create_boundary_pin_form_rect(rzp0, rg_m4m5, 'ZP<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='top')
