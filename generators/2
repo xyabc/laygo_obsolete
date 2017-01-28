@@ -2038,6 +2038,16 @@ def generate_dff(laygen, objectname_pfix, placement_grid, routing_grid_m1m2, rou
         rvdd1_pin_xy = laygen.get_inst_pin_coord("I" + objectname_pfix + 'LCH1INV0', 'VDD', rg_m2m3)
         rvss0_pin_xy = laygen.get_inst_pin_coord(i0.name, 'VSS', rg_m2m3)
         rvss1_pin_xy = laygen.get_inst_pin_coord("I" + objectname_pfix + 'LCH1INV0', 'VSS', rg_m2m3)
+        #debug
+        i = i0
+        t = laygen.templates.get_template(i0.cellname)
+        pinname='VDD'
+        xy0 = i.xy + np.dot(t.pins[pinname]['xy'][0, :], laygen.Mt(i.transform).T)
+        xy1 = i.xy + np.dot(t.pins[pinname]['xy'][1, :], laygen.Mt(i.transform).T)
+        xy=laygen.grids.get_absgrid_coord_region(rg_m2m3, xy0[0], xy1[0])
+        print(laygen.grids.get_phygrid_coord_xy(rg_m2m3, [0,7]))
+        #print(xy0[0], xy1[0] ,xy)
+        #debug end
         laygen.pin(name='VDD', layer=laygen.layers['pin'][2], xy=np.vstack((rvdd0_pin_xy[0],rvdd1_pin_xy[1])), gridname=rg_m1m2)
         laygen.pin(name='VSS', layer=laygen.layers['pin'][2], xy=np.vstack((rvss0_pin_xy[0],rvss1_pin_xy[1])), gridname=rg_m1m2)
 
