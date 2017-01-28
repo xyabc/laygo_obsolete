@@ -69,20 +69,12 @@ def generate_sarlogic(laygen, objectname_pfix, templib_logic, placement_grid, ro
                             gridname=pg, refinstname=ioai1.name, template_libname=templib_logic)
     ind0 = laygen.relplace(name="I" + objectname_pfix + 'ND0', templatename=nand_name,
                            gridname=pg, refinstname=ildno0.name, template_libname=templib_logic)
-    imuxen0 = laygen.relplace(name="I" + objectname_pfix + 'MUXEN0', templatename=inv_name,
-                            gridname=pg, refinstname=ind0.name, template_libname=templib_logic)
-    imux0 = laygen.relplace(name="I" + objectname_pfix + 'MUX0', templatename=mux2to1_name,
-                            gridname=pg, refinstname=imuxen0.name, template_libname=templib_logic)
     izp0 = laygen.relplace(name="I" + objectname_pfix + 'OBUF0', templatename=inv_obuf_name,
-                            gridname=pg, refinstname=imux0.name, template_libname=templib_logic)
-    imux1 = laygen.relplace(name="I" + objectname_pfix + 'MUX1', templatename=mux2to1_name,
-                            gridname=pg, refinstname=izp0.name, template_libname=templib_logic)
+                            gridname=pg, refinstname=ind0.name, template_libname=templib_logic)
     izm0 = laygen.relplace(name="I" + objectname_pfix + 'OBUF1', templatename=inv_obuf_name,
-                            gridname=pg, refinstname=imux1.name, template_libname=templib_logic)
-    imux2 = laygen.relplace(name="I" + objectname_pfix + 'MUX2', templatename=mux2to1_name,
-                            gridname=pg, refinstname=izm0.name, template_libname=templib_logic)
+                            gridname=pg, refinstname=izp0.name, template_libname=templib_logic)
     izmid0 = laygen.relplace(name="I" + objectname_pfix + 'OBUF2', templatename=inv_obuf_name,
-                            gridname=pg, refinstname=imux2.name, template_libname=templib_logic)
+                            gridname=pg, refinstname=izm0.name, template_libname=templib_logic)
 
     # internal pins
     isaopb0_i_xy = laygen.get_inst_pin_coord(isaopb0.name, 'I', rg_m3m4)
@@ -106,23 +98,6 @@ def generate_sarlogic(laygen, objectname_pfix, templib_logic, placement_grid, ro
     ind0_a_xy = laygen.get_inst_pin_coord(ind0.name, 'A', rg_m3m4)
     ind0_b_xy = laygen.get_inst_pin_coord(ind0.name, 'B', rg_m3m4)
     ind0_o_xy = laygen.get_inst_pin_coord(ind0.name, 'O', rg_m3m4)
-    imux0_i0_xy = laygen.get_inst_pin_coord(imux0.name, 'I0', rg_m3m4)
-    imux0_i1_xy = laygen.get_inst_pin_coord(imux0.name, 'I1', rg_m3m4)
-    imux0_en0_xy = laygen.get_inst_pin_coord(imux0.name, 'EN0', rg_m3m4)
-    imux0_en1_xy = laygen.get_inst_pin_coord(imux0.name, 'EN1', rg_m3m4)
-    imux0_o_xy = laygen.get_inst_pin_coord(imux0.name, 'O', rg_m3m4)
-    imuxen0_i_xy = laygen.get_inst_pin_coord(imuxen0.name, 'I', rg_m3m4)
-    imuxen0_o_xy = laygen.get_inst_pin_coord(imuxen0.name, 'O', rg_m3m4)
-    imux1_i0_xy = laygen.get_inst_pin_coord(imux1.name, 'I0', rg_m3m4)
-    imux1_i1_xy = laygen.get_inst_pin_coord(imux1.name, 'I1', rg_m3m4)
-    imux1_en0_xy = laygen.get_inst_pin_coord(imux1.name, 'EN0', rg_m3m4)
-    imux1_en1_xy = laygen.get_inst_pin_coord(imux1.name, 'EN1', rg_m3m4)
-    imux1_o_xy = laygen.get_inst_pin_coord(imux1.name, 'O', rg_m3m4)
-    imux2_i0_xy = laygen.get_inst_pin_coord(imux2.name, 'I0', rg_m3m4)
-    imux2_i1_xy = laygen.get_inst_pin_coord(imux2.name, 'I1', rg_m3m4)
-    imux2_en0_xy = laygen.get_inst_pin_coord(imux2.name, 'EN0', rg_m3m4)
-    imux2_en1_xy = laygen.get_inst_pin_coord(imux2.name, 'EN1', rg_m3m4)
-    imux2_o_xy = laygen.get_inst_pin_coord(imux2.name, 'O', rg_m3m4)
     izp0_i_xy = laygen.get_inst_pin_coord(izp0.name, 'I', rg_m3m4)
     izp0_o_xy = laygen.get_inst_pin_coord(izp0.name, 'O', rg_m3m4)
     izm0_i_xy = laygen.get_inst_pin_coord(izm0.name, 'I', rg_m3m4)
@@ -149,35 +124,19 @@ def generate_sarlogic(laygen, objectname_pfix, templib_logic, placement_grid, ro
     #ldpo
     [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], ioai0_o_xy[0], ildpo0_i_xy[0], y0 + 0 - 3, rg_m3m4, extendl=3, extendr=1)
     [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], ildpo0_o_xy[0], ioai0_a_xy[0], y0 - 4, rg_m3m4)
-    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], ildpo0_o_xy[0], imux0_i0_xy[0], y0 - 4, rg_m3m4)
+    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], ildpo0_o_xy[0], izp0_i_xy[0], y0 - 4, rg_m3m4)
     #ldno
     [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], ioai1_o_xy[0], ildno0_i_xy[0], y0 + 0, rg_m3m4, extendl=2, extendr=2)
     [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], ildno0_o_xy[0], ioai1_a_xy[0], y0 - 3, rg_m3m4)
-    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], ildno0_o_xy[0], imux1_i0_xy[0], y0 - 3, rg_m3m4)
+    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], ildno0_o_xy[0], izm0_i_xy[0], y0 - 3, rg_m3m4)
     #nand input
     [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], ildpo0_o_xy[0], ind0_b_xy[0], y0 - 4, rg_m3m4)
     [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], ildno0_o_xy[0], ind0_a_xy[0], y0 - 3, rg_m3m4)
     #nand output(ldndo)
-    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], ind0_o_xy[0], imux2_i0_xy[0], y0 - 1, rg_m3m4)
-    #mux en
-    rextselv0, rextsel0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], imuxen0_i_xy[0], np.array([x0, y0 + 2]), rg_m3m4)
-    rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], imux0_en1_xy[0], np.array([x0, y0 + 2]), rg_m3m4)
-    rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], imux1_en1_xy[0], np.array([x0, y0 + 2]), rg_m3m4)
-    rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], imux2_en1_xy[0], np.array([x0, y0 + 2]), rg_m3m4)
-    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], imuxen0_o_xy[0], imux0_en0_xy[0], y0 + 1, rg_m3m4)
-    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], imuxen0_o_xy[0], imux1_en0_xy[0], y0 + 1, rg_m3m4)
-    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], imuxen0_o_xy[0], imux2_en0_xy[0], y0 + 1, rg_m3m4)
-    #mux ext
-    rv0, rext_zpb0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], imux0_i1_xy[0], np.array([imux0_i1_xy[0][0]-4, y0 + 0]), rg_m3m4)
-    rv0, rext_zmb0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], imux1_i1_xy[0], np.array([imux1_i1_xy[0][0]-4, y0 + 0]), rg_m3m4)
-    rv0, rext_zmidb0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], imux2_i1_xy[0], np.array([imux2_i1_xy[0][0]-4, y0 + 0]), rg_m3m4)
-    #mux output
-    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], imux0_o_xy[0], izp0_i_xy[0], y0 + 0, rg_m3m4)
-    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], imux1_o_xy[0], izm0_i_xy[0], y0 + 0, rg_m3m4)
-    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], imux2_o_xy[0], izmid0_i_xy[0], y0 + 0, rg_m3m4)
+    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], ind0_o_xy[0], izmid0_i_xy[0], y0 - 1, rg_m3m4)
     #final output
-    rv0, rzp0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], izp0_o_xy[0], np.array([x1, y0 - 4]), rg_m3m4)
-    rv0, rzm0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], izm0_o_xy[0], np.array([x1, y0 - 3]), rg_m3m4)
+    rv0, rzp0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], izp0_o_xy[0], np.array([x1, y0 - 2]), rg_m3m4)
+    rv0, rzm0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], izm0_o_xy[0], np.array([x1, y0 - 0]), rg_m3m4)
     rv0, rzmid0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], izmid0_o_xy[0], np.array([x1, y0 - 1]), rg_m3m4)
    
     #pins 
@@ -189,11 +148,6 @@ def generate_sarlogic(laygen, objectname_pfix, templib_logic, placement_grid, ro
     laygen.create_boundary_pin_form_rect(rrst0, rg_m3m4, "RST", laygen.layers['pin'][4], size=6, direction='left')
     #laygen.pin_from_rect('RST2', laygen.layers['pin'][3], rrstv0, gridname=rg_m3m4, netname='RST')
     laygen.pin_from_rect('RST2', laygen.layers['pin'][3], rrstv1, gridname=rg_m3m4, netname='RST')
-    laygen.create_boundary_pin_form_rect(rextsel0, rg_m3m4, "EXTSEL", laygen.layers['pin'][4], size=6, direction='left')
-    laygen.pin_from_rect('EXTSEL2', laygen.layers['pin'][3], rextselv0, gridname=rg_m3m4, netname='EXTSEL')
-    laygen.create_boundary_pin_form_rect(rext_zpb0, rg_m3m4, "EXT_ZPB", laygen.layers['pin'][4], size=4, direction='left')
-    laygen.create_boundary_pin_form_rect(rext_zmb0, rg_m3m4, "EXT_ZMB", laygen.layers['pin'][4], size=4, direction='left')
-    laygen.create_boundary_pin_form_rect(rext_zmidb0, rg_m3m4, "EXT_ZMIDB", laygen.layers['pin'][4], size=4, direction='left')
     laygen.create_boundary_pin_form_rect(rzp0, rg_m3m4, "ZP", laygen.layers['pin'][4], size=6, direction='right')
     laygen.create_boundary_pin_form_rect(rzm0, rg_m3m4, "ZM", laygen.layers['pin'][4], size=6, direction='right')
     laygen.create_boundary_pin_form_rect(rzmid0, rg_m3m4, "ZMID", laygen.layers['pin'][4], size=6, direction='right')
