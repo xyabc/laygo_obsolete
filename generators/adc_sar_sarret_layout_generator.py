@@ -104,6 +104,7 @@ def generate_sarret(laygen, objectname_pfix, templib_logic, placement_grid,
     y0 = pdict[idff[0].name]['I'][0][1]+2
     x1 = laygen.get_inst_xy(name=idff[-1].name, gridname=rg_m3m4)[0]\
          +laygen.get_template_size(name=idff[-1].cellname, gridname=rg_m3m4, libname=templib_logic)[0] - 1
+    y1_m4m5 = laygen.get_inst_xy(name=idff[-1].name, gridname=rg_m4m5)[1] - 2
 
     #clk route
     rclk=[]
@@ -113,10 +114,29 @@ def generate_sarret(laygen, objectname_pfix, templib_logic, placement_grid,
         rclk.append(rh0)
     #pins
     for i in range(num_bits):
-        laygen.pin(name='ZP<'+str(num_bits-i-1)+'>', layer=laygen.layers['pin'][3], xy=pdict[idff[i].name]['I'], gridname=rg_m3m4)
+        rv0, rzp0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], pdict[idff[i].name]['I'][1],
+                                        pdict[idff[i].name]['I'][1] + np.array([-6, 2]), rg_m3m4)
+        xy=laygen.get_rect_xy(rzp0.name, rg_m4m5, sort=True)
+        rh0, rzp1 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], xy[0],
+                                   np.array([xy[1][0]-6+int(i/num_bits_row), y1_m4m5]), rg_m4m5)
+        laygen.create_boundary_pin_form_rect(rzp1, rg_m4m5, 'ZP<' + str(num_bits - i - 1) + '>',
+                                             laygen.layers['pin'][5], size=6, direction='top')
+        #laygen.pin(name='ZP<'+str(num_bits-i-1)+'>', layer=laygen.layers['pin'][3], xy=pdict[idff[i].name]['I'], gridname=rg_m3m4)
     for i in range(num_bits):
-        laygen.pin(name='ADCOUT<'+str(num_bits-i-1)+'>', layer=laygen.layers['pin'][3], xy=pdict[idff[i].name]['O'], gridname=rg_m3m4)
-    laygen.create_boundary_pin_form_rect(rclk[0], rg_m3m4, "CLK", laygen.layers['pin'][4], size=4, direction='left')
+        rv0, radcout0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], pdict[idff[i].name]['O'][1],
+                                        pdict[idff[i].name]['O'][1] + np.array([-6, 2]), rg_m3m4)
+        xy=laygen.get_rect_xy(radcout0.name, rg_m4m5, sort=True)
+        rh0, radcout1 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], xy[0],
+                                   np.array([xy[1][0]-6+int(i/num_bits_row), 2]), rg_m4m5)
+        laygen.create_boundary_pin_form_rect(radcout1, rg_m4m5, 'ADCOUT<' + str(num_bits - i - 1) + '>',
+                                             laygen.layers['pin'][5], size=6, direction='bottom')
+        #laygen.pin(name='ADCOUT<'+str(num_bits-i-1)+'>', layer=laygen.layers['pin'][3], xy=pdict[idff[i].name]['O'], gridname=rg_m3m4)
+    xy=laygen.get_rect_xy(rclk[0].name, rg_m4m5, sort=True)
+    rv0, rclk0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], xy[0],
+                                 np.array([xy[0][0]+6, 2]), rg_m4m5)
+    laygen.create_boundary_pin_form_rect(rclk0, rg_m4m5, 'CLK',
+                                         laygen.layers['pin'][5], size=6, direction='bottom')
+    #laygen.create_boundary_pin_form_rect(rclk[0], rg_m3m4, "CLK", laygen.layers['pin'][4], size=4, direction='left')
 
     # power pin
     pwr_dim=laygen.get_template_size(name=itapl[-1].cellname, gridname=rg_m2m3, libname=itapl[-1].libname)

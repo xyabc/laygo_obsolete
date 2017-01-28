@@ -235,53 +235,67 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
                             transform_right=transform_bnd_right,
                             origin=origin)
 
-
-
+    #route
+    #reference coordinates
+    pdict_m4m5 = laygen.get_inst_pin_coord(None, None, rg_m4m5)
+    pdict_m5m6 = laygen.get_inst_pin_coord(None, None, rg_m5m6)
+    x_right = laygen.get_inst_xy(name=iret.name, gridname=rg_m5m6)[0]\
+             +laygen.get_template_size(name=iret.cellname, gridname=rg_m5m6, libname=workinglib)[0] - 1
+    xysl = laygen.get_inst_xy(name=isl.name, gridname=rg_m5m6)
+    xyret = laygen.get_inst_xy(name=iret.name, gridname=rg_m5m6)
+    xyfsm = laygen.get_inst_xy(name=ifsm.name, gridname=rg_m5m6)
+    # ret to fsm (clk)
+    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
+                                       pdict_m5m6[iret.name]['CLK'][0], pdict_m5m6[ifsm.name]['RST'][0], xyfsm[1], rg_m5m6)
+    # sl to fsm route
+    # sb
+    for i in range(num_bits):
+        [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
+                                           pdict_m5m6[ifsm.name]['SB<'+str(i)+'>'][0],
+                                           pdict_m5m6[isl.name]['SB<'+str(i)+'>'][0], xysl[1]-i-1, rg_m5m6)
+    # rst
+    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
+                                       pdict_m5m6[ifsm.name]['RST'][0],
+                                       pdict_m5m6[isl.name]['RST'][0], xysl[1] - num_bits - 1, rg_m5m6)
+    # ext_zpb/zmb/zmidb
+    rextzpb=[]
+    rextzmb=[]
+    rextzmidb=[]
+    x_skip=pdict_m5m6[ifsm.name]['SB<0>'][0][0]
+    offset=0
+    for i in range(num_bits):
+        [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
+                                           pdict_m5m6[isl.name]['EXT_ZPB<'+str(i)+'>'][0],
+                                           np.array([x_right-8-i, 0]), xysl[1]+(2*int(i/2)+1-int(i%2))+1, rg_m5m6)
+        rextzpb.append(rv1)
+        [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
+                                           pdict_m5m6[isl.name]['EXT_ZMB<'+str(i)+'>'][0],
+                                           np.array([x_right-8-i-num_bits-1, 0]),
+                                           xysl[1]+(2*int(i/2)+1-int(i%2))+1+num_bits+1, rg_m5m6)
+        rextzmb.append(rv1)
+        if x_right - 8 - i - 2 * num_bits - 2 == x_skip:
+            offset+=1
+        [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
+                                           pdict_m5m6[isl.name]['EXT_ZMIDB<'+str(i)+'>'][0],
+                                           np.array([x_right-8-i-2*num_bits-2-offset, 0]),
+                                           xysl[1]+(2*int(i/2)+1-int(i%2))+1+2*num_bits+2,
+                                           rg_m5m6)
+        rextzmidb.append(rv1)
+    # adcout
+    radcout=[]
+    for i in range(num_bits):
+        laygen.pin(name='ADCOUT<'+str(num_bits-i-1)+'>', layer=laygen.layers['pin'][5],
+                   xy=pdict_m4m5[iret.name]['ADCOUT<'+str(i)+'>'], gridname=rg_m4m5)
     '''
-    for i in range(num_row):
-        if i==0: 
-            itapl.append(laygen.place(name = "I" + objectname_pfix + 'TAPL0', templatename = tap_name,
-                                      gridname = pg, xy=array_origin, template_libname = templib_logic))
-            icdrv.append(laygen.relplace(name = "I" + objectname_pfix + 'C0DRV0', templatename = cdrv_name,
-                                      gridname = pg, refinstname = itapl[-1].name, 
-                                      shape=np.array([num_bits_row, 1]), template_libname = templib_adc)) #C0 driver
-            refi=icdrv[-1].name
-            if not m_space_2x==0:
-                isp2x.append(laygen.relplace(name="I" + objectname_pfix + 'SP2X0', templatename=space_2x_name,
-                             shape = np.array([m_space_2x, 1]), gridname=pg,
-                             refinstname=refi, template_libname=templib_logic))
-                refi = isp2x[-1].name
-            if not m_space_1x==0:
-                isp1x.append(laygen.relplace(name="I" + objectname_pfix + 'SP1X0', templatename=space_1x_name,
-                             shape=np.array([m_space_1x, 1]), gridname=pg,
-                             refinstname=refi, template_libname=templib_logic))
-                refi = isp1x[-1].name
-            itapr.append(laygen.relplace(name = "I" + objectname_pfix + 'TAPR0', templatename = tap_name,
-                                      gridname = pg, refinstname = refi, template_libname = templib_logic))
-
-        else: 
-            if i%2==0: tf='R0'
-            else: tf='MX'
-            itapl.append(laygen.relplace(name = "I" + objectname_pfix + 'TAPL'+str(i), templatename = tap_name,
-                                   gridname = pg, refinstname = itapl[-1].name, transform=tf, 
-                                   direction = 'top', template_libname=templib_logic))
-            icdrv.append(laygen.relplace(name = "I" + objectname_pfix + 'CDRV'+str(i-1), templatename = cdrv_name,
-                                   gridname = pg, refinstname = itapl[-1].name, shape=np.array([num_bits_row, 1]), transform=tf, 
-                                   template_libname=templib_adc))
-            refi = icdrv[-1].name
-            if not m_space_2x==0:
-                isp2x.append(laygen.relplace(name="I" + objectname_pfix + 'SP2X'+str(i), templatename=space_2x_name,
-                             shape = np.array([m_space_2x, 1]), transform=tf, gridname=pg,
-                             refinstname=refi, template_libname=templib_logic))
-                refi = isp2x[-1].name
-            if not m_space_1x==0:
-                isp1x.append(laygen.relplace(name="I" + objectname_pfix + 'SP1X'+str(i), templatename=space_1x_name,
-                             shape=np.array([m_space_1x, 1]), transform=tf, gridname=pg,
-                             refinstname=refi, template_libname=templib_logic))
-                refi = isp1x[-1].name
-            itapr.append(laygen.relplace(name = "I" + objectname_pfix + 'TAPR'+str(i), templatename = tap_name,
-                                   gridname = pg, refinstname = refi, transform=tf, template_libname = templib_logic))
-
+    for i in num_bits:
+        radcout.append(
+            laygen.route(None, laygen.layers['metal'][3], xy0=np.array([0, 0]), xy1=np.array([0, 0]), gridname0=rg_m3m4,
+                         refinstname0=icdrv[i].name, refpinname0='VREF<0>', refinstindex0=np.array([0, 0]),
+                         refinstname1=icdrv[i].name, refpinname1='VREF<0>',
+                         refinstindex1=np.array([num_bits_row - 1, 0])))
+        pdict[iret.name]['ADCOUT<'+str(i)+'>'][0]
+    '''
+    '''
     # internal pins
     icdrv_en0_xy=[]
     icdrv_en1_xy=[]
