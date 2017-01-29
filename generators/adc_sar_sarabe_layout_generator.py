@@ -349,7 +349,11 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
     laygen.pin(name='UP', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['UP'], gridname=rg_m4m5)
     laygen.pin(name='DONE', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['DONE'], gridname=rg_m4m5)
     laygen.pin(name='SARCLK', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['CLKO'], gridname=rg_m4m5)
-    laygen.pin(name='SARCLKB', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['CLKOB'], gridname=rg_m4m5)
+    rh0, rsclkb0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
+                                   pdict_m4m5[ickg.name]['CLKOB'][0],
+                                   np.array([pdict_m4m5[ickg.name]['CLKOB'][1][0]+2, y_top]), rg_m4m5)
+    laygen.create_boundary_pin_form_rect(rsclkb0, rg_m4m5, 'SARCLKB', laygen.layers['pin'][5], size=6, direction='top')
+    #laygen.pin(name='SARCLKB', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['CLKOB'], gridname=rg_m4m5)
     for i in range(num_bits):
         laygen.pin(name='SB<' + str(i) + '>', layer=laygen.layers['pin'][5],
                    xy=pdict_m5m6[isl.name]['SB<' + str(i) + '>'], gridname=rg_m5m6)

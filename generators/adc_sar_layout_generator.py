@@ -100,6 +100,9 @@ def generate_sar(laygen, objectname_pfix, workinglib, placement_grid,
     [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
                                        pdict_m5m6[iabe.name]['SAOMB'][0], pdict_m5m6[iafe.name]['OUTP'][0],
                                        pdict_m5m6[iabe.name]['SAOMB'][0][1] + 6 + 4 * num_bits + 1, rg_m5m6)
+    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
+                                       pdict_m5m6[iabe.name]['SARCLKB'][0], pdict_m5m6[iafe.name]['CLKB'][0],
+                                       pdict_m5m6[iabe.name]['SARCLKB'][0][1] + 6 + 4 * num_bits, rg_m5m6)
     #VDD/VSS pin
     i=0
     for p in pdict_m3m4[iabe.name]:
