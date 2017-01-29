@@ -33,11 +33,12 @@ import os
 #import logging;logging.basicConfig(level=logging.DEBUG)
 
 def generate_sar(laygen, objectname_pfix, workinglib, placement_grid,
-                 routing_grid_m3m4, routing_grid_m5m6, num_bits=8, origin=np.array([0, 0])):
+                 routing_grid_m3m4, routing_grid_m4m5, routing_grid_m5m6, num_bits=8, origin=np.array([0, 0])):
     """generate sar backend """
     pg = placement_grid
 
     rg_m3m4 = routing_grid_m3m4
+    rg_m4m5 = routing_grid_m4m5
     rg_m5m6 = routing_grid_m5m6
 
     sarabe_name = 'sarabe'
@@ -59,6 +60,7 @@ def generate_sar(laygen, objectname_pfix, workinglib, placement_grid,
 
     #reference coordinates
     pdict_m3m4 = laygen.get_inst_pin_coord(None, None, rg_m3m4)
+    pdict_m4m5 = laygen.get_inst_pin_coord(None, None, rg_m4m5)
     pdict_m5m6 = laygen.get_inst_pin_coord(None, None, rg_m5m6)
     #x_right = laygen.get_inst_xy(name=iret.name, gridname=rg_m5m6)[0]\
     #         +laygen.get_template_size(name=iret.cellname, gridname=rg_m5m6, libname=workinglib)[0] - 1
@@ -160,7 +162,13 @@ def generate_sar(laygen, objectname_pfix, workinglib, placement_grid,
         laygen.pin(name='ADCOUT<'+str(i)+'>', layer=laygen.layers['pin'][5], xy=pdict_m5m6[iabe.name]['ADCOUT<'+str(i)+'>'], gridname=rg_m5m6)
     #clk
     laygen.pin(name='CLK', layer=laygen.layers['pin'][5], xy=pdict_m5m6[iabe.name]['RST'], gridname=rg_m5m6)
-
+    #extclk/extclksel
+    laygen.pin(name='EXTCLK', layer=laygen.layers['pin'][4], xy=pdict_m4m5[iabe.name]['EXTCLK'], gridname=rg_m4m5)
+    laygen.pin(name='EXTSEL_CLK', layer=laygen.layers['pin'][4], xy=pdict_m4m5[iabe.name]['EXTSEL_CLK'], gridname=rg_m4m5)
+    #ckdsel
+    for i in range(4):
+        laygen.pin(name='CKDSEL<' + str(i) + '>', layer=laygen.layers['pin'][4],
+                   xy=pdict_m4m5[iabe.name]['CKDSEL<' + str(i) + '>'], gridname=rg_m4m5)
     '''
     #route
     #reference coordinates
@@ -332,7 +340,7 @@ if __name__ == '__main__':
     laygen.add_cell(cellname)
     laygen.sel_cell(cellname)
     generate_sar(laygen, objectname_pfix='SA0', workinglib=workinglib,
-                 placement_grid=pg, routing_grid_m3m4=rg_m3m4, routing_grid_m5m6=rg_m5m6,
+                 placement_grid=pg, routing_grid_m3m4=rg_m3m4, routing_grid_m4m5=rg_m4m5, routing_grid_m5m6=rg_m5m6,
                  num_bits=8, origin=np.array([0, 0]))
     laygen.add_template_from_cell()
 
