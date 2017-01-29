@@ -254,7 +254,7 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
     [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5],
                                            pdict_m5m6[ickg.name]['DONE'][0],
                                            pdict_m5m6[ickd.name]['I'][0],
-                                           pdict_m5m6[ickd.name]['I'][0][0], rg_m4m5)
+                                           pdict_m5m6[ickd.name]['I'][0][0]+2, rg_m4m5)
     # up
     [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5],
                                            pdict_m5m6[ickg.name]['UP'][0],
@@ -292,7 +292,7 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
     for i in range(num_bits):
         [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
                                            pdict_m5m6[isl.name]['ZP<'+str(i)+'>'][0],
-                                           pdict_m5m6[iret.name]['ZP<'+str(i)+'>'][0], xysl[1]+i+1, rg_m5m6)
+                                           pdict_m5m6[iret.name]['ZP<'+str(i)+'>'][0], xysl[1]+i+3, rg_m5m6)
     #output
     # zp/zm/zmid
     for i in range(num_bits):
