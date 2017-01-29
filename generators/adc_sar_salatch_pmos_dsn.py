@@ -31,7 +31,7 @@ params = dict(
     )
 generate_layout = False
 extract_layout = False
-verify = True
+verify = False
 verify_noise = False
 
 print('creating BAG project')

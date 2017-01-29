@@ -5,7 +5,6 @@ import pprint
 import bag
 #from laygo import *
 import laygo
-from adc_sar_templates_layout_generator import *
 import numpy as np
 import yaml
 

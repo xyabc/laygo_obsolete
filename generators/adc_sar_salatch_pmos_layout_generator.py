@@ -1236,15 +1236,19 @@ if __name__ == '__main__':
                                 devname_pmos_dmy='pmos4_fast_dmy_nf2',
                                 devname_ntap_boundary='ntap_fast_boundary', devname_ntap_body='ntap_fast_center_nf1',
                                 m_in=m_in, m_clkh=m_clkh, m_rgnn=m_rgnn, m_rstn=m_rstn, m_buf=m_buf,
-                                m_space_4x=0, m_space_2x=0, m_space_1x=0, origin=sa_origin)
+                                m_space_4x=10, m_space_2x=0, m_space_1x=0, origin=sa_origin)
     laygen.add_template_from_cell()
     # 2. calculate spacing param and regenerate
     x0 = 2*laygen.templates.get_template('capdrv_array_7b', libname=workinglib).xy[1][0] \
          - laygen.templates.get_template(cellname, libname=workinglib).xy[1][0]
-    m_space = int(round(x0 / laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0]))
+    m_space = int(round(x0 / 2 / laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0]))
     m_space_4x = int(m_space / 4)
     m_space_2x = int((m_space - m_space_4x * 4) / 2)
     m_space_1x = int(m_space - m_space_4x * 4 - m_space_2x * 2)
+    print(x0, laygen.templates.get_template('capdrv_array_7b', libname=workinglib).xy[1][0] \
+            , laygen.templates.get_template(cellname, libname=workinglib).xy[1][0] \
+            , laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0], m_space, m_space_4x, m_space_2x, m_space_1x)
+    
     laygen.add_cell(cellname)
     laygen.sel_cell(cellname)
     generate_salatch_pmos_fitdim(laygen, objectname_pfix='SA0',
@@ -1257,9 +1261,9 @@ if __name__ == '__main__':
                                 devname_pmos_dmy='pmos4_fast_dmy_nf2',
                                 devname_ntap_boundary='ntap_fast_boundary', devname_ntap_body='ntap_fast_center_nf1',
                                 m_in=m_in, m_clkh=m_clkh, m_rgnn=m_rgnn, m_rstn=m_rstn, m_buf=m_buf,
-                                 m_space_4x=m_space_4x, m_space_2x=m_space_2x, m_space_1x=m_space_1x, origin=sa_origin)
+                                m_space_4x=10+m_space_4x, m_space_2x=m_space_2x, m_space_1x=m_space_1x, origin=sa_origin)
     laygen.add_template_from_cell()
-
+    
 
     laygen.save_template(filename=workinglib+'.yaml', libname=workinglib)
     #bag export, if bag does not exist, gds export

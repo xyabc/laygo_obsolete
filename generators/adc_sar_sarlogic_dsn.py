@@ -5,15 +5,14 @@ import pprint
 import bag
 #from laygo import *
 import laygo
-from adc_sar_templates_layout_generator import *
 import numpy as np
 import yaml
 
 lib_name = 'adc_sar_templates'
-cell_name = 'sarlogic_array_8b'
+cell_name = 'sarlogic'
 impl_lib = 'adc_sar_generated'
 #tb_lib = 'adc_sar_testbenches'
-#tb_cell = 'sarlogic_array_8b_tb_tran'
+#tb_cell = 'sarlogic_tb_tran'
 
 params = dict(
     lch=16e-9,

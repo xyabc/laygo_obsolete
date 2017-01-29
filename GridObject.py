@@ -124,6 +124,8 @@ class GridObject():
         #check by re-converting to physical grid and see if the points are within original [xy0, xy1]
         xy0_check = self.get_phygrid_coord_xy(_xy0)[0]
         xy1_check = self.get_phygrid_coord_xy(_xy1)[0]
+        #if _xy1[1]==8:
+        #    print("phy:"+str(xy0)+" "+str(xy1)+" abs:"+str(_xy0)+" "+str(_xy1)+" chk:"+str(xy0_check)+" "+str(xy1_check))
         xy0_check = np.around(xy0_check, decimals=self.max_resolution)
         xy1_check = np.around(xy1_check, decimals=self.max_resolution)
         xy0 = np.around(xy0, decimals=self.max_resolution)
@@ -133,8 +135,8 @@ class GridObject():
         if xy1_check[0] > xy0[0] and xy1_check[0] > xy1[0]: _xy1[0] -= 1
         if xy0_check[1] > xy0[1] and xy0_check[1] > xy1[1]: _xy0[1] -= 1
         if xy1_check[1] > xy0[1] and xy1_check[1] > xy1[1]: _xy1[1] -= 1
-
-        #print("phy:"+str(xy0)+" "+str(xy1)+" abs:"+str(_xy0)+" "+str(_xy1)+" chk:"+str(xy0_check)+" "+str(xy1_check))
+        #if _xy1[1]==7:
+        #    print("phy:"+str(xy0)+" "+str(xy1)+" abs:"+str(_xy0)+" "+str(_xy1)+" chk:"+str(xy0_check)+" "+str(xy1_check))
         #print(xy1)
 
         return(np.vstack((_xy0, _xy1)))

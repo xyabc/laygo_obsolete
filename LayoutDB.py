@@ -109,10 +109,10 @@ class LayoutDB():
             for sn in celllist:
                 s=l[sn]
                 print(' [Cell]' + sn)
-                for r in s['rects'].itervalues(): r.display()
-                for i in s['instances'].itervalues(): i.display()
-                for p in s['pins'].itervalues(): p.display()
-                for t in s['texts'].itervalues(): t.display()
+                for r in s['rects'].values(): r.display()
+                for i in s['instances'].values(): i.display()
+                for p in s['pins'].values(): p.display()
+                for t in s['texts'].values(): t.display()
 
     def genid(self, type='instance', pfix='I', sfix='', max_index=100000):
         """
@@ -363,12 +363,12 @@ class LayoutDB():
                 if not sn in self.design[ln]:
                     self.add_cell(sn, ln)
                 self.sel_cell(sn)
-                for r in s['rects'].itervalues():
+                for r in s['rects'].values():
                     #print(r.name,r.xy,r.layer,r.netname)
                     self.add_rect(r.name,r.xy,r.layer,r.netname)
-                for i in s['instances'].itervalues():
+                for i in s['instances'].values():
                     self.add_inst(i.name, i.libname, i.cellname, i.xy, i.shape, i.spacing, i.transform)
-                for t in s['texts'].itervalues():
+                for t in s['texts'].values():
                     self.add_text(t.name, t.text, t.xy, t.layer)
         pass
 
