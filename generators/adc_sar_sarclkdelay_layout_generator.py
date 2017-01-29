@@ -136,18 +136,18 @@ def generate_sarclkdelay(laygen, objectname_pfix, templib_logic, workinglib, pla
     # placement
     itapl = laygen.place(name = "I" + objectname_pfix + 'TAPL0', templatename = tap_name,
                          gridname = pg, xy=origin, template_libname = templib_logic)
-    islice0 = laygen.relplace(name="I" + objectname_pfix + 'SL0', templatename=slice_name,
-                              gridname=pg, refinstname=itapl.name, template_libname=workinglib)
-    islice1 = laygen.relplace(name="I" + objectname_pfix + 'SK1', templatename=slice_name,
-                              gridname=pg, refinstname=islice0.name, template_libname=workinglib)
-    islice2 = laygen.relplace(name="I" + objectname_pfix + 'SL2', templatename=slice_name,
-                              gridname=pg, refinstname=islice1.name, template_libname=workinglib)
     islice3 = laygen.relplace(name="I" + objectname_pfix + 'SL3', templatename=slice_name,
-                              gridname=pg, refinstname=islice2.name, template_libname=workinglib)
+                              gridname=pg, refinstname=itapl.name, template_libname=workinglib, transform='MY')
+    islice2 = laygen.relplace(name="I" + objectname_pfix + 'SL2', templatename=slice_name,
+                              gridname=pg, refinstname=islice3.name, template_libname=workinglib, transform='MY')
+    islice1 = laygen.relplace(name="I" + objectname_pfix + 'SK1', templatename=slice_name,
+                              gridname=pg, refinstname=islice2.name, template_libname=workinglib, transform='MY')
+    islice0 = laygen.relplace(name="I" + objectname_pfix + 'SL0', templatename=slice_name,
+                              gridname=pg, refinstname=islice1.name, template_libname=workinglib, transform='MY')
     isp4x = []
     isp2x = []
     isp1x = []
-    refi=islice3.name
+    refi=islice0.name
     if not m_space_4x==0:
         isp4x.append(laygen.relplace(name="I" + objectname_pfix + 'SP4X0', templatename=space_4x_name,
                      shape = np.array([m_space_4x, 1]), gridname=pg,
@@ -184,7 +184,7 @@ def generate_sarclkdelay(laygen, objectname_pfix, templib_logic, workinglib, pla
                  refinstname0=islice2.name, refpinname0='O', refinstname1=islice3.name, refpinname1='I')
 
     #route-sel
-    rsel0 = laygen.route(None, laygen.layers['metal'][4], xy0=np.array([0, 0]), xy1=np.array([x0+2, y0-2]), gridname0=rg_m3m4,
+    rsel0 = laygen.route(None, laygen.layers['metal'][4], xy0=np.array([0, 0]), xy1=np.array([x0, y0-2]), gridname0=rg_m3m4,
                          refinstname0=islice0.name, refpinname0='SEL')
     rv0, rsel1 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], pdict[islice1.name]['SEL'][0],
                                    np.array([x0, y0-4]), rg_m3m4)
@@ -195,11 +195,17 @@ def generate_sarclkdelay(laygen, objectname_pfix, templib_logic, workinglib, pla
 
     #pins
     laygen.pin(name='I', layer=laygen.layers['pin'][4], xy=pdict[islice0.name]['I'], gridname=rg_m3m4)
-    laygen.create_boundary_pin_form_rect(rsel0, rg_m3m4, "SEL<0>", laygen.layers['pin'][4], size=6, direction='left')
-    laygen.create_boundary_pin_form_rect(rsel1, rg_m3m4, "SEL<1>", laygen.layers['pin'][4], size=6, direction='left')
-    laygen.create_boundary_pin_form_rect(rsel2, rg_m3m4, "SEL<2>", laygen.layers['pin'][4], size=6, direction='left')
-    laygen.create_boundary_pin_form_rect(rsel3, rg_m3m4, "SEL<3>", laygen.layers['pin'][4], size=6, direction='left')
+    laygen.create_boundary_pin_form_rect(rsel0, rg_m3m4, "SEL<0>", laygen.layers['pin'][4], size=6, direction='right')
+    laygen.create_boundary_pin_form_rect(rsel1, rg_m3m4, "SEL<1>", laygen.layers['pin'][4], size=6, direction='right')
+    laygen.create_boundary_pin_form_rect(rsel2, rg_m3m4, "SEL<2>", laygen.layers['pin'][4], size=6, direction='right')
+    laygen.create_boundary_pin_form_rect(rsel3, rg_m3m4, "SEL<3>", laygen.layers['pin'][4], size=6, direction='right')
+    #[rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][3],
+    #                                   pdict[islice3.name]['O'][0], np.array([x0, pdict[islice3.name]['O'][1][1]-3]),
+    #                                   pdict[islice3.name]['O'][1][0], rg_m3m4)
+    #laygen.create_boundary_pin_form_rect(rh1, rg_m3m4, "O", laygen.layers['pin'][4], size=6, direction='left')
     laygen.pin(name='O', layer=laygen.layers['pin'][4], xy=pdict[islice3.name]['O'], gridname=rg_m3m4)
+
+
 
     # power pin
     #create_power_pin_from_inst(laygen, layer=laygen.layers['pin'][2], gridname=rg_m1m2, inst_left=itapl, inst_right=itapr)

@@ -237,17 +237,44 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
 
     #route
     #reference coordinates
+    pdict_m3m4 = laygen.get_inst_pin_coord(None, None, rg_m3m4)
     pdict_m4m5 = laygen.get_inst_pin_coord(None, None, rg_m4m5)
     pdict_m5m6 = laygen.get_inst_pin_coord(None, None, rg_m5m6)
     x_right = laygen.get_inst_xy(name=iret.name, gridname=rg_m5m6)[0]\
              +laygen.get_template_size(name=iret.cellname, gridname=rg_m5m6, libname=workinglib)[0] - 1
+    y_top = laygen.get_inst_xy(name=ickg.name, gridname=rg_m5m6)[1]-1
     xysl = laygen.get_inst_xy(name=isl.name, gridname=rg_m5m6)
     xyret = laygen.get_inst_xy(name=iret.name, gridname=rg_m5m6)
     xyfsm = laygen.get_inst_xy(name=ifsm.name, gridname=rg_m5m6)
     # ret to fsm (clk)
-    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
+    [rrst0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
                                        pdict_m5m6[iret.name]['CLK'][0], pdict_m5m6[ifsm.name]['RST'][0], xyfsm[1], rg_m5m6)
-    # sl to fsm route
+    # ckgen to ckdly route
+    # done
+    [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5],
+                                           pdict_m5m6[ickg.name]['DONE'][0],
+                                           pdict_m5m6[ickd.name]['I'][0],
+                                           pdict_m5m6[ickd.name]['I'][0][0], rg_m4m5)
+    # up
+    [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5],
+                                           pdict_m5m6[ickg.name]['UP'][0],
+                                           pdict_m5m6[ickd.name]['O'][0],
+                                           pdict_m5m6[ickg.name]['UP'][0][0], rg_m4m5)
+    # ckgen to sl route
+    # saopb/saomb
+    [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5],
+                                           pdict_m5m6[ickg.name]['SAOPB'][0],
+                                           pdict_m5m6[isl.name]['SAOPB'][0],
+                                           pdict_m5m6[ickg.name]['SAOPB'][0][0]+1, rg_m4m5)
+    [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5],
+                                           pdict_m5m6[ickg.name]['SAOMB'][0],
+                                           pdict_m5m6[isl.name]['SAOMB'][0],
+                                           pdict_m5m6[ickg.name]['SAOMB'][0][0]+2, rg_m4m5)
+    # ckgen to fsm route
+    # sarclk
+    rh0, rv0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
+                               pdict_m5m6[ickg.name]['CLKO'][0], pdict_m5m6[ifsm.name]['CLK'][0], rg_m4m5)
+    # fsm to sl route
     # sb
     for i in range(num_bits):
         [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
@@ -257,179 +284,70 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
     [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
                                        pdict_m5m6[ifsm.name]['RST'][0],
                                        pdict_m5m6[isl.name]['RST'][0], xysl[1] - num_bits - 1, rg_m5m6)
-    # ext_zpb/zmb/zmidb
-    rextzpb=[]
-    rextzmb=[]
-    rextzmidb=[]
-    x_skip=pdict_m5m6[ifsm.name]['SB<0>'][0][0]
-    offset=0
+    # ckg to sl route
+    rh0, rv0 = laygen.route_hv(laygen.layers['metal'][6], laygen.layers['metal'][5],
+                               pdict_m5m6[ickg.name]['RST'][0], pdict_m5m6[isl.name]['RST'][0], rg_m5m6)
+    # zp
+    yoffset=num_bits
     for i in range(num_bits):
         [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
-                                           pdict_m5m6[isl.name]['EXT_ZPB<'+str(i)+'>'][0],
-                                           np.array([x_right-8-i, 0]), xysl[1]+(2*int(i/2)+1-int(i%2))+1, rg_m5m6)
-        rextzpb.append(rv1)
-        [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
-                                           pdict_m5m6[isl.name]['EXT_ZMB<'+str(i)+'>'][0],
-                                           np.array([x_right-8-i-num_bits-1, 0]),
-                                           xysl[1]+(2*int(i/2)+1-int(i%2))+1+num_bits+1, rg_m5m6)
-        rextzmb.append(rv1)
-        if x_right - 8 - i - 2 * num_bits - 2 == x_skip:
-            offset+=1
-        [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
-                                           pdict_m5m6[isl.name]['EXT_ZMIDB<'+str(i)+'>'][0],
-                                           np.array([x_right-8-i-2*num_bits-2-offset, 0]),
-                                           xysl[1]+(2*int(i/2)+1-int(i%2))+1+2*num_bits+2,
-                                           rg_m5m6)
-        rextzmidb.append(rv1)
+                                           pdict_m5m6[isl.name]['ZP<'+str(i)+'>'][0],
+                                           pdict_m5m6[iret.name]['ZP<'+str(i)+'>'][0], xysl[1]-yoffset-i-1, rg_m5m6)
+    #output
+    # zp/zm/zmid
+    for i in range(num_bits):
+        rzp0 = laygen.route(None, laygen.layers['metal'][5],
+                            xy0=pdict_m4m5[isl.name]['ZP<'+str(i)+'>'][0],
+                            xy1=np.array([pdict_m4m5[isl.name]['ZP<'+str(i)+'>'][0][0], y_top]), gridname0=rg_m5m6)
+        laygen.create_boundary_pin_form_rect(rzp0, rg_m5m6, 'ZP<'+str(num_bits-i-1)+'>', laygen.layers['pin'][5], size=6, direction='top')
+        rzm0 = laygen.route(None, laygen.layers['metal'][5],
+                            xy0=pdict_m4m5[isl.name]['ZM<'+str(i)+'>'][0],
+                            xy1=np.array([pdict_m4m5[isl.name]['ZM<'+str(i)+'>'][0][0], y_top]), gridname0=rg_m5m6)
+        laygen.create_boundary_pin_form_rect(rzm0, rg_m5m6, 'ZM<'+str(num_bits-i-1)+'>', laygen.layers['pin'][5], size=6, direction='top')
+        rzmid0 = laygen.route(None, laygen.layers['metal'][5],
+                            xy0=pdict_m4m5[isl.name]['ZMID<'+str(i)+'>'][0],
+                            xy1=np.array([pdict_m4m5[isl.name]['ZMID<'+str(i)+'>'][0][0], y_top]), gridname0=rg_m5m6)
+        laygen.create_boundary_pin_form_rect(rzmid0, rg_m5m6, 'ZMID<'+str(num_bits-i-1)+'>', laygen.layers['pin'][5], size=6, direction='top')
+        #laygen.pin(name='ZP<'+str(num_bits-i-1)+'>', layer=laygen.layers['pin'][5],
+        #           xy=pdict_m4m5[isl.name]['ZP<'+str(i)+'>'], gridname=rg_m4m5)
+        #laygen.pin(name='ZM<'+str(num_bits-i-1)+'>', layer=laygen.layers['pin'][5],
+        #           xy=pdict_m4m5[isl.name]['ZM<'+str(i)+'>'], gridname=rg_m4m5)
+        #laygen.pin(name='ZMID<'+str(num_bits-i-1)+'>', layer=laygen.layers['pin'][5],
+        #           xy=pdict_m4m5[isl.name]['ZMID<'+str(i)+'>'], gridname=rg_m4m5)
+    # ckdsel
+    for i in range(4):
+        laygen.pin(name='CKDSEL<' + str(i) + '>', layer=laygen.layers['pin'][4],
+                   xy=pdict_m4m5[ickd.name]['SEL<' + str(i) + '>'], gridname=rg_m4m5)
+    # extclk, extsel_clk
+    laygen.pin(name='EXTCLK', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['EXTCLK'], gridname=rg_m4m5)
+    laygen.pin(name='EXTSEL_CLK', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['EXTSEL_CLK'], gridname=rg_m4m5)
     # adcout
-    radcout=[]
     for i in range(num_bits):
-        laygen.pin(name='ADCOUT<'+str(num_bits-i-1)+'>', layer=laygen.layers['pin'][5],
+        laygen.pin(name='ADCOUT<'+str(i)+'>', layer=laygen.layers['pin'][5],
                    xy=pdict_m4m5[iret.name]['ADCOUT<'+str(i)+'>'], gridname=rg_m4m5)
-    '''
-    for i in num_bits:
-        radcout.append(
-            laygen.route(None, laygen.layers['metal'][3], xy0=np.array([0, 0]), xy1=np.array([0, 0]), gridname0=rg_m3m4,
-                         refinstname0=icdrv[i].name, refpinname0='VREF<0>', refinstindex0=np.array([0, 0]),
-                         refinstname1=icdrv[i].name, refpinname1='VREF<0>',
-                         refinstindex1=np.array([num_bits_row - 1, 0])))
-        pdict[iret.name]['ADCOUT<'+str(i)+'>'][0]
-    '''
-    '''
-    # internal pins
-    icdrv_en0_xy=[]
-    icdrv_en1_xy=[]
-    icdrv_en2_xy=[]
-    icdrv_vref0_xy=[]
-    icdrv_vref1_xy=[]
-    icdrv_vref2_xy=[]
-    icdrv_vo_xy=[]
-    for i in range(num_row):
-        for j in range(num_bits_row):
-            icdrv_en0_xy.append(laygen.get_inst_pin_coord(icdrv[i].name, 'EN<0>', rg_m4m5, index=np.array([j,0])))
-            icdrv_en1_xy.append(laygen.get_inst_pin_coord(icdrv[i].name, 'EN<1>', rg_m4m5, index=np.array([j,0])))
-            icdrv_en2_xy.append(laygen.get_inst_pin_coord(icdrv[i].name, 'EN<2>', rg_m4m5, index=np.array([j,0])))
-            icdrv_vref0_xy.append(laygen.get_inst_pin_coord(icdrv[i].name, 'VREF<0>', rg_m4m5, index=np.array([j,0])))
-            icdrv_vref1_xy.append(laygen.get_inst_pin_coord(icdrv[i].name, 'VREF<1>', rg_m4m5, index=np.array([j,0])))
-            icdrv_vref2_xy.append(laygen.get_inst_pin_coord(icdrv[i].name, 'VREF<2>', rg_m4m5, index=np.array([j,0])))
-            icdrv_vo_xy.append(laygen.get_inst_pin_coord(icdrv[i].name, 'VO', rg_m4m5, index=np.array([j,0])))
-
-    # reference route coordinate
-    x0 = icdrv_en0_xy[0][0][0]
-    y0 = laygen.get_inst_xy(name=icdrv[0].name, gridname=rg_m4m5)[1]
-    y1 = laygen.get_inst_xy(name=icdrv[-1].name, gridname=rg_m4m5)[1]
-    if num_row%2==1:
-        y1 += laygen.get_template_size(name=icdrv[-1].cellname, gridname=rg_m4m5, libname=icdrv[-1].libname)
-    # vref route
-    rvref0=[]
-    rvref1=[]
-    rvref2=[]
-    for i in range(num_row):
-        rvref0.append(laygen.route(None, laygen.layers['metal'][4], xy0=np.array([0, 0]), xy1=np.array([0, 0]), gridname0=rg_m4m5,
-                              refinstname0=icdrv[i].name, refpinname0='VREF<0>', refinstindex0=np.array([0, 0]),
-                              refinstname1=icdrv[i].name, refpinname1='VREF<0>', refinstindex1=np.array([num_bits_row-1, 0])))
-        rvref1.append(laygen.route(None, laygen.layers['metal'][4], xy0=np.array([0, 0]), xy1=np.array([0, 0]), gridname0=rg_m4m5,
-                              refinstname0=icdrv[i].name, refpinname0='VREF<1>', refinstindex0=np.array([0, 0]),
-                              refinstname1=icdrv[i].name, refpinname1='VREF<1>', refinstindex1=np.array([num_bits_row-1, 0])))
-        rvref2.append(laygen.route(None, laygen.layers['metal'][4], xy0=np.array([0, 0]), xy1=np.array([0, 0]), gridname0=rg_m4m5,
-                              refinstname0=icdrv[i].name, refpinname0='VREF<2>', refinstindex0=np.array([0, 0]),
-                              refinstname1=icdrv[i].name, refpinname1='VREF<2>', refinstindex1=np.array([num_bits_row-1, 0])))
-    # vref vertical route
-    if not num_row==0:
-        for i in range(1, num_row):
-            [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5], icdrv_vref0_xy[0][0], icdrv_vref0_xy[i*num_bits_row][0], x0+0, rg_m4m5)
-            [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5], icdrv_vref1_xy[0][0], icdrv_vref1_xy[i*num_bits_row][0], x0+1, rg_m4m5)
-            [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5], icdrv_vref2_xy[0][0], icdrv_vref2_xy[i*num_bits_row][0], x0+2, rg_m4m5)
-    # en route
-    ren0 = []
-    ren1 = []
-    ren2 = []
-    for i in range(num_row):
-        for j in range(num_bits_row):
-            rh0, _ren0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
-                                        icdrv_en0_xy[num_bits_row * i + j][0],
-                                        np.array([icdrv_en0_xy[num_bits_row * i + j][0][0] + i*3 + 3, y0]), rg_m4m5)
-            ren0.append(_ren0)
-            rh0, _ren1 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
-                                        icdrv_en1_xy[num_bits_row * i + j][0],
-                                        np.array([icdrv_en1_xy[num_bits_row * i + j][0][0] + i*3 + 4, y0]), rg_m4m5)
-            ren1.append(_ren1)
-            rh0, _ren2 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
-                                        icdrv_en2_xy[num_bits_row * i + j][0],
-                                        np.array([icdrv_en2_xy[num_bits_row * i + j][0][0] + i*3 + 5, y0]), rg_m4m5)
-            ren2.append(_ren2)
-    # vo route
-    rvo = []
-    for i in range(num_row):
-        for j in range(num_bits_row):
-            rh0, _rvo = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
-                                        icdrv_vo_xy[num_bits_row * i + j][0],
-                                        np.array([icdrv_vo_xy[num_bits_row * i + j][0][0] + i, y1]), rg_m4m5)
-            rvo.append(_rvo)
-    #pins
-    laygen.create_boundary_pin_form_rect(rvref0[0], rg_m4m5, "VREF<0>", laygen.layers['pin'][4], size=4, direction='left')
-    laygen.create_boundary_pin_form_rect(rvref1[0], rg_m4m5, "VREF<1>", laygen.layers['pin'][4], size=4, direction='left')
-    laygen.create_boundary_pin_form_rect(rvref2[0], rg_m4m5, "VREF<2>", laygen.layers['pin'][4], size=4, direction='left')
-    for i, _ren0 in enumerate(ren0):
-        if i==0:
-            laygen.create_boundary_pin_form_rect(_ren0, rg_m4m5, "EN_C0<0>", laygen.layers['pin'][5], size=6, direction='bottom')
-        else:
-            laygen.create_boundary_pin_form_rect(_ren0, rg_m4m5, "EN"+str(i-1)+"<0>", laygen.layers['pin'][5], size=6, direction='bottom')
-    for i, _ren1 in enumerate(ren1):
-        if i==0:
-            laygen.create_boundary_pin_form_rect(_ren1, rg_m4m5, "EN_C0<1>", laygen.layers['pin'][5], size=6, direction='bottom')
-        else:
-            laygen.create_boundary_pin_form_rect(_ren1, rg_m4m5, "EN"+str(i-1)+"<1>", laygen.layers['pin'][5], size=6, direction='bottom')
-    for i, _ren2 in enumerate(ren2):
-        if i==0:
-            laygen.create_boundary_pin_form_rect(_ren2, rg_m4m5, "EN_C0<2>", laygen.layers['pin'][5], size=6, direction='bottom')
-        else:
-            laygen.create_boundary_pin_form_rect(_ren2, rg_m4m5, "EN"+str(i-1)+"<2>", laygen.layers['pin'][5], size=6, direction='bottom')
-    for i, _rvo in enumerate(rvo):
-        if i==0:
-            laygen.create_boundary_pin_form_rect(_rvo, rg_m4m5, "VO_C0", laygen.layers['pin'][5], size=6, direction='top')
-        else:
-            laygen.create_boundary_pin_form_rect(_rvo, rg_m4m5, "VO<"+str(i-1)+">", laygen.layers['pin'][5], size=6, direction='top')
-
-    # power pin
-    pwr_dim=laygen.get_template_size(name=itapl[-1].cellname, gridname=rg_m2m3, libname=itapl[-1].libname)
-    rvdd = []
-    rvss = []
-    if num_row%2==0: rp1='VSS'
-    else: rp1='VDD'
-    for i in range(1, int(pwr_dim[0]/2)):
-        rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i, 0]), xy1=np.array([2*i, 0]), gridname0=rg_m2m3,
-                     refinstname0=itapl[0].name, refpinname0='VSS', refinstindex0=np.array([0, 0]),
-                     refinstname1=itapl[-1].name, refpinname1=rp1, refinstindex1=np.array([0, 0])))
-        rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i+1, 0]), xy1=np.array([2*i+1, 0]), gridname0=rg_m2m3,
-                     refinstname0=itapl[0].name, refpinname0='VSS', refinstindex0=np.array([0, 0]),
-                     refinstname1=itapl[-1].name, refpinname1=rp1, refinstindex1=np.array([0, 0])))
-        laygen.pin_from_rect('VDD'+str(2*i-2), laygen.layers['pin'][3], rvdd[-1], gridname=rg_m2m3, netname='VDD')
-        laygen.pin_from_rect('VSS'+str(2*i-2), laygen.layers['pin'][3], rvss[-1], gridname=rg_m2m3, netname='VSS')
-        rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i, 0]), xy1=np.array([2*i, 0]), gridname0=rg_m2m3,
-                     refinstname0=itapr[0].name, refpinname0='VSS', refinstindex0=np.array([0, 0]),
-                     refinstname1=itapr[-1].name, refpinname1=rp1, refinstindex1=np.array([0, 0])))
-        rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i+1, 0]), xy1=np.array([2*i+1, 0]), gridname0=rg_m2m3,
-                     refinstname0=itapr[0].name, refpinname0='VSS', refinstindex0=np.array([0, 0]),
-                     refinstname1=itapr[-1].name, refpinname1=rp1, refinstindex1=np.array([0, 0])))
-        laygen.pin_from_rect('VDD'+str(2*i-1), laygen.layers['pin'][3], rvdd[-1], gridname=rg_m2m3, netname='VDD')
-        laygen.pin_from_rect('VSS'+str(2*i-1), laygen.layers['pin'][3], rvss[-1], gridname=rg_m2m3, netname='VSS')
-
-    for i in range(num_row):
-        for j in range(1, int(pwr_dim[0]/2)):
-            rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j, 0]), xy1=np.array([2*j, 0]), gridname0=rg_m2m3,
-                         refinstname0=itapl[i].name, refpinname0='VDD', refinstindex0=np.array([0, 0]), addvia0=True,
-                         refinstname1=itapl[i].name, refpinname1='VSS', refinstindex1=np.array([0, 0])))
-            rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j+1, 0]), xy1=np.array([2*j+1, 0]), gridname0=rg_m2m3,
-                         refinstname0=itapl[i].name, refpinname0='VDD', refinstindex0=np.array([0, 0]),
-                         refinstname1=itapl[i].name, refpinname1='VSS', refinstindex1=np.array([0, 0]), addvia1=True))
-            rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j, 0]), xy1=np.array([2*j, 0]), gridname0=rg_m2m3,
-                         refinstname0=itapr[i].name, refpinname0='VDD', refinstindex0=np.array([0, 0]), addvia0=True,
-                         refinstname1=itapr[i].name, refpinname1='VSS', refinstindex1=np.array([0, 0])))
-            rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j+1, 0]), xy1=np.array([2*j+1, 0]), gridname0=rg_m2m3,
-                         refinstname0=itapr[i].name, refpinname0='VDD', refinstindex0=np.array([0, 0]),
-                         refinstname1=itapr[i].name, refpinname1='VSS', refinstindex1=np.array([0, 0]), addvia1=True))
-    '''
+    #rst
+    laygen.create_boundary_pin_form_rect(rrst0, rg_m5m6, 'RST', laygen.layers['pin'][5], size=6, direction='bottom')
+    # probe outputs
+    laygen.pin(name='COMPOUT', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['COMPOUT'], gridname=rg_m4m5)
+    laygen.pin(name='UP', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['UP'], gridname=rg_m4m5)
+    laygen.pin(name='DONE', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['DONE'], gridname=rg_m4m5)
+    laygen.pin(name='SARCLK', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['CLKO'], gridname=rg_m4m5)
+    for i in range(num_bits):
+        laygen.pin(name='SB<' + str(i) + '>', layer=laygen.layers['pin'][5],
+                   xy=pdict_m5m6[isl.name]['SB<' + str(i) + '>'], gridname=rg_m5m6)
+    # vdd/vss
+    i=0
+    for p in pdict_m3m4[iret.name]:
+        if p.startswith('VDD'):
+            laygen.pin(name='VDD' + str(i), layer=laygen.layers['pin'][3],
+                       xy=pdict_m3m4[iret.name][p], gridname=rg_m3m4)
+            i+=1
+    i=0
+    for p in pdict_m3m4[iret.name]:
+        if p.startswith('VSS'):
+            laygen.pin(name='VSS' + str(i), layer=laygen.layers['pin'][3],
+                       xy=pdict_m3m4[iret.name][p], gridname=rg_m3m4)
+            i+=1
 
 if __name__ == '__main__':
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")

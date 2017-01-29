@@ -156,6 +156,7 @@ def generate_sarfsm(laygen, objectname_pfix, templib_logic, placement_grid,
     x0 = laygen.get_inst_xy(name=itie0.name, gridname=rg_m3m4)[0] + 1
     x1 = laygen.get_inst_xy(name=idff[-1].name, gridname=rg_m3m4)[0]\
          +laygen.get_template_size(name=idff[-1].cellname, gridname=rg_m3m4, libname=templib_logic)[0] - 1
+    x2 = laygen.get_inst_xy(name=itapr[-1].name, gridname=rg_m4m5)[0] - 2
     y0 = pdict[idff0.name]['I'][0][1] + 2
     y1 = laygen.get_template_size(name=itie0.cellname, gridname=rg_m3m4, libname=templib_logic)[1]
     y2 = y1*(num_row+1)
@@ -231,9 +232,9 @@ def generate_sarfsm(laygen, objectname_pfix, templib_logic, placement_grid,
     #laygen.create_boundary_pin_form_rect(rrst0, rg_m3m4, "RST", laygen.layers['pin'][4], size=4, direction='left')
     xy=laygen.get_rect_xy(rclk0.name, rg_m4m5, sort=True)
     rv0, rclk0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], xy[0],
-                                 np.array([xy[0][0]+6, 2]), rg_m4m5)
+                                 np.array([x2, y2]), rg_m4m5)
     laygen.create_boundary_pin_form_rect(rclk0, rg_m4m5, 'CLK',
-                                         laygen.layers['pin'][5], size=6, direction='bottom')
+                                         laygen.layers['pin'][5], size=6, direction='top')
     #laygen.create_boundary_pin_form_rect(rclk0, rg_m3m4, "CLK", laygen.layers['pin'][4], size=4, direction='left')
 
     # power pin
