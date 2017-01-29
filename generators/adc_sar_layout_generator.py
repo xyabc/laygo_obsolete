@@ -103,6 +103,7 @@ def generate_sar(laygen, objectname_pfix, workinglib, placement_grid,
                                                pdict_m5m6[iabe.name]['ZM<'+str(i)+'>'][0],
                                                pdict_m5m6[iafe.name]['ENR'+str(i-1)+'<0>'][0],
                                                pdict_m5m6[iabe.name]['ZM<' + str(i) + '>'][0][1]+6+i+num_bits, rg_m5m6)
+
         [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
                                            pdict_m5m6[iabe.name]['ZMID<'+str(i)+'>'][0],
                                            pdict_m5m6[iafe.name]['ENL'+str(i-1)+'<1>'][0],
