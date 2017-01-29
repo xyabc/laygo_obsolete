@@ -299,15 +299,15 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
         rzp0 = laygen.route(None, laygen.layers['metal'][5],
                             xy0=pdict_m4m5[isl.name]['ZP<'+str(i)+'>'][0],
                             xy1=np.array([pdict_m4m5[isl.name]['ZP<'+str(i)+'>'][0][0], y_top]), gridname0=rg_m5m6)
-        laygen.create_boundary_pin_form_rect(rzp0, rg_m5m6, 'ZP<'+str(num_bits-i-1)+'>', laygen.layers['pin'][5], size=6, direction='top')
+        laygen.create_boundary_pin_form_rect(rzp0, rg_m5m6, 'ZP<'+str(i)+'>', laygen.layers['pin'][5], size=6, direction='top')
         rzm0 = laygen.route(None, laygen.layers['metal'][5],
                             xy0=pdict_m4m5[isl.name]['ZM<'+str(i)+'>'][0],
                             xy1=np.array([pdict_m4m5[isl.name]['ZM<'+str(i)+'>'][0][0], y_top]), gridname0=rg_m5m6)
-        laygen.create_boundary_pin_form_rect(rzm0, rg_m5m6, 'ZM<'+str(num_bits-i-1)+'>', laygen.layers['pin'][5], size=6, direction='top')
+        laygen.create_boundary_pin_form_rect(rzm0, rg_m5m6, 'ZM<'+str(i)+'>', laygen.layers['pin'][5], size=6, direction='top')
         rzmid0 = laygen.route(None, laygen.layers['metal'][5],
                             xy0=pdict_m4m5[isl.name]['ZMID<'+str(i)+'>'][0],
                             xy1=np.array([pdict_m4m5[isl.name]['ZMID<'+str(i)+'>'][0][0], y_top]), gridname0=rg_m5m6)
-        laygen.create_boundary_pin_form_rect(rzmid0, rg_m5m6, 'ZMID<'+str(num_bits-i-1)+'>', laygen.layers['pin'][5], size=6, direction='top')
+        laygen.create_boundary_pin_form_rect(rzmid0, rg_m5m6, 'ZMID<'+str(i)+'>', laygen.layers['pin'][5], size=6, direction='top')
         #laygen.pin(name='ZP<'+str(num_bits-i-1)+'>', layer=laygen.layers['pin'][5],
         #           xy=pdict_m4m5[isl.name]['ZP<'+str(i)+'>'], gridname=rg_m4m5)
         #laygen.pin(name='ZM<'+str(num_bits-i-1)+'>', layer=laygen.layers['pin'][5],
