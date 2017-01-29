@@ -1044,7 +1044,7 @@ def generate_salatch_pmos_fitdim(laygen, objectname_pfix, placement_grid, routin
          + laygen.templates.get_template(devname_space_1x[0]).xy[1][0] * m_space_1x \
          + laygen.templates.get_template(devname_space_2x[0]).xy[1][0] * m_space_2x \
          + laygen.templates.get_template(devname_space_4x[0]).xy[1][0] * m_space_4x
-    '''
+
     #2. resolving routing grid mismatches
     pg_res = laygen.get_grid(pg).width
     rg_res = laygen.get_grid(rg_m4m5).width
@@ -1060,7 +1060,7 @@ def generate_salatch_pmos_fitdim(laygen, objectname_pfix, placement_grid, routin
          + laygen.templates.get_template(devname_space_1x[0]).xy[1][0] * m_space_1x \
          + laygen.templates.get_template(devname_space_2x[0]).xy[1][0] * m_space_2x \
          + laygen.templates.get_template(devname_space_4x[0]).xy[1][0] * m_space_4x
-    '''
+
     #boundary generation
     m_bnd=m_tot*2*2+m_space*2+2 #2 for diff, 2 for nf, 2 for mos boundary
     [bnd_bottom, bnd_top, bnd_left, bnd_right]=generate_boundary(laygen, objectname_pfix='BND0',
