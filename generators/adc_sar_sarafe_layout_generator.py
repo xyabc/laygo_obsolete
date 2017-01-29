@@ -208,10 +208,12 @@ def generate_sarafe(laygen, objectname_pfix, workinglib, placement_grid,
     rvdd0_pin_xy = laygen.get_rect_xy(rvdd0.name, rg_m3m4_thick)
     rvdd1_pin_xy = laygen.get_rect_xy(rvdd1.name, rg_m3m4_thick)
 
+    #vdd horizontal pins
     laygen.pin(name='VSS0', layer=laygen.layers['pin'][4], xy=rvss0_pin_xy, gridname=rg_m3m4_thick, netname='VSS')
     laygen.pin(name='VSS1', layer=laygen.layers['pin'][4], xy=rvss1_pin_xy, gridname=rg_m3m4_thick, netname='VSS')
     laygen.pin(name='VDD0', layer=laygen.layers['pin'][4], xy=rvdd0_pin_xy, gridname=rg_m3m4_thick, netname='VDD')
     laygen.pin(name='VDD1', layer=laygen.layers['pin'][4], xy=rvdd1_pin_xy, gridname=rg_m3m4_thick, netname='VDD')
+
 
     t = laygen.templates.get_template(icdrvl.cellname, libname=workinglib)
     for pname, p in t.pins.items():
@@ -242,7 +244,8 @@ def generate_sarafe(laygen, objectname_pfix, workinglib, placement_grid,
                     laygen.get_inst_pin_coord(icdrvr.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
                     [x1, y0+3], rg_m3m4_thick)
     # vdd/vss - salatch
-    for i in range(4):
+    num_vert_pwr = 20
+    for i in range(num_vert_pwr):
         pname = 'VVDD' + str(2 * i)
         rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
                 laygen.get_inst_pin_coord(isa.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],

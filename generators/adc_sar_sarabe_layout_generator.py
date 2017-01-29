@@ -220,6 +220,20 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
         devname_bnd_right += ['pmos4_fast_right', 'nmos4_fast_right']
         transform_bnd_left += ['R0', 'MX']
         transform_bnd_right += ['R0', 'MX']
+    #additional space for routing area
+    if not yfsm % 2 == 0:
+        isp.append(laygen.relplace(name="I" + objectname_pfix + 'SP' + str(len(isp)), templatename=space_name,
+                                   gridname=pg, refinstname=refi, direction='top', transform='R0',
+                                   template_libname=workinglib))
+        refi = isp[-1].name
+        isp.append(laygen.relplace(name="I" + objectname_pfix + 'SP' + str(len(isp)), templatename=space_name,
+                                   gridname=pg, refinstname=refi, direction='top', transform='MX',
+                                   template_libname=workinglib))
+        refi = isp[-1].name
+        devname_bnd_left += ['nmos4_fast_left', 'pmos4_fast_left', 'pmos4_fast_left', 'nmos4_fast_left']
+        devname_bnd_right += ['nmos4_fast_right', 'pmos4_fast_right', 'pmos4_fast_right', 'nmos4_fast_right']
+        transform_bnd_left += ['R0', 'MX', 'R0', 'MX']
+        transform_bnd_right += ['R0', 'MX', 'R0', 'MX']
     
     # boundaries
     m_bnd = int(xsp / laygen.get_template_size('boundary_bottom', gridname=pg)[0])
@@ -344,13 +358,13 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
     for p in pdict_m3m4[iret.name]:
         if p.startswith('VDD'):
             laygen.pin(name='VDD' + str(i), layer=laygen.layers['pin'][3],
-                       xy=pdict_m3m4[iret.name][p], gridname=rg_m3m4, netname='VDD')
+                       xy=np.vstack((pdict_m3m4[iret.name][p][0], pdict_m3m4[ickg.name][p][0])), gridname=rg_m3m4, netname='VDD')
             i+=1
     i=0
     for p in pdict_m3m4[iret.name]:
         if p.startswith('VSS'):
             laygen.pin(name='VSS' + str(i), layer=laygen.layers['pin'][3],
-                       xy=pdict_m3m4[iret.name][p], gridname=rg_m3m4, netname='VSS')
+                       xy=np.vstack((pdict_m3m4[iret.name][p][0], pdict_m3m4[ickg.name][p][0])), gridname=rg_m3m4, netname='VSS')
             i+=1
 
 if __name__ == '__main__':
