@@ -320,7 +320,7 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
                    xy=pdict_m4m5[ickd.name]['SEL<' + str(i) + '>'], gridname=rg_m4m5)
     # SAOPB/SAOMB
     laygen.create_boundary_pin_form_rect(rsaopb0, rg_m4m5, 'SAOPB', laygen.layers['pin'][5], size=6, direction='top')
-    laygen.create_boundary_pin_form_rect(rsaopb0, rg_m4m5, 'SAOMB', laygen.layers['pin'][5], size=6, direction='top')
+    laygen.create_boundary_pin_form_rect(rsaomb0, rg_m4m5, 'SAOMB', laygen.layers['pin'][5], size=6, direction='top')
     # extclk, extsel_clk
     laygen.pin(name='EXTCLK', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['EXTCLK'], gridname=rg_m4m5)
     laygen.pin(name='EXTSEL_CLK', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['EXTSEL_CLK'], gridname=rg_m4m5)
