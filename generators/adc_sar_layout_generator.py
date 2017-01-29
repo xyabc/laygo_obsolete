@@ -120,7 +120,7 @@ def generate_sar(laygen, objectname_pfix, workinglib, placement_grid,
                                 gridname0=rg_m3m4, refinstname0=iabe.name, refpinname0=p, refinstname1=iafe.name,
                                 refpinname1='VSS0', direction='y')
             laygen.pin(name='VSS' + str(i), layer=laygen.layers['pin'][3],
-                       xy=laygen.get_rect_xy(rvss.name, rg_m3m4, sort=True), gridname=rg_m3m4, netname='VDD')
+                       xy=laygen.get_rect_xy(rvss.name, rg_m3m4, sort=True), gridname=rg_m3m4, netname='VSS')
             i+=1
     #inp/inm
     laygen.pin(name='INP', layer=laygen.layers['pin'][6], xy=pdict_m5m6[iafe.name]['INP'], gridname=rg_m5m6)
