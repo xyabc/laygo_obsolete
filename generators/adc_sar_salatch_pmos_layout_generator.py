@@ -1010,7 +1010,8 @@ def generate_salatch_pmos_fitdim(laygen, objectname_pfix, placement_grid, routin
                                  devname_nmos_boundary, devname_nmos_body, devname_nmos_dmy,
                                  devname_pmos_boundary, devname_pmos_body, devname_pmos_dmy,
                                  devname_ntap_boundary, devname_ntap_body,
-                                 m_in=4, m_clkh=2, m_rgnn=2, m_rstn=1, m_buf=1, origin=np.array([0, 0])):
+                                 m_in=4, m_clkh=2, m_rgnn=2, m_rstn=1, m_buf=1,
+                                 m_space_4x=0, m_space_2x=0, m_space_1x=0, origin=np.array([0, 0])):
     """generate a salatch & fit to CDAC dim"""
 
     cdac_name = 'capdac_7b'
@@ -1028,6 +1029,7 @@ def generate_salatch_pmos_fitdim(laygen, objectname_pfix, placement_grid, routin
                         'ntap_fast_space_nf4', 'pmos4_fast_space_nf4', 'pmos4_fast_space_nf4',
                         'ntap_fast_space_nf4', 'pmos4_fast_space_nf4', 'nmos4_fast_space_nf4', 'ptap_fast_space_nf4']
     transform_space = ['R0', 'R0', 'R0', 'R0', 'R0', 'R0', 'R0', 'R0', 'MX', 'MX']
+    '''
     #1. making it fit to DAC/capdrv dimension
     x00 = max(2*laygen.templates.get_template(cdac_name, libname=workinglib).xy[1][0],
               2*laygen.templates.get_template(cdrva_name, libname=workinglib).xy[1][0])
@@ -1060,7 +1062,8 @@ def generate_salatch_pmos_fitdim(laygen, objectname_pfix, placement_grid, routin
          + laygen.templates.get_template(devname_space_1x[0]).xy[1][0] * m_space_1x \
          + laygen.templates.get_template(devname_space_2x[0]).xy[1][0] * m_space_2x \
          + laygen.templates.get_template(devname_space_4x[0]).xy[1][0] * m_space_4x
-
+    '''
+    m_space=m_space_4x*4+m_space_2x*2+m_space_1x*1
     #boundary generation
     m_bnd=m_tot*2*2+m_space*2+2 #2 for diff, 2 for nf, 2 for mos boundary
     [bnd_bottom, bnd_top, bnd_left, bnd_right]=generate_boundary(laygen, objectname_pfix='BND0',
@@ -1222,16 +1225,7 @@ if __name__ == '__main__':
     sa_origin=np.array([0, 0])
 
     #salatch body
-    #generate_salatch_fitdim(laygen, objectname_pfix='SA0',
-    #                        placement_grid=pg, routing_grid_m1m2=rg_m1m2, routing_grid_m1m2_thick=rg_m1m2_thick,
-    #                        routing_grid_m2m3=rg_m2m3, routing_grid_m2m3_thick=rg_m2m3_thick, routing_grid_m3m4=rg_m3m4,
-    #                        devname_ptap_boundary='ptap_fast_boundary', devname_ptap_body='ptap_fast_center_nf1',
-    #                        devname_nmos_boundary='nmos4_fast_boundary', devname_nmos_body='nmos4_fast_center_nf2',
-    #                        devname_nmos_dmy='nmos4_fast_dmy_nf2',
-    #                        devname_pmos_boundary='pmos4_fast_boundary', devname_pmos_body='pmos4_fast_center_nf2',
-    #                        devname_pmos_dmy='pmos4_fast_dmy_nf2',
-    #                        devname_ntap_boundary='ntap_fast_boundary', devname_ntap_body='ntap_fast_center_nf1',
-    #                        m_in=m_in, m_clkh=m_clkh, m_rgnp=m_rgnp, m_rstp=m_rstp, m_buf=m_buf, origin=sa_origin)
+    # 1. generate without spacing
     generate_salatch_pmos_fitdim(laygen, objectname_pfix='SA0',
                                 placement_grid=pg, routing_grid_m1m2=rg_m1m2, routing_grid_m1m2_thick=rg_m1m2_thick,
                                 routing_grid_m2m3=rg_m2m3, routing_grid_m2m3_thick=rg_m2m3_thick, routing_grid_m3m4=rg_m3m4,
@@ -1241,8 +1235,31 @@ if __name__ == '__main__':
                                 devname_pmos_boundary='pmos4_fast_boundary', devname_pmos_body='pmos4_fast_center_nf2',
                                 devname_pmos_dmy='pmos4_fast_dmy_nf2',
                                 devname_ntap_boundary='ntap_fast_boundary', devname_ntap_body='ntap_fast_center_nf1',
-                                m_in=m_in, m_clkh=m_clkh, m_rgnn=m_rgnn, m_rstn=m_rstn, m_buf=m_buf, origin=sa_origin)
+                                m_in=m_in, m_clkh=m_clkh, m_rgnn=m_rgnn, m_rstn=m_rstn, m_buf=m_buf,
+                                m_space_4x=0, m_space_2x=0, m_space_1x=0, origin=sa_origin)
     laygen.add_template_from_cell()
+    # 2. calculate spacing param and regenerate
+    x0 = 2*laygen.templates.get_template('capdrv_array_7b', libname=workinglib).xy[1][0] \
+         - laygen.templates.get_template(cellname, libname=workinglib).xy[1][0]
+    m_space = int(round(x0 / laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0]))
+    m_space_4x = int(m_space / 4)
+    m_space_2x = int((m_space - m_space_4x * 4) / 2)
+    m_space_1x = int(m_space - m_space_4x * 4 - m_space_2x * 2)
+    laygen.add_cell(cellname)
+    laygen.sel_cell(cellname)
+    generate_salatch_pmos_fitdim(laygen, objectname_pfix='SA0',
+                                placement_grid=pg, routing_grid_m1m2=rg_m1m2, routing_grid_m1m2_thick=rg_m1m2_thick,
+                                routing_grid_m2m3=rg_m2m3, routing_grid_m2m3_thick=rg_m2m3_thick, routing_grid_m3m4=rg_m3m4,
+                                devname_ptap_boundary='ptap_fast_boundary', devname_ptap_body='ptap_fast_center_nf1',
+                                devname_nmos_boundary='nmos4_fast_boundary', devname_nmos_body='nmos4_fast_center_nf2',
+                                devname_nmos_dmy='nmos4_fast_dmy_nf2',
+                                devname_pmos_boundary='pmos4_fast_boundary', devname_pmos_body='pmos4_fast_center_nf2',
+                                devname_pmos_dmy='pmos4_fast_dmy_nf2',
+                                devname_ntap_boundary='ntap_fast_boundary', devname_ntap_body='ntap_fast_center_nf1',
+                                m_in=m_in, m_clkh=m_clkh, m_rgnn=m_rgnn, m_rstn=m_rstn, m_buf=m_buf,
+                                 m_space_4x=m_space_4x, m_space_2x=m_space_2x, m_space_1x=m_space_1x, origin=sa_origin)
+    laygen.add_template_from_cell()
+
 
     laygen.save_template(filename=workinglib+'.yaml', libname=workinglib)
     #bag export, if bag does not exist, gds export
