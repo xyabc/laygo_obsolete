@@ -262,11 +262,11 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
                                            pdict_m5m6[ickg.name]['UP'][0][0], rg_m4m5)
     # ckgen to sl route
     # saopb/saomb
-    [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5],
+    [rh0, rsaopb0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5],
                                            pdict_m5m6[ickg.name]['SAOPB'][0],
                                            pdict_m5m6[isl.name]['SAOPB'][0],
                                            pdict_m5m6[ickg.name]['SAOPB'][0][0]+1, rg_m4m5)
-    [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5],
+    [rh0, rsaomb0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5],
                                            pdict_m5m6[ickg.name]['SAOMB'][0],
                                            pdict_m5m6[isl.name]['SAOMB'][0],
                                            pdict_m5m6[ickg.name]['SAOMB'][0][0]+2, rg_m4m5)
@@ -285,8 +285,8 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
                                        pdict_m5m6[ifsm.name]['RST'][0],
                                        pdict_m5m6[isl.name]['RST'][0], xysl[1] - num_bits - 1, rg_m5m6)
     # ckg to sl route
-    rh0, rv0 = laygen.route_hv(laygen.layers['metal'][6], laygen.layers['metal'][5],
-                               pdict_m5m6[ickg.name]['RST'][0], pdict_m5m6[isl.name]['RST'][0], rg_m5m6)
+    rh0, rv0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
+                               pdict_m4m5[ickg.name]['RST'][0], pdict_m4m5[isl.name]['RST'][0], rg_m4m5)
     # zp
     #yoffset=num_bits
     for i in range(num_bits):
@@ -318,6 +318,9 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
     for i in range(4):
         laygen.pin(name='CKDSEL<' + str(i) + '>', layer=laygen.layers['pin'][4],
                    xy=pdict_m4m5[ickd.name]['SEL<' + str(i) + '>'], gridname=rg_m4m5)
+    # SAOPB/SAOMB
+    laygen.create_boundary_pin_form_rect(rsaopb0, rg_m4m5, 'SAOPB', laygen.layers['pin'][5], size=6, direction='top')
+    laygen.create_boundary_pin_form_rect(rsaopb0, rg_m4m5, 'SAOMB', laygen.layers['pin'][5], size=6, direction='top')
     # extclk, extsel_clk
     laygen.pin(name='EXTCLK', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['EXTCLK'], gridname=rg_m4m5)
     laygen.pin(name='EXTSEL_CLK', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['EXTSEL_CLK'], gridname=rg_m4m5)
