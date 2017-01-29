@@ -332,6 +332,7 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
     laygen.pin(name='UP', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['UP'], gridname=rg_m4m5)
     laygen.pin(name='DONE', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['DONE'], gridname=rg_m4m5)
     laygen.pin(name='SARCLK', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['CLKO'], gridname=rg_m4m5)
+    laygen.pin(name='SARCLKB', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['CLKOB'], gridname=rg_m4m5)
     for i in range(num_bits):
         laygen.pin(name='SB<' + str(i) + '>', layer=laygen.layers['pin'][5],
                    xy=pdict_m5m6[isl.name]['SB<' + str(i) + '>'], gridname=rg_m5m6)
@@ -340,13 +341,13 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
     for p in pdict_m3m4[iret.name]:
         if p.startswith('VDD'):
             laygen.pin(name='VDD' + str(i), layer=laygen.layers['pin'][3],
-                       xy=pdict_m3m4[iret.name][p], gridname=rg_m3m4)
+                       xy=pdict_m3m4[iret.name][p], gridname=rg_m3m4, netname='VDD')
             i+=1
     i=0
     for p in pdict_m3m4[iret.name]:
         if p.startswith('VSS'):
             laygen.pin(name='VSS' + str(i), layer=laygen.layers['pin'][3],
-                       xy=pdict_m3m4[iret.name][p], gridname=rg_m3m4)
+                       xy=pdict_m3m4[iret.name][p], gridname=rg_m3m4, netname='VSS')
             i+=1
 
 if __name__ == '__main__':
