@@ -294,10 +294,15 @@ def generate_sarabe(laygen, objectname_pfix, workinglib, placement_grid, routing
         [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
                                            pdict_m5m6[ifsm.name]['SB<'+str(i)+'>'][0],
                                            pdict_m5m6[isl.name]['SB<'+str(i)+'>'][0], xysl[1]-i-1, rg_m5m6)
-    # rst
+    # rst 
+    #[rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
+    #                                   pdict_m5m6[ifsm.name]['RST'][0],
+    #                                   pdict_m5m6[isl.name]['RST'][0], xysl[1] - num_bits - 1, rg_m5m6)
+    print(pdict_m5m6[isl.name]['RST'][0][1])
     [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
                                        pdict_m5m6[ifsm.name]['RST'][0],
-                                       pdict_m5m6[isl.name]['RST'][0], xysl[1] - num_bits - 1, rg_m5m6)
+                                       pdict_m5m6[isl.name]['RST'][0], 
+                                       pdict_m5m6[ifsm.name]['RST'][1][1], rg_m5m6)
     # ckg to sl route
     rh0, rv0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
                                pdict_m4m5[ickg.name]['RST'][0], pdict_m4m5[isl.name]['RST'][0], rg_m4m5)

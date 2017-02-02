@@ -1245,7 +1245,7 @@ if __name__ == '__main__':
     m_space_4x = int(m_space / 4)
     m_space_2x = int((m_space - m_space_4x * 4) / 2)
     m_space_1x = int(m_space - m_space_4x * 4 - m_space_2x * 2)
-    print(x0, laygen.templates.get_template('capdrv_array_7b', libname=workinglib).xy[1][0] \
+    print("debug", x0, laygen.templates.get_template('capdrv_array_7b', libname=workinglib).xy[1][0] \
             , laygen.templates.get_template(cellname, libname=workinglib).xy[1][0] \
             , laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0], m_space, m_space_4x, m_space_2x, m_space_1x)
     

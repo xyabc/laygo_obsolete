@@ -41,6 +41,7 @@ def generate_capdac(laygen, objectname_pfix, placement_grid, routing_grid_m6m7,
     m=m_unit
 
     # placement
+    
     #left boundaries
     ibndbl0 = laygen.place(name = "I" + objectname_pfix + "BNDBL0", templatename = devname_cap_boundary,
                            gridname = pg, xy=origin)
@@ -114,16 +115,16 @@ def generate_capdac(laygen, objectname_pfix, placement_grid, routing_grid_m6m7,
         #parallel connections
         for k in range(2**i):
             c_bot_xy3 = laygen.get_inst_pin_coord(c.name, 'BOTTOM', rg_m6m7, index=np.array([k, m*2**num_bits_vertical-1]))[0]
-            laygen.route(None, laygen.layers['metal'][7], xy0=c_bot_xy3 + np.array([0, 0]), xy1=np.array([0, y0+2]), gridname0=rg_m6m7, direction='y')
+            laygen.route(None, laygen.layers['metal'][7], xy0=c_bot_xy3 + np.array([0, 0]), xy1=np.array([0, y0+2-2]), gridname0=rg_m6m7, direction='y')
             for j in range(m*2**num_bits_vertical):
                 laygen.via(None, c_bot_xy2 + np.array([0, 0]), refinstname=c.name, refinstindex=np.array([k, j]), gridname=rg_m6m7)
         #col shorts
         if not i==0:
-            laygen.route(None, laygen.layers['metal'][6], xy0=np.array([c_bot_xy[0], y0+2]), xy1=np.array([c_bot_xy3[0], y0+2]), gridname0=rg_m6m7)
-            laygen.via(None, np.array([c_bot_xy[0], y0+2]), gridname=rg_m6m7)
+            laygen.route(None, laygen.layers['metal'][6], xy0=np.array([c_bot_xy[0], y0+2-2]), xy1=np.array([c_bot_xy3[0], y0+2-2]), gridname0=rg_m6m7)
+            laygen.via(None, np.array([c_bot_xy[0], y0+2-2]), gridname=rg_m6m7)
             for k in range(2**i):
                 c_bot_xy3 = laygen.get_inst_pin_coord(c.name, 'BOTTOM', rg_m6m7, index=np.array([k, m*2**num_bits_vertical-1]))[0]
-                laygen.via(None, np.array([c_bot_xy3[0], y0+2]), gridname=rg_m6m7)
+                laygen.via(None, np.array([c_bot_xy3[0], y0+2-2]), gridname=rg_m6m7)
  
     #pins 
     laygen.create_boundary_pin_form_rect(rc0, rg_m6m7, "I_C0", laygen.layers['pin'][7], size=4, direction='bottom')

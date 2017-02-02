@@ -116,6 +116,10 @@ def generate_capdrv_array(laygen, objectname_pfix, templib_logic, placement_grid
          + laygen.templates.get_template(cdrv_name, libname=workinglib).xy[1][0] * num_bits_row \
          + laygen.templates.get_template(space_1x_name, libname=templib_logic).xy[1][0] * m_space_1x \
          + laygen.templates.get_template(space_2x_name, libname=templib_logic).xy[1][0] * m_space_2x
+    #print(x0, laygen.templates.get_template('capdrv_array_7b', libname=workinglib).xy[1][0] \
+    #        , laygen.templates.get_template(cellname, libname=workinglib).xy[1][0] \
+    #        , laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0], m_space, m_space_4x, m_space_2x, m_space_1x)
+    '''
     #2. resolving routing grid mismatches
     pg_res = laygen.get_grid(pg).width
     rg_res = laygen.get_grid(rg_m4m5).width
@@ -130,6 +134,10 @@ def generate_capdrv_array(laygen, objectname_pfix, templib_logic, placement_grid
          + laygen.templates.get_template(space_1x_name, libname=templib_logic).xy[1][0] * m_space_1x \
          + laygen.templates.get_template(space_2x_name, libname=templib_logic).xy[1][0] * m_space_2x \
          + laygen.templates.get_template(space_4x_name, libname=templib_logic).xy[1][0] * m_space_4x
+    '''
+    m_space_4x = int(m_space / 4)
+    m_space_2x = int((m_space - m_space_4x * 4) / 2)
+    m_space_1x = int(m_space - m_space_4x * 4 - m_space_2x * 2)
 
 
     #boundaries

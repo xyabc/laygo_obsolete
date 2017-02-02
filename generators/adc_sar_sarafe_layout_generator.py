@@ -183,8 +183,8 @@ def generate_sarafe(laygen, objectname_pfix, workinglib, placement_grid,
     for j in range(4):
         laygen.via(None, [x0 - 2 * j, xy0[1]], rg_m4m5)
         laygen.via(None, [x1 + 2 * j, xy1[1]], rg_m4m5)
-    x0 = laygen.get_inst_xy(icdacl.name, rg_m3m4)[0] - 2
-    x1 = laygen.get_inst_xy(icdacr.name, rg_m3m4)[0] + 2
+    x0 = laygen.get_inst_xy(icdacl.name, rg_m3m4)[0] - 1
+    x1 = laygen.get_inst_xy(icdacr.name, rg_m3m4)[0] + 1
     xy0 = laygen.get_inst_pin_coord(isa.name, "INP", rg_m3m4, index=np.array([0, 0]), sort=True)[0]
     xy1 = laygen.get_inst_pin_coord(isa.name, "INM", rg_m3m4, index=np.array([0, 0]), sort=True)[0]
     laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x0, xy0[1]]), xy1=xy0, gridname0=rg_m3m4, addvia1=True)

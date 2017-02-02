@@ -15,15 +15,15 @@ impl_lib = 'adc_sar_generated'
 #tb_cell = 'sarafe_tb_tran'
 
 params = dict(
-    lch=16e-9,
-    pw=4,
-    nw=4,
+    lch=30e-9,
+    pw=240e-9,
+    nw=220e-9,
     m_ckgen=2, 
     m_ckdly=1, 
     m_logic=1, 
     m_fsm=1, 
     m_ret=1, 
-    device_intent='fast',
+    device_intent='fast2',
     )
 #generate_layout = False
 #extract_layout = False
