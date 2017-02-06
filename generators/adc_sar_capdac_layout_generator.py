@@ -23,25 +23,39 @@
 ########################################################################################################################
 
 """ADC library
+Capacitive DAC generation with programmable bits, dimmensions and Cunit
 """
 import laygo
 import numpy as np
-#from logic_layout_generator import *
-from math import log
-import yaml
 import os
-#import logging;logging.basicConfig(level=logging.DEBUG)
 
 def generate_capdac(laygen, objectname_pfix, placement_grid, routing_grid_m6m7,
                     devname_cap_body='momcap_center', devname_cap_dmy='momcap_dmy', devname_cap_boundary='momcap_boundary',
                     m_unit=1, num_bits_vertical=5, num_bits_horizontal=2, num_col_dmy_right=1, origin=np.array([0, 0])):
-    """generate capdac """
+
+    """
+    Generate a capdac array
+
+    Parameters
+    ----------
+    laygen : GridLayoutGenerator object
+    objectname_pfix : prefix of the object name
+    placement_grid : placement grid name
+    routing_grid_m6m7 : M6M7 routing grid name (for i/o routings)
+    devname_cap_body : unit cap name
+    devname_cap_dmy : dummy cap name
+    devname_cap_boundary : boundary name
+    m_unit : multiplier of unit cap
+    num_bits_vertical : number of bits in vertical diretion
+    num_bits_horizontal : number of bits in horizontal direction
+    num_col_dmy_right : number of dummy columns in right side
+    origin : origin of instance
+    """
     pg = placement_grid
     rg_m6m7 = routing_grid_m6m7
     m=m_unit
 
     # placement
-    
     #left boundaries
     ibndbl0 = laygen.place(name = "I" + objectname_pfix + "BNDBL0", templatename = devname_cap_boundary,
                            gridname = pg, xy=origin)
@@ -98,7 +112,6 @@ def generate_capdac(laygen, objectname_pfix, placement_grid, routing_grid_m6m7,
     for j in range(m):
         laygen.via(None, c_bot_xy2, refinstname=ic0.name, refinstindex=np.array([0, j]), gridname=rg_m6m7)
     #bottom route
-    b=0
     rbot=[]
     for i, c in enumerate(ivdac):
         c_bot_xy = laygen.get_inst_pin_coord(c.name, 'BOTTOM', rg_m6m7, index=np.array([0, m*2**i-1]))[0]
@@ -138,15 +151,8 @@ def generate_capdac(laygen, objectname_pfix, placement_grid, routing_grid_m6m7,
             laygen.create_boundary_pin_form_rect(rtop, rg_m6m7, "O"+str(cnt), laygen.layers['pin'][6], size=4, direction='left', netname="O")
             cnt+=1
 
-    #c_top_xy = laygen.get_inst_pin_coord(ic0.name, 'TOP', rg_m6m7)
-    #rtop=laygen.route(None, laygen.layers['metal'][6], xy0=c_top_xy[0], xy1=c_top_xy[1], gridname0=rg_m6m7)
-    #laygen.create_boundary_pin_form_rect(rtop, rg_m6m7, "O", laygen.layers['pin'][6], size=4, direction='left')
-
-    # power pin
-    #create_power_pin_from_inst(laygen, layer=laygen.layers['pin'][2], gridname=rg_m1m2, inst_left=isaopb0, inst_right=izmid0)
-
-
 if __name__ == '__main__':
+    """testbench - generating a capdac array"""
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")
 
     import imp
