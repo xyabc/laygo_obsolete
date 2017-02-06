@@ -18,7 +18,7 @@ TODO: Finish logic & serdes part, start_bag.il clean up (get_cell_list not worki
 
 4. go over lab materials in [labs/](labs/)
 
-More detailed installation instruction can be found in [lab readme](labs/README.md)
+More detailed installation instruction can be found in [lab readme](docs/labs.md)
 
 
 ## Quick Start

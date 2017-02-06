@@ -92,7 +92,6 @@ try:
     import bag
     prj = bag.BagProject()
     db=laygen.import_BAG(prj, utemplib, append=False)
-
 except ImportError:
     #gds import
     print("import from GDS")
