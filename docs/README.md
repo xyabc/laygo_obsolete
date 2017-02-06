@@ -31,14 +31,14 @@ and save to output.gds.
 
 
 ## Example Labs
-Example training labs can be found [here](labs/README.md)
+Example training labs can be found [here](docs/labs.md)
 
 
 ## Example Generators
-Example generaters can be found [here](generators/README.md)
+Example generaters can be found [here](docs/generators.md)
 
 
 ## License
-This project is licensed under the BSD License - see the [LICENSE](LICENSE) file for details
+This project is licensed under the BSD License - see the [LICENSE](../LICENSE) file for details
 
 
