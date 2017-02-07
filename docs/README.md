@@ -8,4 +8,4 @@ TODO: Finish logic & serdes part, start_bag.il clean up (get_cell_list not worki
 
 ![laygo](images/laygo_concept.png)
 
-A more detailed README can be found [here](../README.md)
+A more detailed README can be found [here](https://github.com/ucb-art/laygo)
