@@ -58,7 +58,6 @@ Check lab2_a_gridlayoutgenerator_constructtemplate.py for reference.
 
 3. Copy or make symbolic links of generator files in the bag working directory.
 
-
 4. Edit cds.lib to read adc_sar_templates library.
 
 5. Run bag and bag_adc_sar_import.py. Design modules are generated
