@@ -26,7 +26,7 @@ Lab2-d : 2:1 MUX generation on abstract grid
 
 The functions used in the lab modules will be used for layout generation of
 real designs. Please make sure users understand how they work and what their
-inputs/return values are. More complete generator example will be found [here](generators/README.md)
+inputs/return values are. More complete generator example will be found [here](generators.md)
 
 ## Installation
 
