@@ -66,3 +66,8 @@ Check lab2_a_gridlayoutgenerator_constructtemplate.py for reference.
 6. Overwrite the generated BagModule files with example files in BagModules/adc_sar_templates
 
 7. Run layout generator scripts in a sequence shown above
+
+#### Testbench
+#StrongARM verification
+1. Make sure testbench library is included in cds.lib
+DEFINE adc_sar_testbenches ./laygo/generators/adc_sar_testbenches
