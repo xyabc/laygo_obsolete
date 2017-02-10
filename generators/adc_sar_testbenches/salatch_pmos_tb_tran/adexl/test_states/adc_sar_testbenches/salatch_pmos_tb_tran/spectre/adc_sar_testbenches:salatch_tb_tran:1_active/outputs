@@ -280,6 +280,10 @@ tmp1->definedIn = ""
 tmp1->name = "tckq"
 tmp1->expression = (let
 (tmp1 tmp2 tmp3)
+tmp1 = 'times
+tmp2 = 3
+tmp3 = (let
+(tmp1 tmp2 tmp3)
 tmp1 = 'difference
 tmp2 = (let
 (tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 tmp7)
@@ -301,7 +305,7 @@ tmp1 = 'VAR
 tmp2 = "vdd"
 list(tmp1 tmp2)
 )
-tmp3 = 9.0000000000000002e-01
+tmp3 = 6.3200000000000001e-01
 list(tmp1 tmp2 tmp3)
 )
 tmp4 = 1
@@ -334,6 +338,8 @@ list(tmp1 tmp2 tmp3)
 tmp4 = 1
 tmp5 = "either"
 list(tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 tmp7)
+)
+list(tmp1 tmp2 tmp3)
 )
 list(tmp1 tmp2 tmp3)
 )
