@@ -140,10 +140,10 @@ def generate_capdac(laygen, objectname_pfix, placement_grid, routing_grid_m6m7,
         #c_bot_xy = laygen.get_inst_pin_coord(c.name, 'BOTTOM', rg_m6m7, index=np.array([0, m*2**num_bits_vertical-1]))[0]
         c_bot_xy = laygen.get_inst_pin_coord(c.name, 'BOTTOM', rg_m6m7, index=np.array([0, m*m_horizontal[i]-1]))[0]
         c_bot_xy2 = laygen.get_template_pin_coord(c.cellname, 'BOTTOM', rg_m6m7)[0]
-        #rbot.append(laygen.route(None, laygen.layers['metal'][7], xy0=c_bot_xy + np.array([0, 0]), xy1=np.array([0, y0]), gridname0=rg_m6m7, direction='y'))
+        rbot.append(laygen.route(None, laygen.layers['metal'][7], xy0=c_bot_xy + np.array([0, 0]), xy1=np.array([0, y0]), gridname0=rg_m6m7, direction='y'))
         #for j in range(m*2**num_bits_vertical):
-        #for j in range(m*m_horizontal[i]):
-        #    laygen.via(None, c_bot_xy2 + np.array([0, 0]), refinstname=c.name, refinstindex=np.array([0, j]), gridname=rg_m6m7)
+        for j in range(m*m_horizontal[i]):
+            laygen.via(None, c_bot_xy2 + np.array([0, 0]), refinstname=c.name, refinstindex=np.array([0, j]), gridname=rg_m6m7)
         #parallel connections
         for k in range(2**i):
             c_bot_xy3 = laygen.get_inst_pin_coord(c.name, 'BOTTOM', rg_m6m7, index=np.array([k, m*m_horizontal[i]-1]))[0]
