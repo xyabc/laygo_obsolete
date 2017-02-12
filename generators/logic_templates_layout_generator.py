@@ -2718,7 +2718,7 @@ if __name__ == '__main__':
                  'ndsr_1x', 'ndsr_2x',
                  'mux2to1_1x', 'mux2to1_2x', 'mux2to1_4x', 'mux2to1_8x',
                  ]
-    mycell_list=['nsw_2x', 'nsw_4x', 'nsw_8x']
+    #mycell_list=['nsw_2x', 'nsw_4x', 'nsw_8x']
     import imp
     try:
         imp.find_module('bag')
