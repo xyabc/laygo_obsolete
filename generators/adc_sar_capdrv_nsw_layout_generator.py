@@ -39,24 +39,18 @@ def create_power_pin_from_inst(laygen, layer, gridname, inst_left, inst_right):
     laygen.pin(name='VDD', layer=layer, xy=np.vstack((rvdd0_pin_xy[0],rvdd1_pin_xy[1])), gridname=gridname)
     laygen.pin(name='VSS', layer=layer, xy=np.vstack((rvss0_pin_xy[0],rvss1_pin_xy[1])), gridname=gridname)
 
-def generate_capdrv(laygen, objectname_pfix, templib_logic, placement_grid, routing_grid_m3m4, m=2, origin=np.array([0, 0])):
+def generate_capdrv_nsw(laygen, objectname_pfix, templib_logic, placement_grid, routing_grid_m3m4, m=2, origin=np.array([0, 0])):
     """generate cap driver """
     pg = placement_grid
     rg_m3m4 = routing_grid_m3m4
 
-    inv_name='inv_'+str(m)+'x'
-    tg_name='tgate_'+str(m)+'x'
+    #inv_name='inv_'+str(m)+'x'
+    tg_name='nsw_'+str(m)+'x'
     tie_name='tie_2x'
 
     # placement
-    i0 = laygen.place(name = "I" + objectname_pfix + 'INV0', templatename = inv_name,
-                      gridname = pg, xy=origin, template_libname=templib_logic)
-    i1 = laygen.relplace(name = "I" + objectname_pfix + 'INV1', templatename = inv_name,
-                         gridname = pg, refinstname = i0.name, template_libname=templib_logic)
-    i2 = laygen.relplace(name="I" + objectname_pfix + 'INV2', templatename=inv_name,
-                         gridname=pg, refinstname=i1.name, template_libname=templib_logic)
-    it0 = laygen.relplace(name="I" + objectname_pfix + 'TIE0', templatename=tie_name,
-                          gridname=pg, refinstname=i2.name, template_libname=templib_logic)
+    it0 = laygen.place(name="I" + objectname_pfix + 'TIE0', templatename=tie_name,
+                          gridname=pg, xy=origin, template_libname=templib_logic)
     i3 = laygen.relplace(name = "I" + objectname_pfix + 'TG0', templatename = tg_name,
                          gridname = pg, refinstname = it0.name, template_libname=templib_logic)
     i4 = laygen.relplace(name = "I" + objectname_pfix + 'TG1', templatename = tg_name,
@@ -65,44 +59,27 @@ def generate_capdrv(laygen, objectname_pfix, templib_logic, placement_grid, rout
                          gridname = pg, refinstname = i4.name, template_libname=templib_logic)
 
     # internal pins
-    i0_i_xy = laygen.get_inst_pin_coord(i0.name, 'I', rg_m3m4)
-    i0_o_xy = laygen.get_inst_pin_coord(i0.name, 'O', rg_m3m4)
-    i1_i_xy = laygen.get_inst_pin_coord(i1.name, 'I', rg_m3m4)
-    i1_o_xy = laygen.get_inst_pin_coord(i1.name, 'O', rg_m3m4)
-    i2_i_xy = laygen.get_inst_pin_coord(i2.name, 'I', rg_m3m4)
-    i2_o_xy = laygen.get_inst_pin_coord(i2.name, 'O', rg_m3m4)
     it0_vdd_xy = laygen.get_inst_pin_coord(it0.name, 'TIEVDD', rg_m3m4)
     it0_vss_xy = laygen.get_inst_pin_coord(it0.name, 'TIEVSS', rg_m3m4)
+    i3_en_xy = laygen.get_inst_pin_coord(i3.name, 'EN', rg_m3m4)
     i3_i_xy = laygen.get_inst_pin_coord(i3.name, 'I', rg_m3m4)
     i3_o_xy = laygen.get_inst_pin_coord(i3.name, 'O', rg_m3m4)
-    i3_en_xy = laygen.get_inst_pin_coord(i3.name, 'EN', rg_m3m4)
-    i3_enb_xy = laygen.get_inst_pin_coord(i3.name, 'ENB', rg_m3m4)
     i4_en_xy = laygen.get_inst_pin_coord(i4.name, 'EN', rg_m3m4)
-    i4_enb_xy = laygen.get_inst_pin_coord(i4.name, 'ENB', rg_m3m4)
     i4_i_xy = laygen.get_inst_pin_coord(i4.name, 'I', rg_m3m4)
     i4_o_xy = laygen.get_inst_pin_coord(i4.name, 'O', rg_m3m4)
     i5_en_xy = laygen.get_inst_pin_coord(i5.name, 'EN', rg_m3m4)
-    i5_enb_xy = laygen.get_inst_pin_coord(i5.name, 'ENB', rg_m3m4)
     i5_i_xy = laygen.get_inst_pin_coord(i5.name, 'I', rg_m3m4)
     i5_o_xy = laygen.get_inst_pin_coord(i5.name, 'O', rg_m3m4)
 
     #reference route coordinate
-    y0 = i0_i_xy[0][1]
-    x0 = laygen.get_inst_xy(name=i0.name, gridname=rg_m3m4)[0] + 1
+    y0 = i3_i_xy[0][1]
+    x0 = laygen.get_inst_xy(name=it0.name, gridname=rg_m3m4)[0] + 1
     x1 = laygen.get_inst_xy(name=i5.name, gridname=rg_m3m4)[0]\
          +laygen.get_template_size(name=i5.cellname, gridname=rg_m3m4, libname=templib_logic)[0] - 1
     #en
-    rv0, ren0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i0_i_xy[0], np.array([x0, y0 - 4]), rg_m3m4)
-    rv0, ren1 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i1_i_xy[0], np.array([x0, y0 - 3]), rg_m3m4)
-    rv0, ren2 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i2_i_xy[0], np.array([x0, y0 - 2]), rg_m3m4)
-    rv0, ren0_1 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i3_en_xy[0], np.array([x0, y0 - 4]), rg_m3m4)
-    rv0, ren1_1 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i4_en_xy[0], np.array([x0, y0 - 3]), rg_m3m4)
-    rv0, ren2_1 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i5_en_xy[0], np.array([x0, y0 - 2]), rg_m3m4)
-
-    #ienb
-    [rv0, renb0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], i0_o_xy[0], i3_enb_xy[0], y0 - 1, rg_m3m4)
-    [rv0, renb1, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], i1_o_xy[0], i4_enb_xy[0], y0 + 0, rg_m3m4)
-    [rv0, renb2, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], i2_o_xy[0], i5_enb_xy[0], y0 + 1, rg_m3m4)
+    rv0, ren0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i3_en_xy[0], np.array([x0, y0 - 4]), rg_m3m4)
+    rv0, ren1 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i4_en_xy[0], np.array([x0, y0 - 3]), rg_m3m4)
+    rv0, ren2 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i5_en_xy[0], np.array([x0, y0 - 2]), rg_m3m4)
 
     #shield
     rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], it0_vdd_xy[0], np.array([x0, y0 + 2]), rg_m3m4)
@@ -115,7 +92,6 @@ def generate_capdrv(laygen, objectname_pfix, templib_logic, placement_grid, rout
     rv0, rvref1 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i4_i_xy[0], np.array([x0, y0 + 4]), rg_m3m4)
     rv0, rvref2 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i5_i_xy[0], np.array([x0, y0 + 5]), rg_m3m4)
     rv0, rvo0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i3_o_xy[0], np.array([x1, y0 + 6]), rg_m3m4)
-    #[rv0, rvo0, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], i3_o_xy[0], i4_o_xy[0], y0 + 6, rg_m3m4)
     [rv0, rvo1, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], i4_o_xy[0], i5_o_xy[0], y0 + 6, rg_m3m4)
 
     #pin
@@ -128,7 +104,7 @@ def generate_capdrv(laygen, objectname_pfix, templib_logic, placement_grid, rout
     laygen.create_boundary_pin_form_rect(rvo0, rg_m3m4, "VO", laygen.layers['pin'][4], size=4, direction='right')
 
     # power pin
-    create_power_pin_from_inst(laygen, layer=laygen.layers['pin'][2], gridname=rg_m1m2, inst_left=i0, inst_right=i5)
+    create_power_pin_from_inst(laygen, layer=laygen.layers['pin'][2], gridname=rg_m1m2, inst_left=it0, inst_right=i5)
 
 if __name__ == '__main__':
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")
@@ -177,13 +153,13 @@ if __name__ == '__main__':
     mycell_list = []
     #capdrv generation
     m=2
-    cellname='capdrv'
+    cellname='capdrv_nsw'
     print(cellname+" generating")
     mycell_list.append(cellname)
     laygen.add_cell(cellname)
     laygen.sel_cell(cellname)
-    generate_capdrv(laygen, objectname_pfix='CD0', templib_logic=logictemplib,
-                    placement_grid=pg, routing_grid_m3m4=rg_m3m4, m=m, origin=np.array([0, 0]))
+    generate_capdrv_nsw(laygen, objectname_pfix='CD0', templib_logic=logictemplib,
+                        placement_grid=pg, routing_grid_m3m4=rg_m3m4, m=m, origin=np.array([0, 0]))
     laygen.add_template_from_cell()
 
     laygen.save_template(filename=workinglib+'.yaml', libname=workinglib)
