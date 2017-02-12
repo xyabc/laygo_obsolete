@@ -460,7 +460,7 @@ if __name__ == '__main__':
 
     mycell_list = []
     #capdrv generation
-    cellname='capdrv_array_8b'
+    cellname='capdrv_array_nsw_8b'
     print(cellname+" generating")
     mycell_list.append(cellname)
     laygen.add_cell(cellname)
