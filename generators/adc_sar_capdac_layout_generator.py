@@ -171,6 +171,7 @@ def generate_capdac(laygen, objectname_pfix, placement_grid, routing_grid_m6m7,
             laygen.create_boundary_pin_form_rect(rtop, rg_m6m7, "O"+str(cnt), laygen.layers['pin'][6], size=4, direction='left', netname="O")
             cnt+=1
 
+
 if __name__ == '__main__':
     """testbench - generating a capdac array"""
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")
