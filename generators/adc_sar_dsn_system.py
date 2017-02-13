@@ -7,25 +7,30 @@ import numpy as np
 import yaml
 from math import log10
 
-#high level spec
-T=300+100                           #temperature
+yamlfile_input="adc_sar_dsn_system_input.yaml"
+yamlfile_output="adc_sar_dsn_system_output.yaml"
+#load spec
+with open(yamlfile_input, 'r') as stream:
+    specdict = yaml.load(stream)
+T=specdict['T']                      #Temperature
 kT=1.38e-23*T
-v_in=0.4                             #input range
-n_bit=9                              #number of bits
-fsamp=9.6e9                         #effective sampling rate
-c_unit=0.205e-15                    #minimum cap size (set by process and template)
-c_m=1                               #multiplier of unit cap for LSB
+v_in=specdict['v_in']                #input range
+n_bit=specdict['n_bit']              #number of bits
+fsamp=float(specdict['fsamp'])              #effective sampling rate
+c_unit=specdict['c_unit']             #minimum cap size (set by process and template)
+c_m=specdict['c_m']                  #multiplier of unit cap for LSB
 c0=c_unit*c_m 
-c_delta=0.2*2.7                         #Max. cap mismatch ratio for c_unit
-n_bit_samp_noise=0.5                 #Max. sampling noise level in bits
-n_bit_samp_settle=0.5                #Max. sampling settling error level in bits
-n_bit_comp_noise=0.5                 #Max. comparator noise level in bits
-#n_bit_comp_kickback=0.5             #comparator kickback level in bits
-rdx_array=np.array([1, 2, 4, 8, 16, 28, 53, 100]) #capdac radix array
-rdx_enob=8                          #enob from redundancy
-v_bit=v_in/2**n_bit                    #1 bit step(ideal)
-#c_samp=c0*2**n_bit           #sampling cap from c_unit -radix2
-c_samp=c0*np.sum(rdx_array)           #sampling cap from c_unit
+c_delta=specdict['c_delta']          #Max. cap mismatch ratio for c_unit
+n_bit_samp_noise=specdict['n_bit_samp_noise']   #Max. sampling noise level in bits
+n_bit_samp_settle=specdict['n_bit_samp_settle'] #Max. sampling settling error level in bits
+n_bit_comp_noise=specdict['n_bit_comp_noise']   #Max. comparator noise level in bits
+rdx_array=np.array(specdict['rdx_array'])      #capdac radix array
+rdx_enob=specdict['rdx_enob']        #enob from redundancy
+v_bit=v_in/2**n_bit                  #1 bit step(ideal)
+c_samp=c0*np.sum(rdx_array)          #sampling cap from c_unit
+t_comp=(8-1)/9/9.6e9*0.2             #comparator timing
+t_logic=(8-1)/9/9.6e9*0.4            #logic timing
+t_dac=(8-1)/9/9.6e9*0.5              #DAC settling timing
 
 print("[Top level parameters]")
 print("v_bit:"+str(v_bit*1e3)+"mV")
@@ -35,6 +40,8 @@ v_samp_noise=v_bit*n_bit_samp_noise   #sampling noise
 c_samp_noise=kT/v_samp_noise**2     #sampling cap from noise requirement
 c_unit_noise=c_samp_noise/2**n_bit   #unit cap calculated from noise requirement
 print("")
+print("[[Frontend]]")
+print("")
 print("[Sampling noise analysis]")
 print("v_samp_noise:"+str(v_samp_noise*1e3)+"mV")
 print("c_samp_noise:"+str(c_samp_noise*1e15)+"fF")
@@ -42,12 +49,6 @@ if c_samp_noise>c_samp:
     print("Sampling cap has to increase to meet noise calculation. Use a larger c_unit or c_m, or relax n_bit_samp_noise")
 else:
     print("Current sampling cap meets noise specification")
-#comparator noise calculation
-print("")
-print("[Comparator noise analysis]")
-v_comp_noise=v_bit*n_bit_comp_noise   #comparator noise
-print("v_comp_noise:"+str(v_comp_noise*1e3)+"mV")
-print("Use the noise number for comparator design")
 #sampling bandwidth calculation
 print("")
 print("[Sampling bandwidth analysis]")
@@ -63,12 +64,34 @@ print("Use the bandwidth parameter for sampling frontend design")
 print("")
 print("[Redundancy analysis]")
 #rdx_array_ratio=np.divide(1.0*rdx_array[1:], 1.0*rdx_array[:-1])
-#alpha=np.prod(rdx_array_ratio)**(1.0/n_bit)
-alpha=(1.0*rdx_array[-1]/rdx_array[0])**(1.0/n_bit)
-print(alpha)
+alpha=(1.0*rdx_array[-1]/rdx_array[0])**(1.0/(n_bit-2))
 rdx_test=(1-alpha**n_bit)/(1-alpha)+1-2**rdx_enob-c_delta*((1-alpha**(2*n_bit))/(1-alpha**2)+1)**0.5
-print(rdx_test)
-#c_delta
-#rdx_array
+print("radix:"+str(alpha))
+print("ENOB test:"+str(rdx_test))
+if rdx_test<0:
+    print("Cannot achieve the target ENOB. Change redundancy paramters")
+else:
+    print("Target ENOB can be achieved for given mismatch parameters")
+print("")
+print("[[Comparator]]")
+#comparator noise calculation
+print("")
+print("[Comparator noise analysis]")
+v_comp_noise=v_bit*n_bit_comp_noise   #comparator noise
+print("v_comp_noise:"+str(v_comp_noise*1e3)+"mV")
+print("Use the noise number for comparator design")
+print("")
+print("[Comparator/logic/DAC timing analysis]")
+print("t_comp:"+str(t_comp*1e12)+"ps")
+print("t_logic:"+str(t_logic*1e12)+"ps")
+print("t_dac:"+str(t_dac*1e12)+"ps")
 
-
+#write to file
+outdict=dict()
+outdict['v_bit']=v_bit
+outdict['v_comp_noise']=v_comp_noise
+outdict['t_comp']=t_comp
+outdict['t_logic']=t_logic
+outdict['t_dac']=t_dac
+with open(yamlfile_output, 'w') as stream:
+    yaml.dump(outdict, stream)

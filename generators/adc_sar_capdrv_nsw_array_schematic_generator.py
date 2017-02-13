@@ -21,8 +21,15 @@ params = dict(
     m_list=[2,2,2,2,2,2,4,8],
     device_intent='fast',
     )
+load_from_file=True
 #generate_layout = False
 #extract_layout = False
+
+yamlfile_size="adc_sar_capdrv_nsw_array_output.yaml"
+if load_from_file==True:
+    with open(yamlfile_size, 'r') as stream:
+        sizedict = yaml.load(stream)
+params['m_list']=sizedict['m_list']
 
 print('creating BAG project')
 prj = bag.BagProject()

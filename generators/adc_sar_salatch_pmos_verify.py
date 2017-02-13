@@ -20,10 +20,21 @@ cload=20e-15
 vamp_tran=1e-3
 vamp_noise=1e-3
 
+load_from_file=True
 verify_lvs = True
 extracted = False
 verify_tran = True
 verify_noise = True
+yamlfile_system_input="adc_sar_dsn_system_input.yaml"
+yamlfile_system_output="adc_sar_dsn_system_output.yaml"
+
+if load_from_file==True:
+    with open(yamlfile_system_input, 'r') as stream:
+        sysdict_i = yaml.load(stream)
+    with open(yamlfile_system_output, 'r') as stream:
+        sysdict_o = yaml.load(stream)
+    vamp_tran=sysdict_o['v_bit']/2
+    vamp_noise=sysdict_o['v_comp_noise']/2
 
 print('creating BAG project')
 prj = bag.BagProject()

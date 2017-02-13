@@ -612,9 +612,9 @@ def generate_nsw(laygen, objectname_pfix,
     laygen.route(None, laygen.layers['metal'][2], xy0=np.array([-1, 0]), xy1=np.array([1, 0]), gridname0=rg_m1m2,
                  refinstname0=in1.name, refpinname0='G0', refinstindex0=np.array([0, 0]),
                  refinstname1=in1.name, refpinname1='G0', refinstindex1=np.array([m-1, 0]))
-    ren0 = laygen.route(None, laygen.layers['metal'][3], xy0=np.array([1, 0]), xy1=np.array([1, 2]), gridname0=rg_m2m3,
+    ren0 = laygen.route(None, laygen.layers['metal'][3], xy0=np.array([-1, 0]), xy1=np.array([-1, 2]), gridname0=rg_m2m3,
                        refinstname0=in1.name, refpinname0='G0', refinstname1=in1.name, refpinname1='G0')
-    laygen.via(None, np.array([1, 0]), refinstname=in1.name, refpinname='G0', gridname=rg_m2m3)
+    laygen.via(None, np.array([-1, 0]), refinstname=in1.name, refpinname='G0', gridname=rg_m2m3)
 
     #input
     laygen.route(None, laygen.layers['metal'][2], xy0=np.array([-1+1, 0]), xy1=np.array([0, 0]), gridname0=rg_m2m3,
@@ -623,11 +623,13 @@ def generate_nsw(laygen, objectname_pfix,
     for i in range(m):
         laygen.via(None, np.array([0, 0]), refinstname=in1.name, refpinname='S0', refinstindex=np.array([i, 0]), gridname=rg_m1m2)
     laygen.via(None, np.array([0, 0]), refinstname=in1.name, refpinname='S1', refinstindex=np.array([m-1, 0]), gridname=rg_m1m2)
-    laygen.via(None, np.array([0, 0]), refinstname=in1.name, refpinname='S0', refinstindex=np.array([0, 0]), gridname=rg_m2m3)
-    ri0 = laygen.route(None, laygen.layers['metal'][3], xy0=np.array([0, 0]), xy1=np.array([0, 4]), gridname0=rg_m2m3,
-                       refinstname0=in1.name, refpinname0='S0', refinstindex0=np.array([0, 0]),
-                       refinstname1=in1.name, refpinname1='S0', refinstindex1=np.array([0, 0]))
-                       #refinstname1=ip1.name, refpinname1='S0', refinstindex1=np.array([0, 0]))
+    ri=[]
+    for i in range(m):
+        laygen.via(None, np.array([0, 0]), refinstname=in1.name, refpinname='S1', refinstindex=np.array([i, 0]), gridname=rg_m2m3)
+        ri0 = laygen.route(None, laygen.layers['metal'][3], xy0=np.array([0, 0]), xy1=np.array([0, 4]), gridname0=rg_m2m3,
+                           refinstname0=in1.name, refpinname0='S1', refinstindex0=np.array([i, 0]),
+                           refinstname1=in1.name, refpinname1='S1', refinstindex1=np.array([i, 0]))
+        ri.append(ri0)
     #output
     laygen.route(None, laygen.layers['metal'][2], xy0=np.array([-1+1, 1]), xy1=np.array([0, 1]), gridname0=rg_m2m3,
                  refinstname0=in1.name, refpinname0='S0', refinstindex0=np.array([0, 0]), endstyle0='extend',
@@ -635,11 +637,13 @@ def generate_nsw(laygen, objectname_pfix,
     for i in range(m):
         laygen.via(None, np.array([0, 1]), refinstname=in1.name, refpinname='D0', refinstindex=np.array([i, 0]),
                    gridname=rg_m1m2)
-    laygen.via(None, np.array([0, 1]), refinstname=in1.name, refpinname='D0', refinstindex=np.array([0, 0]), gridname=rg_m2m3)
-    ro0 = laygen.route(None, laygen.layers['metal'][3], xy0=np.array([0, 1]), xy1=np.array([0, 4]), gridname0=rg_m2m3,
-                       refinstname0=in1.name, refpinname0='D0', refinstindex0=np.array([0, 0]),
-                       refinstname1=in1.name, refpinname1='D0', refinstindex1=np.array([0, 0]))
-                       #refinstname1=ip1.name, refpinname1='D0', refinstindex1=np.array([m-1, 0]))
+    ro=[]
+    for i in range(m):
+        laygen.via(None, np.array([0, 1]), refinstname=in1.name, refpinname='D0', refinstindex=np.array([i, 0]), gridname=rg_m2m3)
+        ro0 = laygen.route(None, laygen.layers['metal'][3], xy0=np.array([0, 1]), xy1=np.array([0, 4]), gridname0=rg_m2m3,
+                       refinstname0=in1.name, refpinname0='D0', refinstindex0=np.array([i, 0]),
+                       refinstname1=in1.name, refpinname1='D0', refinstindex1=np.array([i, 0]))
+        ro.append(ro0)
 
     # power and groud rail
     xy = laygen.get_template_size(in2.cellname, rg_m1m2) * np.array([1, 0])
@@ -650,7 +654,7 @@ def generate_nsw(laygen, objectname_pfix,
     # pin
     if create_pin == True:
         create_io_pin(laygen, layer=laygen.layers['pin'][3], gridname=rg_m2m3_pin,
-                      pinname_list = ['EN', 'I', 'O'], rect_list=[ren0, ri0, ro0])
+                      pinname_list = ['EN', 'I', 'O'], rect_list=[ren0, ri[0], ro[0]])
         create_power_pin(laygen, layer=laygen.layers['pin'][2], gridname=rg_m1m2, rect_vdd=rvdd, rect_vss=rvss)
 
 def generate_nand(laygen, objectname_pfix,

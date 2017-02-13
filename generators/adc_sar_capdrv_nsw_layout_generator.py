@@ -106,17 +106,22 @@ def generate_capdrv_nsw(laygen, objectname_pfix, templib_logic, placement_grid, 
     rv0, ren2 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i5_en_xy[0], np.array([x0, y0 - 2]), rg_m3m4)
 
     #shield
-    rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], it0_vdd_xy[0], np.array([x0, y0 + 2]), rg_m3m4)
-    rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], it0_vdd_xy[0], np.array([x1, y0 + 2]), rg_m3m4)
+    rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], it0_vdd_xy[0], np.array([x0, y0 - 1]), rg_m3m4)
+    rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], it0_vdd_xy[0], np.array([x1, y0 - 1]), rg_m3m4)
     rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], it0_vdd_xy[0], np.array([x0, y0 + 7]), rg_m3m4)
     rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], it0_vdd_xy[0], np.array([x1, y0 + 7]), rg_m3m4)
 
     #vref
-    rv0, rvref0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i3_i_xy[0], np.array([x0, y0 + 3]), rg_m3m4)
-    rv0, rvref1 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i4_i_xy[0], np.array([x0, y0 + 4]), rg_m3m4)
-    rv0, rvref2 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i5_i_xy[0], np.array([x0, y0 + 5]), rg_m3m4)
-    rv0, rvo0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i3_o_xy[0], np.array([x1, y0 + 6]), rg_m3m4)
-    [rv0, rvo1, rv1] = laygen.route_vhv(laygen.layers['metal'][3], laygen.layers['metal'][4], i4_o_xy[0], i5_o_xy[0], y0 + 6, rg_m3m4)
+    for i in range(int(m/2)):
+        rv0, rvref0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i3_i_xy[0]+np.array([2*i, 0]), np.array([x0, y0 + 0]), rg_m3m4)
+        rv0, rvref1 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i4_i_xy[0]+np.array([2*i, 0]), np.array([x0, y0 + 2]), rg_m3m4)
+        rv0, rvref2 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i5_i_xy[0]+np.array([2*i, 0]), np.array([x0, y0 + 4]), rg_m3m4)
+
+    #out
+    for i in range(int(m/2)):
+        rv0, rvo0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i3_o_xy[0]+np.array([2*i, 0]), np.array([x1, y0 + 6]), rg_m3m4)
+        rv0, rvo1 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i4_o_xy[0]+np.array([2*i, 0]), np.array([x1, y0 + 6]), rg_m3m4)
+        rv0, rvo2 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4], i5_o_xy[0]+np.array([2*i, 0]), np.array([x1, y0 + 6]), rg_m3m4)
 
     #pin
     laygen.create_boundary_pin_form_rect(ren0, rg_m3m4, "EN<0>", laygen.layers['pin'][4], size=4, direction='left')
@@ -128,7 +133,6 @@ def generate_capdrv_nsw(laygen, objectname_pfix, templib_logic, placement_grid, 
     laygen.create_boundary_pin_form_rect(rvo0, rg_m3m4, "VO", laygen.layers['pin'][4], size=4, direction='right')
 
     # power pin
-    #create_power_pin_from_inst(laygen, layer=laygen.layers['pin'][2], gridname=rg_m1m2, inst_left=it0, inst_right=i5)
     create_power_pin_from_inst(laygen, layer=laygen.layers['pin'][2], gridname=rg_m1m2, inst_left=it0, inst_right=refi)
 
 if __name__ == '__main__':

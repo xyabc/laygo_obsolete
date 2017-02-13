@@ -14,7 +14,6 @@ cell_name = 'capdac_8b'
 impl_lib = 'adc_sar_generated'
 tb_lib = 'adc_sar_testbenches'
 tb_cell = 'capdac_8b_tb_tran'
-#tb_noise_cell = 'capdac_8b_tb_noise'
 
 #spec
 vh=0.3
@@ -25,7 +24,6 @@ per=1e-9
 verify_lvs = False
 extracted = True
 verify_tran = True
-verify_noise = False
 
 print('creating BAG project')
 prj = bag.BagProject()
@@ -90,25 +88,3 @@ if verify_tran==True:
     plt.grid()
     plt.xlabel('code')
     plt.ylabel('v') 
-'''
-# transient noise test
-if verify_noise==True:
-    print('creating testbench %s__%s' % (impl_lib, tb_noise_cell))
-    tb_noise = prj.create_testbench(tb_lib, tb_noise_cell, impl_lib, cell_name, impl_lib)
-    tb_noise.set_parameter('cload', cload)
-    tb_noise.set_parameter('vamp', vamp_noise)
-
-    tb_noise.set_simulation_environments(['tt'])
-
-    if extracted:
-        tb_noise.set_simulation_view(impl_lib, cell_name, 'calibre')
-
-    tb_noise.update_testbench()
-
-    print('running simulation')
-    tb_noise.run_simulation()
-
-    print('loading results')
-    results = bag.data.load_sim_results(tb_noise.save_dir)
-    print('0/1 ratio (0.841 for 1sigma):'+str(results['zero_one_ratio']))
-'''

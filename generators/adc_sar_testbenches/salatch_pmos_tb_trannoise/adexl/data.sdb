@@ -1884,8 +1884,7 @@
 				</plottingoptions>
 				<sortVariableValues>0</sortVariableValues>
 			</checkpoint>
-			<timestamp>Mon Jan 23 23:10:54 2017
-</timestamp>
+			<timestamp>Mon Jan 23 23:10:54 2017</timestamp>
 			<resultsname>/tools/projects/jdhan/BAG/tsmc16_craft/adc_sar_testbenches/salatch_pmos_tb_trannoise/adexl/results/data/Interactive.12.rdb</resultsname>
 			<simresults>$AXL_SETUPDB_DIR/results/data/Interactive.12.rdb</simresults>
 			<rawdatadelstrategy>SaveAll</rawdatadelstrategy>
