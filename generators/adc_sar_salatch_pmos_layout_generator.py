@@ -1239,15 +1239,15 @@ if __name__ == '__main__':
                                 m_space_4x=10, m_space_2x=0, m_space_1x=0, origin=sa_origin)
     laygen.add_template_from_cell()
     # 2. calculate spacing param and regenerate
-    x0 = 2*laygen.templates.get_template('capdrv_array_7b', libname=workinglib).xy[1][0] \
+    x0 = 2*laygen.templates.get_template('capdac_8b', libname=workinglib).xy[1][0] \
          - laygen.templates.get_template(cellname, libname=workinglib).xy[1][0]
     m_space = int(round(x0 / 2 / laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0]))
     m_space_4x = int(m_space / 4)
     m_space_2x = int((m_space - m_space_4x * 4) / 2)
     m_space_1x = int(m_space - m_space_4x * 4 - m_space_2x * 2)
-    print("debug", x0, laygen.templates.get_template('capdrv_array_7b', libname=workinglib).xy[1][0] \
-            , laygen.templates.get_template(cellname, libname=workinglib).xy[1][0] \
-            , laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0], m_space, m_space_4x, m_space_2x, m_space_1x)
+    #print("debug", x0, laygen.templates.get_template('capdrv_array_7b', libname=workinglib).xy[1][0] \
+    #        , laygen.templates.get_template(cellname, libname=workinglib).xy[1][0] \
+    #        , laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0], m_space, m_space_4x, m_space_2x, m_space_1x)
     
     laygen.add_cell(cellname)
     laygen.sel_cell(cellname)

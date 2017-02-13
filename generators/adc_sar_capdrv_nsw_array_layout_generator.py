@@ -95,8 +95,8 @@ def generate_capdrv_array(laygen, objectname_pfix, templib_logic, cdrv_name_list
     num_row=int(num_bits/num_bits_row)
 
     tap_name='tap'
-    #cdrv_name='capdrv_nsw'
-    cdac_name='capdac_'+str(num_bits-1)+'b'
+    cdrv_name='capdrv_nsw_8x'
+    cdac_name='capdac_'+str(num_bits)+'b'
     space_1x_name = 'space_1x'
     space_2x_name = 'space_2x'
     space_4x_name = 'space_4x'
@@ -104,6 +104,7 @@ def generate_capdrv_array(laygen, objectname_pfix, templib_logic, cdrv_name_list
     #space cell insertion
     #1. making it fit to DAC-DAC dimension
     x0 = laygen.templates.get_template(cdac_name, libname=workinglib).xy[1][0] \
+         - laygen.templates.get_template('nmos4_fast_left').xy[1][0] * 2 \
          - laygen.templates.get_template(cdrv_name_list[0], libname=workinglib).xy[1][0] * num_bits_row \
          - laygen.templates.get_template(tap_name, libname=templib_logic).xy[1][0] * 2 
     m_space = int(round(x0 / laygen.templates.get_template(space_1x_name, libname=templib_logic).xy[1][0]))
@@ -111,6 +112,8 @@ def generate_capdrv_array(laygen, objectname_pfix, templib_logic, cdrv_name_list
     m_space_4x = 0
     m_space_2x = 0
     m_space_1x = m_space
+    #print(laygen.templates.get_template(cdac_name, libname=workinglib).xy[1][0])
+    #print(laygen.templates.get_template(cdrv_name_list[0], libname=workinglib).xy[1][0])
     x0 = laygen.templates.get_template(tap_name, libname=templib_logic).xy[1][0] * 2 \
          + laygen.templates.get_template(cdrv_name_list[0], libname=workinglib).xy[1][0] * num_bits_row \
          + laygen.templates.get_template(space_1x_name, libname=templib_logic).xy[1][0] * m_space_1x \
@@ -393,7 +396,7 @@ if __name__ == '__main__':
     laygen.sel_cell(cellname)
     generate_capdrv_array(laygen, objectname_pfix='CA0', templib_logic=logictemplib, cdrv_name_list=cdrv_name_list,
                           placement_grid=pg, routing_grid_m2m3=rg_m2m3, routing_grid_m4m5=rg_m4m5, num_bits=8,
-                          num_bits_row=4, origin=np.array([0, 0]))
+                          num_bits_row=2, origin=np.array([0, 0]))
     laygen.add_template_from_cell()
 
     laygen.save_template(filename=workinglib+'.yaml', libname=workinglib)

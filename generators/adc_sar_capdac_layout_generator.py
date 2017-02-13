@@ -239,14 +239,7 @@ if __name__ == '__main__':
                     num_space_bottom=num_space_bottom,
                     origin=np.array([0, 0]))
 
-    #cap_dim_vert_x = np.ones()
-    #cap_dim_vert_y = np.array([1, 2, 4, 8, 16, 32])
-    #generate_capdac(laygen, objectname_pfix='CDAC0', placement_grid=pg, routing_grid_m6m7=rg_m6m7,
-    #                devname_cap_body='momcap_center', devname_cap_dmy='momcap_dmy', devname_cap_space='momcap_space',
-    #                devname_cap_boundary='momcap_boundary',
-    #                cap_dim=[[1,m_unit], [2,m_unit], [2,m_unit], [4,m_unit], [8,m_unit], [16,m_unit]],
-    #                m_vertical=[1,2,2,4,8,16], m_horizontal=[32, 32], num_bits_horizontal=num_bits_horizontal, num_col_space_right=num_col_dmy_right, origin=np.array([0, 0]))
-    #laygen.add_template_from_cell()
+    laygen.add_template_from_cell()
 
     laygen.save_template(filename=workinglib+'.yaml', libname=workinglib)
 
