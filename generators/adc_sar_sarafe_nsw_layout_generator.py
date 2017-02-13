@@ -36,7 +36,7 @@ import os
 def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
                     routing_grid_m2m3_thick, routing_grid_m3m4_thick,
                     routing_grid_m5m6, routing_grid_m6m7,
-                    num_bits=9, num_bits_vertical=5, m_sa=8, origin=np.array([0, 0])):
+                    num_bits=8, num_bits_vertical=6, m_sa=8, origin=np.array([0, 0])):
     """generate sar analog frontend """
     pg = placement_grid
 
@@ -45,8 +45,8 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     rg_m6m7 = routing_grid_m6m7
 
     tap_name='tap'
-    cdrv_name='capdrv_nsw_array_'+str(num_bits-1)+'b'
-    cdac_name='capdac_'+str(num_bits-1)+'b'
+    cdrv_name='capdrv_nsw_array_'+str(num_bits)+'b'
+    cdac_name='capdac_'+str(num_bits)+'b'
     sa_name='salatch_pmos'
     space_1x_name='space_1x'
 
@@ -85,7 +85,7 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     icdacl_i_c0_xy = laygen.get_inst_pin_coord(icdacl.name, 'I_C0', rg_m5m6)
     icdrvr_vo_c0_xy = laygen.get_inst_pin_coord(icdrvr.name, 'VO_C0', rg_m5m6)
     icdacr_i_c0_xy = laygen.get_inst_pin_coord(icdacr.name, 'I_C0', rg_m5m6)
-    for i in range(num_bits-1):
+    for i in range(num_bits):
         icdrvl_vo_xy.append(laygen.get_inst_pin_coord(icdrvl.name, 'VO<' + str(i) + '>', rg_m5m6))
         icdacl_i_xy.append(laygen.get_inst_pin_coord(icdacl.name, 'I<' + str(i) + '>', rg_m5m6))
         icdrvr_vo_xy.append(laygen.get_inst_pin_coord(icdrvr.name, 'VO<' + str(i) + '>', rg_m5m6))
@@ -101,7 +101,7 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
                                        icdacr_i_c0_xy[0], y0 + 2, rg_m5m6, layerv1=laygen.layers['metal'][7], gridname1=rg_m6m7)
     laygen.create_boundary_pin_form_rect(rv0, rg_m5m6, "VOR_C0", laygen.layers['pin'][5], size=4, direction='bottom', netname='VREF<1>')
 
-    for i in range(num_bits-1):
+    for i in range(num_bits):
         [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6], icdrvl_vo_xy[i][0],
                                            icdacl_i_xy[i][0], y0 - i, rg_m5m6, layerv1=laygen.layers['metal'][7], gridname1=rg_m6m7)
         laygen.create_boundary_pin_form_rect(rv0, rg_m5m6, "VOL<"+str(i)+">", laygen.layers['pin'][5], size=4, direction='bottom')
@@ -139,7 +139,7 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     renr0 = []
     renr1 = []
     renr2 = []
-    for i in range(num_bits-1):
+    for i in range(num_bits):
         renl0.append(laygen.route(None, laygen.layers['metal'][5], xy0=np.array([0, 0]), xy1=np.array([0, 0]),
                      refinstname0=icdrvl.name, refpinname0='EN'+str(i)+'<0>', gridname0=rg_m5m6, direction='y'))
         renl1.append(laygen.route(None, laygen.layers['metal'][5], xy0=np.array([0, 0]), xy1=np.array([0, 0]),
@@ -344,15 +344,16 @@ if __name__ == '__main__':
     #laygen.save_template(filename=workinglib+'_templates.yaml', libname=workinglib)
 
     mycell_list = []
+    num_bits=8
     #capdrv generation
-    cellname='sarafe_nsw'
+    cellname='sarafe_nsw_'+str(num_bits)+'x'
     print(cellname+" generating")
     mycell_list.append(cellname)
     laygen.add_cell(cellname)
     laygen.sel_cell(cellname)
     generate_sarafe_nsw(laygen, objectname_pfix='CA0', workinglib=workinglib,
                     placement_grid=pg, routing_grid_m2m3_thick=rg_m2m3_thick, routing_grid_m3m4_thick=rg_m3m4_thick,
-                    routing_grid_m5m6=rg_m5m6, routing_grid_m6m7=rg_m6m7, num_bits=9, m_sa=8,
+                    routing_grid_m5m6=rg_m5m6, routing_grid_m6m7=rg_m6m7, num_bits=num_bits, m_sa=8,
                     origin=np.array([0, 0]))
     laygen.add_template_from_cell()
 
