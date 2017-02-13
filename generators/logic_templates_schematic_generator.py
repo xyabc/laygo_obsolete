@@ -39,6 +39,7 @@ params = dict(lch=16e-9, pw=4, nw=4, device_intent='fast', m=1)
 cell_name_dict={'tie':[2],
                 'inv':[1,2,4,8],
                 'tgate':[2,4,8],
+                'nsw':[2,4,8],
                 'tinv':[1,2,4,8],
                 'tinv_small':[1],
                 'nand':[1,2,4,8],

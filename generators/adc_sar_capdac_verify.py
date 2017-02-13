@@ -22,7 +22,7 @@ vl=0.0
 vcm=0.15
 per=1e-9
 
-verify_lvs = True
+verify_lvs = False
 extracted = True
 verify_tran = True
 verify_noise = False

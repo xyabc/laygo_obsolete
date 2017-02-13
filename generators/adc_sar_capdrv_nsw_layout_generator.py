@@ -39,7 +39,7 @@ def create_power_pin_from_inst(laygen, layer, gridname, inst_left, inst_right):
     laygen.pin(name='VDD', layer=layer, xy=np.vstack((rvdd0_pin_xy[0],rvdd1_pin_xy[1])), gridname=gridname)
     laygen.pin(name='VSS', layer=layer, xy=np.vstack((rvss0_pin_xy[0],rvss1_pin_xy[1])), gridname=gridname)
 
-def generate_capdrv_nsw(laygen, objectname_pfix, templib_logic, placement_grid, routing_grid_m3m4, m=2, origin=np.array([0, 0])):
+def generate_capdrv_nsw(laygen, objectname_pfix, templib_logic, placement_grid, routing_grid_m3m4, m=2, m_space=18, origin=np.array([0, 0])):
     """generate cap driver """
     pg = placement_grid
     rg_m3m4 = routing_grid_m3m4
@@ -47,6 +47,14 @@ def generate_capdrv_nsw(laygen, objectname_pfix, templib_logic, placement_grid, 
     #inv_name='inv_'+str(m)+'x'
     tg_name='nsw_'+str(m)+'x'
     tie_name='tie_2x'
+    space_1x_name = 'space_1x'
+    space_2x_name = 'space_2x'
+    space_4x_name = 'space_4x'
+    
+    #calculate space param
+    m_space_4x = int(m_space / 4)
+    m_space_2x = int((m_space - m_space_4x * 4) / 2)
+    m_space_1x = int(m_space - m_space_4x * 4 - m_space_2x * 2)
 
     # placement
     it0 = laygen.place(name="I" + objectname_pfix + 'TIE0', templatename=tie_name,
@@ -57,6 +65,22 @@ def generate_capdrv_nsw(laygen, objectname_pfix, templib_logic, placement_grid, 
                          gridname = pg, refinstname = i3.name, template_libname=templib_logic)
     i5 = laygen.relplace(name = "I" + objectname_pfix + 'TG2', templatename = tg_name,
                          gridname = pg, refinstname = i4.name, template_libname=templib_logic)
+    refi=i5
+    if not m_space_4x==0:
+        isp4x=laygen.relplace(name="I" + objectname_pfix + 'SP4X0', templatename=space_4x_name,
+                     shape = np.array([m_space_4x, 1]), gridname=pg,
+                     refinstname=refi.name, template_libname=templib_logic)
+        refi = isp4x
+    if not m_space_2x==0:
+        isp2x=laygen.relplace(name="I" + objectname_pfix + 'SP2X0', templatename=space_2x_name,
+                     shape = np.array([m_space_2x, 1]), gridname=pg,
+                     refinstname=refi.name, template_libname=templib_logic)
+        refi = isp2x
+    if not m_space_1x==0:
+        isp1x=laygen.relplace(name="I" + objectname_pfix + 'SP1X0', templatename=space_1x_name,
+                     shape=np.array([m_space_1x, 1]), gridname=pg,
+                     refinstname=refi.name, template_libname=templib_logic)
+        refi = isp1x
 
     # internal pins
     it0_vdd_xy = laygen.get_inst_pin_coord(it0.name, 'TIEVDD', rg_m3m4)
@@ -104,7 +128,8 @@ def generate_capdrv_nsw(laygen, objectname_pfix, templib_logic, placement_grid, 
     laygen.create_boundary_pin_form_rect(rvo0, rg_m3m4, "VO", laygen.layers['pin'][4], size=4, direction='right')
 
     # power pin
-    create_power_pin_from_inst(laygen, layer=laygen.layers['pin'][2], gridname=rg_m1m2, inst_left=it0, inst_right=i5)
+    #create_power_pin_from_inst(laygen, layer=laygen.layers['pin'][2], gridname=rg_m1m2, inst_left=it0, inst_right=i5)
+    create_power_pin_from_inst(laygen, layer=laygen.layers['pin'][2], gridname=rg_m1m2, inst_left=it0, inst_right=refi)
 
 if __name__ == '__main__':
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")
@@ -151,16 +176,18 @@ if __name__ == '__main__':
     #laygen.save_template(filename=workinglib+'_templates.yaml', libname=workinglib)
 
     mycell_list = []
+    m_list = [2,4,8]
     #capdrv generation
-    m=2
-    cellname='capdrv_nsw'
-    print(cellname+" generating")
-    mycell_list.append(cellname)
-    laygen.add_cell(cellname)
-    laygen.sel_cell(cellname)
-    generate_capdrv_nsw(laygen, objectname_pfix='CD0', templib_logic=logictemplib,
-                        placement_grid=pg, routing_grid_m3m4=rg_m3m4, m=m, origin=np.array([0, 0]))
-    laygen.add_template_from_cell()
+    for m in m_list:
+        cellname='capdrv_nsw_'+str(m)+'x'
+        print(cellname+" generating")
+        mycell_list.append(cellname)
+        laygen.add_cell(cellname)
+        laygen.sel_cell(cellname)
+        generate_capdrv_nsw(laygen, objectname_pfix='CD0', templib_logic=logictemplib,
+                            placement_grid=pg, routing_grid_m3m4=rg_m3m4, m=m, m_space=3*(8-m), origin=np.array([0, 0]))
+        laygen.add_template_from_cell()
+
 
     laygen.save_template(filename=workinglib+'.yaml', libname=workinglib)
     #bag export, if bag does not exist, gds export
