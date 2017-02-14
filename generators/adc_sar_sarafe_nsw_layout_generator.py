@@ -51,10 +51,6 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     space_1x_name='space_1x'
 
     # placement
-    #laygen.get_template_size(templatename, gridname, libname=template_libname)
-
-    # laygen.get_template_size(cdac_name, gridname=pg, libname=workinglib)
-    # laygen.get_template_size(cdac_name, gridname=pg, libname=workinglib)
     xy0 = origin + (laygen.get_template_size(cdrv_name, gridname=pg, libname=workinglib)*np.array([1, 0]) )
     icdrvl = laygen.place(name="I" + objectname_pfix + 'CDRVL0', templatename=cdrv_name, gridname=pg,
                           xy=xy0, template_libname = workinglib, transform='MY')
