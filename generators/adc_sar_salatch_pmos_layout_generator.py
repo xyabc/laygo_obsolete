@@ -27,6 +27,7 @@
 import laygo
 import numpy as np
 import os
+import yaml
 #import logging;logging.basicConfig(level=logging.DEBUG)
 
 def create_power_pin_from_inst(laygen, layer, gridname, inst_left, inst_right):
@@ -1213,6 +1214,13 @@ if __name__ == '__main__':
     print(cellname+" generating")
     mycell_list.append(cellname)
     m_sa=8
+    #load from preset
+    load_from_file=True
+    yamlfile_system_input="adc_sar_dsn_system_input.yaml"
+    if load_from_file==True:
+        with open(yamlfile_system_input, 'r') as stream:
+            sysdict_i = yaml.load(stream)
+        m_sa=sysdict_i['m_salatch']
     m_in=int(m_sa/2)            #4
     m_clkh=m_in                 #4
     m_rstn=1                    #1

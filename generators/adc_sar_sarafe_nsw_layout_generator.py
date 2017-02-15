@@ -281,7 +281,7 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     laygen.create_boundary_pin_form_rect(routm, rg_m4m5, "OUTM", laygen.layers['pin'][5], size=4, direction='bottom')
     laygen.create_boundary_pin_form_rect(rosp, rg_m2m3, "OSP", laygen.layers['pin'][3], size=4, direction='bottom')
     laygen.create_boundary_pin_form_rect(rosm, rg_m2m3, "OSM", laygen.layers['pin'][3], size=4, direction='bottom')
-    for i in range(num_bits - 1):
+    for i in range(num_bits):
         laygen.create_boundary_pin_form_rect(renl0[i], rg_m5m6, "ENL"+str(i)+"<0>", laygen.layers['pin'][5], size=4, direction='bottom')
         laygen.create_boundary_pin_form_rect(renl1[i], rg_m5m6, "ENL"+str(i)+"<1>", laygen.layers['pin'][5], size=4, direction='bottom')
         laygen.create_boundary_pin_form_rect(renl2[i], rg_m5m6, "ENL"+str(i)+"<2>", laygen.layers['pin'][5], size=4, direction='bottom')
@@ -333,16 +333,17 @@ if __name__ == '__main__':
     rg_m1m2_pin = 'route_M1_M2_basic'
     rg_m2m3_pin = 'route_M2_M3_basic'
 
-
-    #display
-    #laygen.display()
-    #laygen.templates.display()
-    #laygen.save_template(filename=workinglib+'_templates.yaml', libname=workinglib)
-
     mycell_list = []
     num_bits=8
+    #load from preset
+    load_from_file=True
+    yamlfile_system_input="adc_sar_dsn_system_input.yaml"
+    if load_from_file==True:
+        with open(yamlfile_system_input, 'r') as stream:
+            sysdict_i = yaml.load(stream)
+        num_bits=sysdict_i['n_bit']-1
     #capdrv generation
-    cellname='sarafe_nsw_'+str(num_bits)+'x'
+    cellname='sarafe_nsw_'+str(num_bits)+'b'
     print(cellname+" generating")
     mycell_list.append(cellname)
     laygen.add_cell(cellname)

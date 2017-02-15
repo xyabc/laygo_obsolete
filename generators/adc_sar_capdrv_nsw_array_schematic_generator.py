@@ -11,8 +11,6 @@ import yaml
 lib_name = 'adc_sar_templates'
 cell_name = 'capdrv_nsw_array_8b'
 impl_lib = 'adc_sar_generated'
-#tb_lib = 'adc_sar_testbenches'
-#tb_cell = 'capdrv_array_7b_tb_tran'
 
 params = dict(
     lch=16e-9,
@@ -22,14 +20,16 @@ params = dict(
     device_intent='fast',
     )
 load_from_file=True
-#generate_layout = False
-#extract_layout = False
 
+yamlfile_system_input="adc_sar_dsn_system_input.yaml"
 yamlfile_size="adc_sar_capdrv_nsw_array_output.yaml"
 if load_from_file==True:
+    with open(yamlfile_system_input, 'r') as stream:
+        sysdict_i = yaml.load(stream)
+    cell_name='capdrv_nsw_array_'+str(sysdict_i['n_bit']-1)+'b'
     with open(yamlfile_size, 'r') as stream:
         sizedict = yaml.load(stream)
-params['m_list']=sizedict['m_list']
+    params['m_list']=sizedict['m_list']
 
 print('creating BAG project')
 prj = bag.BagProject()

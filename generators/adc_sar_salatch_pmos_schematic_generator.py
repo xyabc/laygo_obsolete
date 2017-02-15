@@ -23,6 +23,15 @@ params = dict(
     device_intent='fast',
     )
 
+load_from_file=True
+
+yamlfile_system_input="adc_sar_dsn_system_input.yaml"
+if load_from_file==True:
+    with open(yamlfile_system_input, 'r') as stream:
+        sysdict_i = yaml.load(stream)
+    params['m']=sysdict_i['m_salatch']
+
+
 print('creating BAG project')
 prj = bag.BagProject()
 

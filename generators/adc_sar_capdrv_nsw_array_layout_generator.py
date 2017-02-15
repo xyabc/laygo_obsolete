@@ -381,7 +381,7 @@ if __name__ == '__main__':
 
     mycell_list = []
     #capdrv generation
-    cellname='capdrv_nsw_array_8b'
+    cell_name='capdrv_nsw_array_8b'
     cdrv_name_list=[
         'capdrv_nsw_2x',
         'capdrv_nsw_2x',
@@ -394,18 +394,22 @@ if __name__ == '__main__':
         ]
     #load from preset
     load_from_file=True
+    yamlfile_system_input="adc_sar_dsn_system_input.yaml"
     yamlfile_size="adc_sar_capdrv_nsw_array_output.yaml"
     if load_from_file==True:
+        with open(yamlfile_system_input, 'r') as stream:
+            sysdict_i = yaml.load(stream)
+        cell_name='capdrv_nsw_array_'+str(sysdict_i['n_bit']-1)+'b'
         with open(yamlfile_size, 'r') as stream:
             sizedict = yaml.load(stream)
     m_list=sizedict['m_list']
     for i, m in enumerate(m_list):
         cdrv_name_list[i]='capdrv_nsw_'+str(m)+'x'
 
-    print(cellname+" generating")
-    mycell_list.append(cellname)
-    laygen.add_cell(cellname)
-    laygen.sel_cell(cellname)
+    print(cell_name+" generating")
+    mycell_list.append(cell_name)
+    laygen.add_cell(cell_name)
+    laygen.sel_cell(cell_name)
     generate_capdrv_array(laygen, objectname_pfix='CA0', templib_logic=logictemplib, cdrv_name_list=cdrv_name_list,
                           placement_grid=pg, routing_grid_m2m3=rg_m2m3, routing_grid_m4m5=rg_m4m5, num_bits=8,
                           num_bits_row=2, origin=np.array([0, 0]))
