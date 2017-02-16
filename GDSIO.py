@@ -22,13 +22,14 @@
 #
 ########################################################################################################################
 
-"""GDSII IO class for Python3. Import/export layout database to GDS. Implemented by Eric Jan"""
+"""GDSII IO class for importing/exporting layout database from/to GDS. Implemented by Eric Jan"""
 
 #TODO: Change save function to export function to maintain our naming conventions (done by Jaeduk)
-#TODO: Implement import functions (similar to load in python-gdsii)
+#TODO: integrate to laygo framework
 #TODO: Implement instance class (similar to SRef in python-gdsii)
+#TODO: Implement import functions (similar to load in python-gdsii)
 
-from pack import * #??
+from GDSIOHelper import *
 
 class Library(list):
     def __init__(self, version, name, physicalUnit, logicalUnit):
@@ -66,7 +67,7 @@ class Library(list):
         stream.write(pack_text("LIBNAME", self.name))
         stream.write(pack_double("UNITS", self.units))
         for struct in self:
-            struct.save(stream)
+            struct.export(stream)
         stream.write(pack_no_data("ENDLIB"))
 
 
@@ -95,7 +96,7 @@ class Structure(list):
         stream.write(pack_bgn("BGNSTR"))
         stream.write(pack_text("STRNAME", self.name))
         for element in self:
-            element.save(stream)
+            element.export(stream)
         stream.write(pack_no_data("ENDSTR"))
 
 
@@ -104,7 +105,7 @@ class Structure(list):
     # has many subclasses of elements (to be expanded in the future)
     # def __init__(self):
 
-    # def save(self, stream):
+    # def export(self, stream):
 
 # class Boundary (Elements):
 class Boundary:
@@ -150,7 +151,37 @@ class Boundary:
         stream.write(pack_long("XY", self.xy))
         stream.write(pack_no_data("ENDEL"))
 
+class Instance:
+    def __init__(self):
+        """
+        initialize An Instance object
+        """
 
+    def export(self, stream):
+        """
+        Export to stream
+
+        Parameters
+        ----------
+        stream : stream
+            File stream to be written
+        """
+
+class InstanceArray:
+    def __init__(self):
+        """
+        initialize An Instance object
+        """
+
+    def export(self, stream):
+        """
+        Export to stream
+
+        Parameters
+        ----------
+        stream : stream
+            File stream to be written
+        """
 #test
 if __name__ == '__main__':
     # Create a new library
