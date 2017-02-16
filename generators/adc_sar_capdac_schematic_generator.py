@@ -3,7 +3,6 @@
 import pprint
 
 import bag
-#from laygo import *
 import laygo
 import numpy as np
 import yaml
@@ -11,11 +10,14 @@ import yaml
 lib_name = 'adc_sar_templates'
 cell_name = 'capdac_8b'
 impl_lib = 'adc_sar_generated'
-#tb_lib = 'adc_sar_testbenches'
-#tb_cell = 'capdac_7b_tb_tran'
 
-#generate_layout = False
-#extract_layout = False
+load_from_file=True
+yamlfile_system_input="adc_sar_dsn_system_input.yaml"
+
+if load_from_file==True:
+    with open(yamlfile_system_input, 'r') as stream:
+        sysdict_i = yaml.load(stream)
+    cell_name='capdac_'+str(sysdict_i['n_bit']-1)+'b'
 
 print('creating BAG project')
 prj = bag.BagProject()

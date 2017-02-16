@@ -46,7 +46,7 @@ class adc_sar_templates__sarclkgen_core_static(Module):
     def __init__(self, bag_config, parent=None, prj=None, **kwargs):
         Module.__init__(self, bag_config, yaml_file, parent=parent, prj=prj, **kwargs)
 
-    def design(self):
+    def design(self, lch, pw, nw, m, device_intent='fast'):
         """To be overridden by subclasses to design this module.
 
         This method should fill in values for all parameters in
@@ -62,6 +62,12 @@ class adc_sar_templates__sarclkgen_core_static(Module):
         restore_instance()
         array_instance()
         """
+        self.instances['IN0'].design(l=lch, w=nw, nf=m, intent=device_intent)
+        self.instances['IN1'].design(l=lch, w=nw, nf=m, intent=device_intent)
+        self.instances['IN2'].design(l=lch, w=nw, nf=m, intent=device_intent)
+        self.instances['IP0'].design(l=lch, w=pw, nf=m, intent=device_intent)
+        self.instances['IP1'].design(l=lch, w=pw, nf=m, intent=device_intent)
+        self.instances['IP2'].design(l=lch, w=pw, nf=m, intent=device_intent)
         pass
 
     def get_layout_params(self, **kwargs):

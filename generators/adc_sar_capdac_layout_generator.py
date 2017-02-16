@@ -28,6 +28,7 @@ A simple capacitive DAC generation with programmable bits, dimmensions and Cunit
 import laygo
 import numpy as np
 import os
+import yaml
 
 def generate_capdac(laygen, objectname_pfix, placement_grid, routing_grid_m6m7,
                     devname_cap_body='momcap_center', devname_cap_dmy='momcap_dmy', devname_cap_space='momcap_space',
@@ -174,6 +175,13 @@ def generate_capdac(laygen, objectname_pfix, placement_grid, routing_grid_m6m7,
 
 if __name__ == '__main__':
     """testbench - generating a capdac array"""
+    cell_name='capdac_8b'
+    load_from_file=True
+    yamlfile_system_input="adc_sar_dsn_system_input.yaml"
+    if load_from_file==True:
+        with open(yamlfile_system_input, 'r') as stream:
+            sysdict_i = yaml.load(stream)
+        cell_name='capdac_'+str(sysdict_i['n_bit']-1)+'b'
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")
 
     import imp
@@ -219,11 +227,10 @@ if __name__ == '__main__':
     num_space_bottom = 4
     num_space_left = 1
     num_space_right = 2
-    cellname='capdac_8b'
-    print(cellname+" generating")
-    mycell_list.append(cellname)
-    laygen.add_cell(cellname)
-    laygen.sel_cell(cellname)
+    print(cell_name+" generating")
+    mycell_list.append(cell_name)
+    laygen.add_cell(cell_name)
+    laygen.sel_cell(cell_name)
     #routing grid used as placement grid
     generate_capdac(laygen, objectname_pfix='CDAC0', placement_grid=rg_m6m7, routing_grid_m6m7=rg_m6m7,
                     devname_cap_body='momcap_center_1x', devname_cap_dmy='momcap_dmy_1x', devname_cap_space='momcap_space_1x',

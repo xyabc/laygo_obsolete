@@ -28,7 +28,7 @@ rdx_array=np.array(specdict['rdx_array'])      #capdac radix array
 rdx_enob=specdict['rdx_enob']        #enob from redundancy
 v_bit=v_in/2**n_bit                  #1 bit step(ideal)
 c_samp=c0*np.sum(rdx_array)          #sampling cap from c_unit
-t_comp=(8-1)/9/9.6e9*0.2             #comparator timing
+t_comp=(8-1)/9/9.6e9*0.25            #comparator timing
 t_logic=(8-1)/9/9.6e9*0.4            #logic timing
 t_dac=(8-1)/9/9.6e9*0.5              #DAC settling timing
 

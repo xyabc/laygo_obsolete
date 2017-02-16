@@ -18,7 +18,7 @@ l = 16e-9
 intent = 'ulvt'
 pw = 4
 nw = 4
-cl = 30e-15
+cl = 20e-15
 
 vdd = 0.8
 vincm = 0.2
@@ -87,11 +87,11 @@ tint=-c0/mclkh['ids']/m_clkh*vth*2-c0/mclkh['ids']/m_clkh*vth
 print('tint:',tint)
 # regeneration time
 c=mrgnp['cdb']*m_rgnp+mrgnn['cdb']*m_rgnn+mbufn['cgs']*m_buf+mbufp['cgs']*m_buf
-trgn=c/mrgnn['gm']/m_rgnn*10
+trgn=c/mrgnn['gm']/m_rgnn
 print('trgn:',trgn)
 # buffer delay
 c=cl+mbufn['cdb']*m_buf+mbufp['cdb']*m_buf
-tbuf=c/mbufn['ids']/m_buf*vdd
+tbuf=c/mbufn['ids']/m_buf*vdd/2
 print('tbuf:',tbuf)
 tckq=ton+tint+trgn+tbuf
 print('tckq:',tckq)
