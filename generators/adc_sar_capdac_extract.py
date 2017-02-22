@@ -11,10 +11,12 @@ import yaml
 lib_name = 'adc_sar_templates'
 cell_name = 'capdac_8b'
 impl_lib = 'adc_sar_generated'
-tb_lib = 'adc_sar_testbenches'
-tb_cell = 'salatch_pmos_tb_tran'
-tb_noise_cell = 'salatch_pmos_tb_trannoise'
-
+load_from_file=True
+yamlfile_system_input="adc_sar_dsn_system_input.yaml"
+if load_from_file==True:
+    with open(yamlfile_system_input, 'r') as stream:
+        sysdict_i = yaml.load(stream)
+    cell_name='capdac_'+str(sysdict_i['n_bit']-1)+'b'
 
 print('creating BAG project')
 prj = bag.BagProject()

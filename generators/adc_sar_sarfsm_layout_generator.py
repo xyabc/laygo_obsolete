@@ -356,19 +356,19 @@ if __name__ == '__main__':
                     origin=np.array([0, 0]))
     laygen.add_template_from_cell()
     # 2. calculate spacing param and regenerate
-    x0 = laygen.templates.get_template('sarafe', libname=workinglib).xy[1][0] \
+    x0 = laygen.templates.get_template('sarafe_nsw_'+str(sysdict_i['n_bit']-1)+'b', libname=workinglib).xy[1][0] \
          - laygen.templates.get_template(cellname, libname=workinglib).xy[1][0] \
          - laygen.templates.get_template('nmos4_fast_left').xy[1][0] * 2
     m_space = int(round(x0 / laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0]))
     m_space_4x = int(m_space / 4)
     m_space_2x = int((m_space - m_space_4x * 4) / 2)
     m_space_1x = int(m_space - m_space_4x * 4 - m_space_2x * 2)
-    #laygen.add_cell(cellname)
-    #laygen.sel_cell(cellname)
-    #generate_sarfsm(laygen, objectname_pfix='FSM0', templib_logic=logictemplib, placement_grid=pg,
-    #                routing_grid_m3m4=rg_m3m4, num_bits=num_bits, num_bits_row=4, m=m, m_space_4x=m_space_4x, m_space_2x=m_space_2x,
-    #                m_space_1x=m_space_1x, origin=np.array([0, 0]))
-    #laygen.add_template_from_cell()
+    laygen.add_cell(cellname)
+    laygen.sel_cell(cellname)
+    generate_sarfsm(laygen, objectname_pfix='FSM0', templib_logic=logictemplib, placement_grid=pg,
+                    routing_grid_m3m4=rg_m3m4, num_bits=num_bits, num_bits_row=4, m=m, m_space_4x=m_space_4x, m_space_2x=m_space_2x,
+                    m_space_1x=m_space_1x, origin=np.array([0, 0]))
+    laygen.add_template_from_cell()
 
     laygen.save_template(filename=workinglib+'.yaml', libname=workinglib)
     #bag export, if bag does not exist, gds export

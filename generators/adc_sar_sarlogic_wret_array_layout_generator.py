@@ -204,18 +204,18 @@ def generate_sarlogic_wret_array(laygen, objectname_pfix, templib_logic, placeme
             if i*num_bits_row+j < num_bits:
                 rv0, rsb0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], pdict_m4m5[islogic[i*num_bits_row+j].name]['SB'][0],
                                             np.array([pdict_m4m5[islogic[i*num_bits_row+j].name]['SB'][0][0]+1+i+6, 0]), rg_m4m5)
-                laygen.create_boundary_pin_form_rect(rsb0, rg_m4m5, 'SB<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='bottom')
                 rv0, rzp0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], pdict_m4m5[islogic[i*num_bits_row+j].name]['ZP'][0],
-                                            np.array([pdict_m4m5[islogic[i*num_bits_row+j].name]['ZP'][0][0]-2+1+i, y2]), rg_m4m5)
-                laygen.create_boundary_pin_form_rect(rzp0, rg_m4m5, 'ZP<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='top')
-                rv0, rzmid0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], pdict_m4m5[islogic[i*num_bits_row+j].name]['ZMID'][0],
-                                             np.array([pdict_m4m5[islogic[i*num_bits_row+j].name]['ZMID'][0][0]-2+1+i+num_row+1, y2]), rg_m4m5)
-                laygen.create_boundary_pin_form_rect(rzmid0, rg_m4m5, 'ZMID<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='top')
+                                            np.array([pdict_m4m5[islogic[i*num_bits_row+j].name]['ZP'][0][0]-2+1+i-11+(1+num_row)*1, y2]), rg_m4m5)
                 rv0, rzm0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], pdict_m4m5[islogic[i*num_bits_row+j].name]['ZM'][0],
-                                            np.array([pdict_m4m5[islogic[i*num_bits_row+j].name]['ZM'][0][0]-2+1+i+num_row*2+2, y2]), rg_m4m5)
-                laygen.create_boundary_pin_form_rect(rzm0, rg_m4m5, 'ZM<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='top')
+                                            np.array([pdict_m4m5[islogic[i*num_bits_row+j].name]['ZM'][0][0]-2+1+i-11+(1+num_row)*0, y2]), rg_m4m5)
+                rv0, rzmid0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], pdict_m4m5[islogic[i*num_bits_row+j].name]['ZMID'][0],
+                                             np.array([pdict_m4m5[islogic[i*num_bits_row+j].name]['ZMID'][0][0]-2+1+i-11+(1+num_row)*2, y2]), rg_m4m5)
                 rv0, rreto0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], pdict_m4m5[islogic[i*num_bits_row+j].name]['RETO'][0],
                                             np.array([pdict_m4m5[islogic[i*num_bits_row+j].name]['RETO'][0][0]+1+i+0, 0]), rg_m4m5)
+                laygen.create_boundary_pin_form_rect(rsb0, rg_m4m5, 'SB<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='bottom')
+                laygen.create_boundary_pin_form_rect(rzp0, rg_m4m5, 'ZP<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='top')
+                laygen.create_boundary_pin_form_rect(rzmid0, rg_m4m5, 'ZMID<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='top')
+                laygen.create_boundary_pin_form_rect(rzm0, rg_m4m5, 'ZM<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='top')
                 laygen.create_boundary_pin_form_rect(rreto0, rg_m4m5, 'RETO<'+str(i*num_bits_row+j)+'>', laygen.layers['pin'][5], size=6, direction='bottom')
 
     # power pin
@@ -323,9 +323,9 @@ if __name__ == '__main__':
                             m_space_1x=0, origin=np.array([0, 0]))
     laygen.add_template_from_cell()
     # 2. calculate spacing param and regenerate
-    x0 = laygen.templates.get_template('sarafe_nsw_8b', libname=workinglib).xy[1][0] \
-         - laygen.templates.get_template(cellname, libname=workinglib).xy[1][0] #\
-         #- laygen.templates.get_template('nmos4_fast_left').xy[1][0] * 2
+    x0 = laygen.templates.get_template('sarafe_nsw_'+str(sysdict_i['n_bit']-1)+'b', libname=workinglib).xy[1][0] \
+         - laygen.templates.get_template(cellname, libname=workinglib).xy[1][0] \
+         - laygen.templates.get_template('nmos4_fast_left').xy[1][0] * 2
     m_space = int(round(x0 / laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0]))
     m_space_4x = int(m_space / 4)
     m_space_2x = int((m_space - m_space_4x * 4) / 2)

@@ -70,10 +70,12 @@ class TemplateDB():
             templatestr = "template:" + templatename
         print('Display ' + libstr + templatestr)
         for ln, l in self.templates.items():
-            print('[Library]' + ln)
-            for sn, s in l.items():
-                print(' [Template]' + sn)
-                s.display()
+            if libname==None or libname==ln:
+                print('[Library]' + ln)
+                for sn, s in l.items():
+                    if templatename==None or templatename==sn:
+                        print(' [Template]' + sn)
+                        s.display()
 
     def export_yaml(self, filename, libname=None):
         """

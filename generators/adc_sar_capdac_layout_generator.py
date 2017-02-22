@@ -176,12 +176,14 @@ def generate_capdac(laygen, objectname_pfix, placement_grid, routing_grid_m6m7,
 if __name__ == '__main__':
     """testbench - generating a capdac array"""
     cell_name='capdac_8b'
+    cell_name_aux=['sar_9b_IAFE0_ICAPM0']
     load_from_file=True
     yamlfile_system_input="adc_sar_dsn_system_input.yaml"
     if load_from_file==True:
         with open(yamlfile_system_input, 'r') as stream:
             sysdict_i = yaml.load(stream)
         cell_name='capdac_'+str(sysdict_i['n_bit']-1)+'b'
+        cell_name_aux=['sar_'+str(sysdict_i['n_bit'])+'b_IAFE0_ICAPM0']
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")
 
     import imp
@@ -245,10 +247,26 @@ if __name__ == '__main__':
                     num_space_top=num_space_top,
                     num_space_bottom=num_space_bottom,
                     origin=np.array([0, 0]))
-
     laygen.add_template_from_cell()
-
     laygen.save_template(filename=workinglib+'.yaml', libname=workinglib)
+    #aux cells for top level use
+    for c in cell_name_aux:
+        mycell_list.append(c)
+        laygen.add_cell(c)
+        laygen.sel_cell(c)
+        generate_capdac(laygen, objectname_pfix='CDAC0', placement_grid=rg_m6m7, routing_grid_m6m7=rg_m6m7,
+                        devname_cap_body='momcap_center_1x', devname_cap_dmy='momcap_dmy_1x', devname_cap_space='momcap_space_1x',
+                        devname_cap_boundary='momcap_boundary_1x',
+                        m_unit=m_unit,
+                        num_bits_vertical=num_bits_vertical,
+                        m_vertical=np.array([1,2,4,8,16,28]),
+                        num_bits_horizontal=num_bits_horizontal,
+                        m_horizontal=np.array([53, 50]),
+                        num_space_left=num_space_left,
+                        num_space_right=num_space_right,
+                        num_space_top=num_space_top,
+                        num_space_bottom=num_space_bottom,
+                        origin=np.array([0, 0]))
 
     #bag export, if bag does not exist, gds export
     import imp

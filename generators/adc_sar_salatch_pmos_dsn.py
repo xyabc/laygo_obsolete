@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+############################################# 
+# Title: ADC salatch design script
+# Author: Jaeduk Han (jdhan@eecs.berkeley.edu) 
+# Created(YYYYMMDD): 20170219
+# Last updated: 
+#############################################  
 
 import pprint
 

@@ -342,7 +342,7 @@ if __name__ == '__main__':
         with open(yamlfile_system_input, 'r') as stream:
             sysdict_i = yaml.load(stream)
         num_bits=sysdict_i['n_bit']-1
-    #capdrv generation
+    #sarafe generation
     cellname='sarafe_nsw_'+str(num_bits)+'b'
     print(cellname+" generating")
     mycell_list.append(cellname)
