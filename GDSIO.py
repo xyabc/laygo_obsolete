@@ -25,11 +25,14 @@
 """GDSII IO class for importing/exporting layout database from/to GDS. Implemented by Eric Jan"""
 
 #TODO: Change save function to export function to maintain our naming conventions (done by Jaeduk)
+#TODO: Implement text class
+#TODO: Support rotations
 #TODO: integrate to laygo framework
 #TODO: Implement instance class (similar to SRef in python-gdsii)
 #TODO: Implement import functions (similar to load in python-gdsii)
 
 from GDSIOHelper import *
+
 
 class Library(list):
     def __init__(self, version, name, physicalUnit, logicalUnit):
@@ -62,10 +65,10 @@ class Library(list):
         stream : stream
             File stream to be written
         """
-        stream.write(pack_int("HEADER", self.version))
+        stream.write(pack_data("HEADER", self.version))
         stream.write(pack_bgn("BGNLIB"))
-        stream.write(pack_text("LIBNAME", self.name))
-        stream.write(pack_double("UNITS", self.units))
+        stream.write(pack_data("LIBNAME", self.name))
+        stream.write(pack_data("UNITS", self.units))
         for struct in self:
             struct.export(stream)
         stream.write(pack_no_data("ENDLIB"))
@@ -94,18 +97,19 @@ class Structure(list):
             File stream to be written
         """
         stream.write(pack_bgn("BGNSTR"))
-        stream.write(pack_text("STRNAME", self.name))
+        stream.write(pack_data("STRNAME", self.name))
         for element in self:
             element.export(stream)
         stream.write(pack_no_data("ENDSTR"))
 
 
-# class Elements:
-    # stores stuff ...
-    # has many subclasses of elements (to be expanded in the future)
-    # def __init__(self):
+        # class Elements:
+        # stores stuff ...
+        # has many subclasses of elements (to be expanded in the future)
+        # def __init__(self):
 
-    # def export(self, stream):
+        # def export(self, stream):
+
 
 # class Boundary (Elements):
 class Boundary:
@@ -145,17 +149,40 @@ class Boundary:
         stream : stream
             File stream to be written
         """
-        stream.write(pack_no_data("BOUNDARY"))
-        stream.write(pack_int("LAYER", self.layer))
-        stream.write(pack_int("DATATYPE", self.dataType))
-        stream.write(pack_long("XY", self.xy))
-        stream.write(pack_no_data("ENDEL"))
+        to_write = pack_no_data("BOUNDARY")
+        to_write += pack_data("LAYER", self.layer)
+        to_write += pack_data("DATATYPE", self.dataType)
+        to_write += pack_data("XY", self.xy)
+        to_write += pack_no_data("ENDEL")
+        stream.write(to_write)
 
+
+# class SRef:
 class Instance:
-    def __init__(self):
+    def __init__(self, sname, xy, transform='R0'):
         """
-        initialize An Instance object
+        initialize Instance object
+
+        Parameters
+        ----------
+        sname : string
+            Instance name
+        xy : array
+            xy coordinate of Instance Object
+        transform : str
+            transform parameter
+            'R0' : default, no transform
+            'R90' : rotate by 90-degree
+            'R180' : rotate by 180-degree
+            'R270' : rotate by 270-degree
+            'MX' : mirror across X axis
+            'MY' : mirror across Y axis
         """
+
+        self.sname = sname
+        if (len(xy) != 1):
+            raise Exception("too many points provided\ninstance should only be located at one point")
+        self.xy = xy[0]
 
     def export(self, stream):
         """
@@ -166,12 +193,49 @@ class Instance:
         stream : stream
             File stream to be written
         """
+        to_write = pack_no_data("SREF")
+        to_write += pack_data("SNAME", self.sname)
+        to_write += pack_data("XY", self.xy)
+        to_write += pack_no_data("ENDEL")
+        stream.write(to_write)
 
+
+# class ARef:
 class InstanceArray:
-    def __init__(self):
+    def __init__(self, sname, n_col, n_row, xy, transform='R0'):
         """
-        initialize An Instance object
+        initialize Instance Array object
+        Parameters
+        ----------
+        sname : string
+            InstanceArray name
+        n_col: int
+            Number of columns
+        n_row : int
+            Number of rows
+        xy : array
+            xy coordinates for InstanceArray Object
+            should be organized as: [(x0, y0), (x0+n_col*sp_col, y_0), (x_0, y0+n_row*sp_row)]
+        transform : str
+            transform parameter
+            'R0' : default, no transform
+            'R90' : rotate by 90-degree
+            'R180' : rotate by 180-degree
+            'R270' : rotate by 270-degree
+            'MX' : mirror across X axis
+            'MY' : mirror across Y axis
         """
+        l = len(xy)
+        if l != 3:
+            s = "\nxy: [(x0, y0), (x0+n_col*sp_col, y_0), (x_0, y0+n_row*sp_row)]"
+            if l > 3:
+                s = "too many points provided" + s
+            else:
+                s = "not enough points provided" + s
+            raise Exception(s)
+        self.sname = sname
+        self.colrow = [n_col, n_row]
+        self.xy = [num for pt in xy for num in pt]
 
     def export(self, stream):
         """
@@ -182,7 +246,15 @@ class InstanceArray:
         stream : stream
             File stream to be written
         """
-#test
+        to_write = pack_no_data("AREF")
+        to_write += pack_data("SNAME", self.sname)
+        to_write += pack_data("COLROW", self.colrow)
+        to_write += pack_data("XY", self.xy)
+        to_write += pack_no_data("ENDEL")
+        stream.write(to_write)
+
+
+# test
 if __name__ == '__main__':
     # Create a new library
     new_lib = Library(5, b'NEWLIB.DB', 1e-9, 0.001)
@@ -193,12 +265,19 @@ if __name__ == '__main__':
     new_lib.append(struc)
 
     # Add objects
-    struc.append(Boundary(45, 0, [(-100000, -100000), (-100000, 0), (0,0), (0, -100000), (-100000, -100000)]))
-    struc.append(Boundary(50, 0, [(100000, 100000), (100000, 0), (0,0), (0, 100000), (100000, 100000)]))
-    # struc.append(Boundary(57, 0, [(10000, 10000), (10000, 0), (0,0), (0, 10000), (10000, 1000000)]))
-    # struc.append(Boundary(288, 0, [(1, 1), (1, 0), (0,0), (0, 1), (1, 1)]))imp
+    struc.append(Boundary(45, 0, [(-100000, -100000), (-100000, 0), (0, 0), (0, -100000), (-100000, -100000)]))
+    struc.append(Boundary(50, 0, [(100000, 100000), (100000, 0), (0, 0), (0, 100000), (100000, 100000)]))
 
-    # Exprot to a GDS file
+    struc2 = Structure('test2')
+    # Add the new structure to the new library
+    new_lib.append(struc2)
+    # Add an instance
+    struc2.append(Instance('test', [(0, 0)]))
+    # Add an array instance
+    struc2.append(
+        InstanceArray('test', 2, 3, [(300000, 300000), (300000 + 2 * 200000, 300000), (300000, 300000 + 3 * 300000)]))
+
+    # Export to a GDS file
     with open('testGDS.gds', 'wb') as stream:
         new_lib.export(stream)
 
