@@ -702,6 +702,7 @@ if __name__ == '__main__':
                          placement_grid=pg, routing_grid_m3m4=rg_m3m4, m_space_4x=0, m_space_2x=0, m_space_1x=0,
                          origin=np.array([0, 0]))
     laygen.add_template_from_cell()
+    '''
     #2. calculate spacing param and regenerate
     x0 = laygen.templates.get_template('sarafe', libname=workinglib).xy[1][0] \
          - laygen.templates.get_template(cellname, libname=workinglib).xy[1][0]  \
@@ -716,7 +717,7 @@ if __name__ == '__main__':
                          placement_grid=pg, routing_grid_m3m4=rg_m3m4, m_space_4x=m_space_4x, m_space_2x=m_space_2x,
                          m_space_1x=m_space_1x, origin=np.array([0, 0]))
     laygen.add_template_from_cell()
-
+    '''
     laygen.save_template(filename=workinglib+'.yaml', libname=workinglib)
     #bag export, if bag does not exist, gds export
     import imp
