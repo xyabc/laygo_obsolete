@@ -46,7 +46,7 @@ class adc_sar_templates__sarclkdelay_compact_dual(Module):
     def __init__(self, bag_config, parent=None, prj=None, **kwargs):
         Module.__init__(self, bag_config, yaml_file, parent=parent, prj=prj, **kwargs)
 
-    def design(self):
+    def design(self, lch, pw, nw, m, device_intent='fast'):
         """To be overridden by subclasses to design this module.
 
         This method should fill in values for all parameters in
@@ -62,7 +62,12 @@ class adc_sar_templates__sarclkdelay_compact_dual(Module):
         restore_instance()
         array_instance()
         """
-        pass
+        self.instances['IDLY0'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
+        self.instances['IDLY1'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
+        self.instances['ITIE0'].design(lch=lch, pw=pw, nw=nw, m=2, device_intent=device_intent)
+        self.instances['IDFF0'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
+        self.instances['IMUX0'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
+        self.instances['IINV0'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
 
     def get_layout_params(self, **kwargs):
         """Returns a dictionary with layout parameters.

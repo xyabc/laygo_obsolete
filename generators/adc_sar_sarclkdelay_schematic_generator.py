@@ -7,7 +7,7 @@ import numpy as np
 import yaml
 
 lib_name = 'adc_sar_templates'
-cell_name = 'sarclkdelay_compact'
+cell_name_list = ['sarclkdelay', 'sarclkdelay_compact', 'sarclkdelay_compact_dual']
 impl_lib = 'adc_sar_generated'
 #tb_lib = 'adc_sar_testbenches'
 #tb_cell = 'sarclkdelay_tb_tran'
@@ -25,13 +25,14 @@ params = dict(
 print('creating BAG project')
 prj = bag.BagProject()
 
-# create design module and run design method.
-print('designing module')
-dsn = prj.create_design_module(lib_name, cell_name)
-print('design parameters:\n%s' % pprint.pformat(params))
-dsn.design(**params)
+for cell_name in cell_name_list:
+    # create design module and run design method.
+    print('designing module')
+    dsn = prj.create_design_module(lib_name, cell_name)
+    print('design parameters:\n%s' % pprint.pformat(params))
+    dsn.design(**params)
 
-# implement the design
-print('implementing design with library %s' % impl_lib)
-dsn.implement_design(impl_lib, top_cell_name=cell_name, erase=True)
+    # implement the design
+    print('implementing design with library %s' % impl_lib)
+    dsn.implement_design(impl_lib, top_cell_name=cell_name, erase=True)
 

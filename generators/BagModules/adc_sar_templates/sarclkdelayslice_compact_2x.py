@@ -33,12 +33,12 @@ import pkg_resources
 from bag.design import Module
 
 
-yaml_file = pkg_resources.resource_filename(__name__, os.path.join('netlist_info', 'sarclkdelay_compact.yaml'))
+yaml_file = pkg_resources.resource_filename(__name__, os.path.join('netlist_info', 'sarclkdelayslice_compact_2x.yaml'))
 
 
 # noinspection PyPep8Naming
-class adc_sar_templates__sarclkdelay_compact(Module):
-    """Module for library adc_sar_templates cell sarclkdelay_compact.
+class adc_sar_templates__sarclkdelayslice_compact_2x(Module):
+    """Module for library adc_sar_templates cell sarclkdelayslice_compact_2x.
 
     Fill in high level description here.
     """
@@ -62,8 +62,12 @@ class adc_sar_templates__sarclkdelay_compact(Module):
         restore_instance()
         array_instance()
         """
-        self.instances['I0'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
-        self.instances['I1'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
+        self.instances['IINV11'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
+        self.instances['IINV12'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
+        self.instances['IINV13'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
+        self.instances['IINV14'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
+        self.instances['IINVSEL0'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
+        self.instances['IMUX0'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
 
     def get_layout_params(self, **kwargs):
         """Returns a dictionary with layout parameters.
