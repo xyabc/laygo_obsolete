@@ -2214,6 +2214,9 @@ if __name__ == '__main__':
     workinglib = tech+'_logic_templates'
     laygen.add_library(workinglib)
     laygen.sel_library(workinglib)
+    if os.path.exists(workinglib+'.yaml'): #generated layout file exists
+        laygen.load_template(filename=workinglib+'.yaml', libname=workinglib)
+        laygen.templates.sel_library(utemplib)
 
     #grid
     pg = 'placement_basic' #placement grid
