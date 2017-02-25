@@ -27,6 +27,7 @@
 import laygo
 import numpy as np
 import yaml
+import os
 #import logging;logging.basicConfig(level=logging.DEBUG)
 
 def create_io_pin(laygen, layer, gridname, pinname_list, rect_list, offset_y=np.array([-1, 1])):
