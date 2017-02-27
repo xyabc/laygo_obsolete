@@ -46,7 +46,7 @@ class adc_sar_templates__sarret(Module):
     def __init__(self, bag_config, parent=None, prj=None, **kwargs):
         Module.__init__(self, bag_config, yaml_file, parent=parent, prj=prj, **kwargs)
 
-    def design(self, lch, pw, nw, m, device_intent='fast'):
+    def design(self, lch, pw, nw, m, fo, num_bit, device_intent='fast'):
         """To be overridden by subclasses to design this module.
 
         This method should fill in values for all parameters in
@@ -62,14 +62,19 @@ class adc_sar_templates__sarret(Module):
         restore_instance()
         array_instance()
         """
-        self.instances['I7'].design(lch=lch, pw=pw, nw=nw, m=1, device_intent=device_intent)
-        self.instances['I6'].design(lch=lch, pw=pw, nw=nw, m=1, device_intent=device_intent)
-        self.instances['I5'].design(lch=lch, pw=pw, nw=nw, m=1, device_intent=device_intent)
-        self.instances['I4'].design(lch=lch, pw=pw, nw=nw, m=1, device_intent=device_intent)
-        self.instances['I3'].design(lch=lch, pw=pw, nw=nw, m=1, device_intent=device_intent)
-        self.instances['I2'].design(lch=lch, pw=pw, nw=nw, m=1, device_intent=device_intent)
-        self.instances['I1'].design(lch=lch, pw=pw, nw=nw, m=1, device_intent=device_intent)
-        self.instances['I0'].design(lch=lch, pw=pw, nw=nw, m=1, device_intent=device_intent)
+        name_list=[]
+        term_list=[]
+        for i in range(num_bit):
+            in_pin = 'IN<%d>'%i
+            out_pin = 'OUT<%d>'%i
+            term_list.append({'I': in_pin, 'O':out_pin})
+            name_list.append('I%d'%i)
+        self.array_instance('I0', name_list, term_list=term_list)
+        self.rename_pin('IN','IN<%d:0>'%(num_bit-1))
+        self.rename_pin('OUT','OUT<%d:0>'%(num_bit-1))
+        
+        for inst in self.instances['I0']:
+            inst.design(lch=lch, pw=pw, nw=nw, m=m, fo=fo, device_intent=device_intent)
 
     def get_layout_params(self, **kwargs):
         """Returns a dictionary with layout parameters.

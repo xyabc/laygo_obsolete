@@ -20,6 +20,9 @@ params = dict(
     nw=4,
     m_sa=8,
     m_drv_list=[2,2,2,2,2,2,4,8],
+    #num_bit=8,
+    #c_m=1,
+    #rdx_array=[1,2,4,8,16,32,64,128],
     device_intent='fast',
     )
 load_from_file=True
@@ -32,6 +35,10 @@ if load_from_file==True:
     cell_name='sarafe_nsw_'+str(sysdict_i['n_bit']-1)+'b'
     with open(yamlfile_capdrv_size, 'r') as stream:
         sizedict_cdrv = yaml.load(stream)
+    #params['m_sa']=sysdict_i['m_sa']
+    #params['num_bit']=sysdict_i['n_bit']-1
+    #params['c_m']=sysdict_i['c_m']
+    #params['rdx_array']=sysdict_i['rdx_array']
     params['m_drv_list']=sizedict_cdrv['m_list']
 
 print('creating BAG project')

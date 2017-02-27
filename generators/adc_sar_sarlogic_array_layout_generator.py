@@ -26,6 +26,7 @@
 """
 import laygo
 import numpy as np
+import yaml
 import os
 #import logging;logging.basicConfig(level=logging.DEBUG)
 
@@ -283,10 +284,17 @@ if __name__ == '__main__':
     #laygen.save_template(filename=workinglib+'_templates.yaml', libname=workinglib)
 
     mycell_list = []
+    num_bits=9
+    #load from preset
+    load_from_file=True
+    yamlfile_system_input="adc_sar_dsn_system_input.yaml"
+    if load_from_file==True:
+        with open(yamlfile_system_input, 'r') as stream:
+            sysdict_i = yaml.load(stream)
+        num_bits=sysdict_i['n_bit']
     #sarlogic generation
-
     # generation (2 step)
-    cellname='sarlogic_array_8b'
+    cellname='sarlogic_array_'+str(num_bits)+'b'
     print(cellname+" generating")
     mycell_list.append(cellname)
     # 1. generate without spacing
@@ -298,7 +306,7 @@ if __name__ == '__main__':
                             m_space_1x=0, origin=np.array([0, 0]))
     laygen.add_template_from_cell()
     # 2. calculate spacing param and regenerate
-    x0 = laygen.templates.get_template('sarafe', libname=workinglib).xy[1][0] \
+    x0 = laygen.templates.get_template('sarafe_nsw_'+str(num_bits-1)+'b', libname=workinglib).xy[1][0] \
          - laygen.templates.get_template(cellname, libname=workinglib).xy[1][0] \
          - laygen.templates.get_template('nmos4_fast_left').xy[1][0] * 2
     m_space = int(round(x0 / laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0]))

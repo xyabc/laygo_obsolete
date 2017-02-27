@@ -46,7 +46,7 @@ class adc_sar_templates__sarret_9b(Module):
     def __init__(self, bag_config, parent=None, prj=None, **kwargs):
         Module.__init__(self, bag_config, yaml_file, parent=parent, prj=prj, **kwargs)
 
-    def design(self):
+    def design(self, lch, pw, nw, m, fo, device_intent='fast'):
         """To be overridden by subclasses to design this module.
 
         This method should fill in values for all parameters in
@@ -62,7 +62,15 @@ class adc_sar_templates__sarret_9b(Module):
         restore_instance()
         array_instance()
         """
-        pass
+        self.instances['I0'].design(lch=lch, pw=pw, nw=nw, m=m, fo=fo, device_intent=device_intent)
+        self.instances['I1'].design(lch=lch, pw=pw, nw=nw, m=m, fo=fo, device_intent=device_intent)
+        self.instances['I2'].design(lch=lch, pw=pw, nw=nw, m=m, fo=fo, device_intent=device_intent)
+        self.instances['I3'].design(lch=lch, pw=pw, nw=nw, m=m, fo=fo, device_intent=device_intent)
+        self.instances['I4'].design(lch=lch, pw=pw, nw=nw, m=m, fo=fo, device_intent=device_intent)
+        self.instances['I5'].design(lch=lch, pw=pw, nw=nw, m=m, fo=fo, device_intent=device_intent)
+        self.instances['I6'].design(lch=lch, pw=pw, nw=nw, m=m, fo=fo, device_intent=device_intent)
+        self.instances['I7'].design(lch=lch, pw=pw, nw=nw, m=m, fo=fo, device_intent=device_intent)
+        self.instances['I8'].design(lch=lch, pw=pw, nw=nw, m=m, fo=fo, device_intent=device_intent)
 
     def get_layout_params(self, **kwargs):
         """Returns a dictionary with layout parameters.

@@ -26,6 +26,7 @@
 """
 import laygo
 import numpy as np
+import yaml
 import os
 #import logging;logging.basicConfig(level=logging.DEBUG)
 
@@ -226,7 +227,7 @@ def generate_sarclkgen_static(laygen, objectname_pfix, templib_logic, placement_
     rvdd = []
     rvss = []
     rp1='VDD'
-    for i in range(1, int(pwr_dim[0]/2)):
+    for i in range(0, int(pwr_dim[0]/2)):
         rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i, 0]), xy1=np.array([2*i, 0]), gridname0=rg_m2m3,
                      refinstname0=itapl.name, refpinname0='VSS', refinstindex0=np.array([0, 0]),
                      refinstname1=itapl.name, refpinname1=rp1, refinstindex1=np.array([0, 0])))
@@ -235,25 +236,25 @@ def generate_sarclkgen_static(laygen, objectname_pfix, templib_logic, placement_
                      refinstname1=itapl.name, refpinname1=rp1, refinstindex1=np.array([0, 0])))
         laygen.pin_from_rect('VDD'+str(2*i-2), laygen.layers['pin'][3], rvdd[-1], gridname=rg_m2m3, netname='VDD')
         laygen.pin_from_rect('VSS'+str(2*i-2), laygen.layers['pin'][3], rvss[-1], gridname=rg_m2m3, netname='VSS')
-        rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i+1, 0]), xy1=np.array([2*i+1, 0]), gridname0=rg_m2m3,
+        rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i+2+1, 0]), xy1=np.array([2*i+2+1, 0]), gridname0=rg_m2m3,
                      refinstname0=itapr.name, refpinname0='VSS', refinstindex0=np.array([0, 0]),
                      refinstname1=itapr.name, refpinname1=rp1, refinstindex1=np.array([0, 0])))
-        rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i, 0]), xy1=np.array([2*i, 0]), gridname0=rg_m2m3,
+        rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i+2, 0]), xy1=np.array([2*i+2, 0]), gridname0=rg_m2m3,
                      refinstname0=itapr.name, refpinname0='VSS', refinstindex0=np.array([0, 0]),
                      refinstname1=itapr.name, refpinname1=rp1, refinstindex1=np.array([0, 0])))
         laygen.pin_from_rect('VDD'+str(2*i-1), laygen.layers['pin'][3], rvdd[-1], gridname=rg_m2m3, netname='VDD')
         laygen.pin_from_rect('VSS'+str(2*i-1), laygen.layers['pin'][3], rvss[-1], gridname=rg_m2m3, netname='VSS')
-    for j in range(1, int(pwr_dim[0]/2)):
+    for j in range(0, int(pwr_dim[0]/2)):
         rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j, 0]), xy1=np.array([2*j, 0]), gridname0=rg_m2m3,
                      refinstname0=itapl.name, refpinname0='VDD', refinstindex0=np.array([0, 0]), addvia0=True,
                      refinstname1=itapl.name, refpinname1='VSS', refinstindex1=np.array([0, 0])))
         rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j+1, 0]), xy1=np.array([2*j+1, 0]), gridname0=rg_m2m3,
                      refinstname0=itapl.name, refpinname0='VDD', refinstindex0=np.array([0, 0]),
                      refinstname1=itapl.name, refpinname1='VSS', refinstindex1=np.array([0, 0]), addvia1=True))
-        rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j+1, 0]), xy1=np.array([2*j+1, 0]), gridname0=rg_m2m3,
+        rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j+2+1, 0]), xy1=np.array([2*j+2+1, 0]), gridname0=rg_m2m3,
                      refinstname0=itapr.name, refpinname0='VDD', refinstindex0=np.array([0, 0]), addvia0=True,
                      refinstname1=itapr.name, refpinname1='VSS', refinstindex1=np.array([0, 0])))
-        rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j, 0]), xy1=np.array([2*j, 0]), gridname0=rg_m2m3,
+        rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j+2, 0]), xy1=np.array([2*j+2, 0]), gridname0=rg_m2m3,
                      refinstname0=itapr.name, refpinname0='VDD', refinstindex0=np.array([0, 0]),
                      refinstname1=itapr.name, refpinname1='VSS', refinstindex1=np.array([0, 0]), addvia1=True))
 
@@ -302,6 +303,14 @@ if __name__ == '__main__':
     #laygen.save_template(filename=workinglib+'_templates.yaml', libname=workinglib)
 
     mycell_list = []
+    num_bits=9
+    #load from preset
+    load_from_file=True
+    yamlfile_system_input="adc_sar_dsn_system_input.yaml"
+    if load_from_file==True:
+        with open(yamlfile_system_input, 'r') as stream:
+            sysdict_i = yaml.load(stream)
+        num_bits=sysdict_i['n_bit']
     #generation (2 step)
     cellname='sarclkgen_static'
     print(cellname+" generating")
@@ -314,7 +323,7 @@ if __name__ == '__main__':
                        m=2, m_space_4x=0, m_space_2x=0, m_space_1x=0, origin=np.array([0, 0]))
     laygen.add_template_from_cell()
     #2. calculate spacing param and regenerate
-    x0 = laygen.templates.get_template('sarafe', libname=workinglib).xy[1][0] \
+    x0 = laygen.templates.get_template('sarafe_nsw_'+str(num_bits-1)+'b', libname=workinglib).xy[1][0] \
          - laygen.templates.get_template(cellname, libname=workinglib).xy[1][0]  \
          - laygen.templates.get_template('nmos4_fast_left').xy[1][0] * 2
     m_space = int(round(x0 / laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0]))

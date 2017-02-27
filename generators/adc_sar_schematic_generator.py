@@ -20,6 +20,8 @@ params = dict(
     m_ckdly=1, 
     m_logic=1, 
     m_fsm=1, 
+    m_ret=2, 
+    fo_ret=2, 
     device_intent='fast',
     )
 load_from_file=True
@@ -36,6 +38,8 @@ if load_from_file==True:
     params['m_drv_list']=capdrvdict_o['m_list']
     params['m_logic']=sysdict_i['m_sarlogic']
     params['m_fsm']=sysdict_i['m_sarfsm']
+    params['m_ret']=sysdict_i['m_sarret']
+    params['fo_ret']=sysdict_i['fo_sarret']
     params['m_ckgen']=sysdict_i['m_sarclkgen']
 
 print('creating BAG project')

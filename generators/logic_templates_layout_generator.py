@@ -594,16 +594,12 @@ def generate_nsw(laygen, objectname_pfix,
     m = max(1, int(m / 2))  # using nf=2 devices
 
     # placement
-    #in_space = laygen.place("I"+objectname_pfix+'NDMY', devname_nmos_space, pg, shape=np.array([2, 1]), xy=origin)
-    #in0 = laygen.relplace("I" + objectname_pfix + 'N0', devname_nmos_boundary, pg, in_space.name)
     in0 = laygen.place("I" + objectname_pfix + 'N0', devname_nmos_boundary, pg, xy=origin)
     in1 = laygen.relplace("I"+objectname_pfix+'N1', devname_nmos_body, pg, in0.name, shape=np.array([m, 1]))
     in2 = laygen.relplace("I"+objectname_pfix+'N2', devname_nmos_boundary, pg, in1.name)
-    #ip_space = laygen.relplace("I"+objectname_pfix+'PDMY', devname_pmos_space, pg, in_space.name, direction='top', transform='MX', shape=np.array([2, 1]))
-    #ip0 = laygen.relplace("I"+objectname_pfix+'P0', devname_pmos_boundary, pg, ip_space.name, transform='MX')
-    ip0 = laygen.relplace("I"+objectname_pfix+'P0', devname_pmos_boundary, pg, in0.name, direction='top', transform='MX')
+    ip0 = laygen.relplace("I"+objectname_pfix+'P0', devname_pmos_space, pg, in0.name, direction='top', transform='MX')
     ip1 = laygen.relplace("I"+objectname_pfix+'P2', devname_pmos_space, pg, ip0.name, transform='MX', shape=np.array([m*2, 1]))
-    ip2 = laygen.relplace("I"+objectname_pfix+'P3', devname_pmos_boundary, pg, ip1.name, transform='MX')
+    ip2 = laygen.relplace("I"+objectname_pfix+'P3', devname_pmos_space, pg, ip1.name, transform='MX')
 
     # route
     # en, enb

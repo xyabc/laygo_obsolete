@@ -34,7 +34,7 @@ import os
 
 def generate_sar(laygen, objectname_pfix, workinglib, sarabe_name, sarafe_name, 
                  placement_grid,
-                 routing_grid_m3m4, routing_grid_m4m5, routing_grid_m5m6, num_bits=8, origin=np.array([0, 0])):
+                 routing_grid_m3m4, routing_grid_m4m5, routing_grid_m5m6, routing_grid_m5m6_thick, num_bits=8, origin=np.array([0, 0])):
     """generate sar backend """
     pg = placement_grid
 
@@ -55,6 +55,7 @@ def generate_sar(laygen, objectname_pfix, workinglib, sarabe_name, sarafe_name,
     pdict_m3m4 = laygen.get_inst_pin_coord(None, None, rg_m3m4)
     pdict_m4m5 = laygen.get_inst_pin_coord(None, None, rg_m4m5)
     pdict_m5m6 = laygen.get_inst_pin_coord(None, None, rg_m5m6)
+    pdict_m5m6_thick = laygen.get_inst_pin_coord(None, None, rg_m5m6_thick)
 
     #zp/zm/zmid route
     x0=pdict_m5m6[iafe.name]['ENL0<0>'][0][0]+8
@@ -107,23 +108,25 @@ def generate_sar(laygen, objectname_pfix, workinglib, sarabe_name, sarafe_name,
                                        pdict_m5m6[iabe.name]['SARCLKB'][0], pdict_m5m6[iafe.name]['CLKB'][0],
                                        pdict_m5m6[iabe.name]['SARCLKB'][0][1] + 8 + 4 * num_bits - 2, rg_m5m6)
     #VDD/VSS pin
-    i=0
     for p in pdict_m3m4[iabe.name]:
-        if p.startswith('VDD'):
+        if p.startswith('VDD_M3'):
             rvdd = laygen.route(None, laygen.layers['metal'][3], xy0=np.array([0, 0]), xy1=np.array([0, 0]),
                                 gridname0=rg_m3m4, refinstname0=iabe.name, refpinname0=p, refinstname1=iafe.name,
                                 refpinname1='VDD0', direction='y')
-            laygen.pin(name='VDD' + str(i), layer=laygen.layers['pin'][3],
-                       xy=laygen.get_rect_xy(rvdd.name, rg_m3m4, sort=True), gridname=rg_m3m4, netname='VDD')
-            i+=1
-    i=0
     for p in pdict_m3m4[iabe.name]:
-        if p.startswith('VSS'):
+        if p.startswith('VSS_M3'):
             rvss = laygen.route(None, laygen.layers['metal'][3], xy0=np.array([0, 0]), xy1=np.array([0, 0]),
                                 gridname0=rg_m3m4, refinstname0=iabe.name, refpinname0=p, refinstname1=iafe.name,
                                 refpinname1='VSS0', direction='y')
-            laygen.pin(name='VSS' + str(i), layer=laygen.layers['pin'][3],
-                       xy=laygen.get_rect_xy(rvss.name, rg_m3m4, sort=True), gridname=rg_m3m4, netname='VSS')
+    i=0
+    for p, pxy in pdict_m5m6_thick[iabe.name].items():
+        if p.startswith('VDD_M6'):
+            laygen.pin(name='VDD' + str(i), layer=laygen.layers['pin'][6], xy=pxy, gridname=rg_m5m6_thick, netname='VDD')
+            i+=1
+    i=0
+    for p, pxy in pdict_m5m6_thick[iabe.name].items():
+        if p.startswith('VSS_M6'):
+            laygen.pin(name='VSS' + str(i), layer=laygen.layers['pin'][6], xy=pxy, gridname=rg_m5m6_thick, netname='VSS')
             i+=1
     #inp/inm
     laygen.pin(name='INP', layer=laygen.layers['pin'][6], xy=pdict_m5m6[iafe.name]['INP'], gridname=rg_m5m6)
@@ -150,9 +153,11 @@ def generate_sar(laygen, objectname_pfix, workinglib, sarabe_name, sarafe_name,
     laygen.pin(name='EXTCLK', layer=laygen.layers['pin'][5], xy=pdict_m4m5[iabe.name]['EXTCLK'], gridname=rg_m4m5)
     laygen.pin(name='EXTSEL_CLK', layer=laygen.layers['pin'][5], xy=pdict_m4m5[iabe.name]['EXTSEL_CLK'], gridname=rg_m4m5)
     #ckdsel
-    for i in range(4):
-        laygen.pin(name='CKDSEL<' + str(i) + '>', layer=laygen.layers['pin'][5],
-                   xy=pdict_m4m5[iabe.name]['CKDSEL<' + str(i) + '>'], gridname=rg_m4m5)
+    for i in range(2):
+        laygen.pin(name='CKDSEL0<' + str(i) + '>', layer=laygen.layers['pin'][5],
+                   xy=pdict_m4m5[iabe.name]['CKDSEL0<' + str(i) + '>'], gridname=rg_m4m5)
+        laygen.pin(name='CKDSEL1<' + str(i) + '>', layer=laygen.layers['pin'][5],
+                   xy=pdict_m4m5[iabe.name]['CKDSEL1<' + str(i) + '>'], gridname=rg_m4m5)
 if __name__ == '__main__':
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")
 
@@ -188,6 +193,7 @@ if __name__ == '__main__':
     rg_m3m4 = 'route_M3_M4_basic'
     rg_m4m5 = 'route_M4_M5_basic'
     rg_m5m6 = 'route_M5_M6_basic'
+    rg_m5m6_thick = 'route_M5_M6_thick'
     rg_m1m2_pin = 'route_M1_M2_basic'
     rg_m2m3_pin = 'route_M2_M3_basic'
 
@@ -202,7 +208,7 @@ if __name__ == '__main__':
         num_bits=sysdict_i['n_bit']
     #sar generation
     cellname='sar_'+str(num_bits)+'b'
-    sarabe_name = 'sarabe_'+str(num_bits)+'b'
+    sarabe_name = 'sarabe_dualdelay_'+str(num_bits)+'b'
     sarafe_name = 'sarafe_nsw_'+str(num_bits-1)+'b'
 
     print(cellname+" generating")
@@ -211,6 +217,7 @@ if __name__ == '__main__':
     laygen.sel_cell(cellname)
     generate_sar(laygen, objectname_pfix='SA0', workinglib=workinglib, sarabe_name=sarabe_name, sarafe_name=sarafe_name,
                  placement_grid=pg, routing_grid_m3m4=rg_m3m4, routing_grid_m4m5=rg_m4m5, routing_grid_m5m6=rg_m5m6,
+                 routing_grid_m5m6_thick=rg_m5m6_thick,
                  num_bits=num_bits, origin=np.array([0, 0]))
     laygen.add_template_from_cell()
 

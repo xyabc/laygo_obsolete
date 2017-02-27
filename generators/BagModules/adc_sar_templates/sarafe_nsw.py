@@ -46,7 +46,7 @@ class adc_sar_templates__sarafe_nsw(Module):
     def __init__(self, bag_config, parent=None, prj=None, **kwargs):
         Module.__init__(self, bag_config, yaml_file, parent=parent, prj=prj, **kwargs)
 
-    def design(self, lch, pw, nw, m_sa, m_drv_list, device_intent='fast'):
+    def design(self, lch, pw, nw, m_sa, m_drv_list, num_bit, c_m, rdx_array, device_intent='fast'):
         """To be overridden by subclasses to design this module.
 
         This method should fill in values for all parameters in
@@ -65,6 +65,11 @@ class adc_sar_templates__sarafe_nsw(Module):
         self.instances['ISA0'].design(lch=lch, pw=pw, nw=nw, m=m_sa, device_intent=device_intent)
         self.instances['ICDRVP0'].design(lch=lch, pw=pw, nw=nw, m_list=m_drv_list, device_intent=device_intent)
         self.instances['ICDRVM0'].design(lch=lch, pw=pw, nw=nw, m_list=m_drv_list, device_intent=device_intent)
+        self.instances['ICAPP0'].design(num_bit=num_bit, c_m=c_m, rdx_array=rdx_array)
+        self.instances['ICAPM0'].design(num_bit=num_bit, c_m=c_m, rdx_array=rdx_array)
+        name_list=['ICAPP0']
+        term_list=[{'I<7:0>':'VOL<7:0>'}]
+        self.array_instance('ICAPP0', name_list, term_list=term_list)
 
     def get_layout_params(self, **kwargs):
         """Returns a dictionary with layout parameters.

@@ -128,10 +128,28 @@ def generate_sarlogic_wret_array(laygen, objectname_pfix, templib_logic, placeme
                 refi = islogic[-1].name
             else:
                 nfill = laygen.get_template_size(name=islogic[0].cellname, gridname=pg, libname=workinglib)[0]
-                ifill=laygen.relplace(name = "I" + objectname_pfix + 'CLGFILL'+str(i*num_bits_row+j), templatename = space_1x_name,
-                                               gridname = pg, refinstname = refi, shape=np.array([nfill, 1]),
-                                               transform=tf, template_libname=templib_logic)
-                refi = ifill.name
+                #ifill=laygen.relplace(name = "I" + objectname_pfix + 'CLGFILL'+str(i*num_bits_row+j), templatename = space_1x_name,
+                #                               gridname = pg, refinstname = refi, shape=np.array([nfill, 1]),
+                #                               transform=tf, template_libname=templib_logic)
+                #refi = ifill.name
+                nfill_4x = int(nfill/4)
+                nfill_2x = int((nfill-nfill_4x*4)/2)
+                nfill_1x = nfill-nfill_4x*4-nfill_2x*2
+                if nfill_4x>0:
+                    ifill_4x=laygen.relplace(name = "I" + objectname_pfix + 'SLFILL4X'+str(i*num_bits_row+j), templatename = space_4x_name,
+                                             gridname = pg, refinstname = refi, shape=np.array([nfill_4x, 1]),
+                                             transform=tf, template_libname=templib_logic)
+                    refi = ifill_4x.name
+                if nfill_2x>0:
+                    ifill_2x=laygen.relplace(name = "I" + objectname_pfix + 'SLFILL2X'+str(i*num_bits_row+j), templatename = space_2x_name,
+                                             gridname = pg, refinstname = refi, shape=np.array([nfill_2x, 1]),
+                                             transform=tf, template_libname=templib_logic)
+                    refi = ifill_2x.name
+                if nfill_1x>0:
+                    ifill_1x=laygen.relplace(name = "I" + objectname_pfix + 'SLFILL1X'+str(i*num_bits_row+j), templatename = space_2x_name,
+                                             gridname = pg, refinstname = refi, shape=np.array([nfill_1x, 1]),
+                                             transform=tf, template_libname=templib_logic)
+                    refi = ifill_1x.name
         if not m_space_4x==0:
             isp4x.append(laygen.relplace(name="I" + objectname_pfix + 'SP4X'+str(i), templatename=space_4x_name,
                          shape = np.array([m_space_4x, 1]), transform=tf, gridname=pg,
@@ -224,7 +242,7 @@ def generate_sarlogic_wret_array(laygen, objectname_pfix, templib_logic, placeme
     rvss = []
     if num_row%2==0: rp1='VSS'
     else: rp1='VDD'
-    for i in range(1, int(pwr_dim[0]/2)):
+    for i in range(0, int(pwr_dim[0]/2)):
         rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i, 0]), xy1=np.array([2*i, 0]), gridname0=rg_m2m3,
                      refinstname0=itapl[0].name, refpinname0='VSS', refinstindex0=np.array([0, 0]),
                      refinstname1=itapl[-1].name, refpinname1=rp1, refinstindex1=np.array([0, 0])))
@@ -233,26 +251,26 @@ def generate_sarlogic_wret_array(laygen, objectname_pfix, templib_logic, placeme
                      refinstname1=itapl[-1].name, refpinname1=rp1, refinstindex1=np.array([0, 0])))
         laygen.pin_from_rect('VDD'+str(2*i-2), laygen.layers['pin'][3], rvdd[-1], gridname=rg_m2m3, netname='VDD')
         laygen.pin_from_rect('VSS'+str(2*i-2), laygen.layers['pin'][3], rvss[-1], gridname=rg_m2m3, netname='VSS')
-        rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i+1, 0]), xy1=np.array([2*i+1, 0]), gridname0=rg_m2m3,
+        rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i+2+1, 0]), xy1=np.array([2*i+2+1, 0]), gridname0=rg_m2m3,
                      refinstname0=itapr[0].name, refpinname0='VSS', refinstindex0=np.array([0, 0]),
                      refinstname1=itapr[-1].name, refpinname1=rp1, refinstindex1=np.array([0, 0])))
-        rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i, 0]), xy1=np.array([2*i, 0]), gridname0=rg_m2m3,
+        rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*i+2, 0]), xy1=np.array([2*i+2, 0]), gridname0=rg_m2m3,
                      refinstname0=itapr[0].name, refpinname0='VSS', refinstindex0=np.array([0, 0]),
                      refinstname1=itapr[-1].name, refpinname1=rp1, refinstindex1=np.array([0, 0])))
         laygen.pin_from_rect('VDD'+str(2*i-1), laygen.layers['pin'][3], rvdd[-1], gridname=rg_m2m3, netname='VDD')
         laygen.pin_from_rect('VSS'+str(2*i-1), laygen.layers['pin'][3], rvss[-1], gridname=rg_m2m3, netname='VSS')
     for i in range(num_row):
-        for j in range(1, int(pwr_dim[0]/2)):
+        for j in range(0, int(pwr_dim[0]/2)):
             rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j, 0]), xy1=np.array([2*j, 0]), gridname0=rg_m2m3,
                          refinstname0=itapl[i].name, refpinname0='VDD', refinstindex0=np.array([0, 0]), addvia0=True,
                          refinstname1=itapl[i].name, refpinname1='VSS', refinstindex1=np.array([0, 0])))
             rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j+1, 0]), xy1=np.array([2*j+1, 0]), gridname0=rg_m2m3,
                          refinstname0=itapl[i].name, refpinname0='VDD', refinstindex0=np.array([0, 0]),
                          refinstname1=itapl[i].name, refpinname1='VSS', refinstindex1=np.array([0, 0]), addvia1=True))
-            rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j+1, 0]), xy1=np.array([2*j+1, 0]), gridname0=rg_m2m3,
+            rvdd.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j+2+1, 0]), xy1=np.array([2*j+2+1, 0]), gridname0=rg_m2m3,
                          refinstname0=itapr[i].name, refpinname0='VDD', refinstindex0=np.array([0, 0]), addvia0=True,
                          refinstname1=itapr[i].name, refpinname1='VSS', refinstindex1=np.array([0, 0])))
-            rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j, 0]), xy1=np.array([2*j, 0]), gridname0=rg_m2m3,
+            rvss.append(laygen.route(None, laygen.layers['metal'][3], xy0=np.array([2*j+2, 0]), xy1=np.array([2*j+2, 0]), gridname0=rg_m2m3,
                          refinstname0=itapr[i].name, refpinname0='VDD', refinstindex0=np.array([0, 0]),
                          refinstname1=itapr[i].name, refpinname1='VSS', refinstindex1=np.array([0, 0]), addvia1=True))
 

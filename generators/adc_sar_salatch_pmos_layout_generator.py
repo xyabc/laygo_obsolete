@@ -1015,7 +1015,7 @@ def generate_salatch_pmos_fitdim(laygen, objectname_pfix, placement_grid, routin
                                  m_space_4x=0, m_space_2x=0, m_space_1x=0, origin=np.array([0, 0])):
     """generate a salatch & fit to CDAC dim"""
 
-    cdac_name = 'capdac_7b'
+    cdac_name = 'capdac'
     cdrva_name = 'capdrv_array_7b'
 
     m_tot = max(m_in, m_clkh, m_rgnn + 2*m_rstn + m_buf*(1+4)) + 1  # at least one dummy
@@ -1247,7 +1247,7 @@ if __name__ == '__main__':
                                 m_space_4x=10, m_space_2x=0, m_space_1x=0, origin=sa_origin)
     laygen.add_template_from_cell()
     # 2. calculate spacing param and regenerate
-    x0 = 2*laygen.templates.get_template('capdac_8b', libname=workinglib).xy[1][0] \
+    x0 = 2*laygen.templates.get_template('capdac', libname=workinglib).xy[1][0] \
          - laygen.templates.get_template(cellname, libname=workinglib).xy[1][0]
     m_space = int(round(x0 / 2 / laygen.templates.get_template('space_1x', libname=logictemplib).xy[1][0]))
     m_space_4x = int(m_space / 4)

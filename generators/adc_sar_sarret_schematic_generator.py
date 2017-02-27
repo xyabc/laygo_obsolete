@@ -3,26 +3,33 @@
 import pprint
 
 import bag
-#from laygo import *
-import laygo
 import numpy as np
 import yaml
 
 lib_name = 'adc_sar_templates'
 cell_name = 'sarret'
 impl_lib = 'adc_sar_generated'
-#tb_lib = 'adc_sar_testbenches'
-#tb_cell = 'sarret_tb_tran'
 
 params = dict(
     lch=16e-9,
     pw=4,
     nw=4,
-    m=1,
+    m=2,
+    fo=2,
+    #num_bit=9,
     device_intent='fast',
     )
-#generate_layout = False
-#extract_layout = False
+load_from_file=True
+
+yamlfile_system_input="adc_sar_dsn_system_input.yaml"
+if load_from_file==True:
+    with open(yamlfile_system_input, 'r') as stream:
+        sysdict_i = yaml.load(stream)
+    cell_name='sarret_'+str(sysdict_i['n_bit'])+'b'
+    params['m']=sysdict_i['m_sarret']
+    params['fo']=sysdict_i['fo_sarret']
+    #params['num_bit']=sysdict_i['n_bit']
+
 
 print('creating BAG project')
 prj = bag.BagProject()

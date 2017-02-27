@@ -96,7 +96,8 @@ def generate_capdrv_array(laygen, objectname_pfix, templib_logic, cdrv_name_list
 
     tap_name='tap'
     cdrv_name='capdrv_nsw_8x'
-    cdac_name='capdac_'+str(num_bits)+'b'
+    #cdac_name='capdac_'+str(num_bits)+'b'
+    cdac_name='capdac'
     space_1x_name = 'space_1x'
     space_2x_name = 'space_2x'
     space_4x_name = 'space_4x'
@@ -245,8 +246,18 @@ def generate_capdrv_array(laygen, objectname_pfix, templib_logic, cdrv_name_list
     if not num_row==0:
         for i in range(1, num_row):
             [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5], icdrv_vref0_xy[0][0], icdrv_vref0_xy[i*num_bits_row][0], x0+1, rg_m4m5)
-            [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5], icdrv_vref1_xy[0][0], icdrv_vref1_xy[i*num_bits_row][0], x0+2, rg_m4m5)
-            [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5], icdrv_vref2_xy[0][0], icdrv_vref2_xy[i*num_bits_row][0], x0+3, rg_m4m5)
+            [rh0, rv1, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5], icdrv_vref1_xy[0][0], icdrv_vref1_xy[i*num_bits_row][0], x0+2, rg_m4m5)
+            [rh0, rv2, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5], icdrv_vref2_xy[0][0], icdrv_vref2_xy[i*num_bits_row][0], x0+3, rg_m4m5)
+            #equalize vertical route for pin generation
+            rv0_xy=laygen.get_rect_xy(rv0.name, rg_m4m5, sort=True)
+            rv1_xy=laygen.get_rect_xy(rv1.name, rg_m4m5, sort=True)
+            rv2_xy=laygen.get_rect_xy(rv2.name, rg_m4m5, sort=True)
+            rv_y0=min((rv0_xy[0][1], rv1_xy[0][1], rv2_xy[0][1]))
+            rv_y1=max((rv0_xy[1][1], rv1_xy[1][1], rv2_xy[1][1]))
+            rvref0v=laygen.route(None, laygen.layers['metal'][5], xy0=np.array([rv0_xy[0][0], rv_y0]), xy1=np.array([rv0_xy[1][0], rv_y1]), gridname0=rg_m4m5)
+            rvref1v=laygen.route(None, laygen.layers['metal'][5], xy0=np.array([rv1_xy[0][0], rv_y0]), xy1=np.array([rv1_xy[1][0], rv_y1]), gridname0=rg_m4m5)
+            rvref2v=laygen.route(None, laygen.layers['metal'][5], xy0=np.array([rv2_xy[0][0], rv_y0]), xy1=np.array([rv2_xy[1][0], rv_y1]), gridname0=rg_m4m5)
+            
     # en route
     ren0 = []
     ren1 = []
@@ -281,6 +292,10 @@ def generate_capdrv_array(laygen, objectname_pfix, templib_logic, cdrv_name_list
     laygen.create_boundary_pin_form_rect(rvref0[0], rg_m4m5, "VREF<0>", laygen.layers['pin'][4], size=4, direction='left')
     laygen.create_boundary_pin_form_rect(rvref1[0], rg_m4m5, "VREF<1>", laygen.layers['pin'][4], size=4, direction='left')
     laygen.create_boundary_pin_form_rect(rvref2[0], rg_m4m5, "VREF<2>", laygen.layers['pin'][4], size=4, direction='left')
+    laygen.pin(name='VREF_M5<0>', layer=laygen.layers['pin'][5], xy=laygen.get_rect_xy(rvref0v.name, gridname=rg_m4m5), gridname=rg_m4m5, netname='VREF<0>')
+    laygen.pin(name='VREF_M5<1>', layer=laygen.layers['pin'][5], xy=laygen.get_rect_xy(rvref1v.name, gridname=rg_m4m5), gridname=rg_m4m5, netname='VREF<1>')
+    laygen.pin(name='VREF_M5<2>', layer=laygen.layers['pin'][5], xy=laygen.get_rect_xy(rvref2v.name, gridname=rg_m4m5), gridname=rg_m4m5, netname='VREF<2>')
+    
     for i, _ren0 in enumerate(ren0):
         laygen.create_boundary_pin_form_rect(_ren0, rg_m4m5, "EN"+str(i)+"<0>", laygen.layers['pin'][5], size=6, direction='bottom')
     for i, _ren1 in enumerate(ren1):

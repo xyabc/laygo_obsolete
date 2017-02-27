@@ -175,14 +175,15 @@ def generate_capdac(laygen, objectname_pfix, placement_grid, routing_grid_m6m7,
 
 if __name__ == '__main__':
     """testbench - generating a capdac array"""
-    cell_name='capdac_8b'
+    #cell_name='capdac_8b'
+    cell_name='capdac'
     cell_name_aux=['sar_9b_IAFE0_ICAPM0']
     load_from_file=True
     yamlfile_system_input="adc_sar_dsn_system_input.yaml"
     if load_from_file==True:
         with open(yamlfile_system_input, 'r') as stream:
             sysdict_i = yaml.load(stream)
-        cell_name='capdac_'+str(sysdict_i['n_bit']-1)+'b'
+        #cell_name='capdac_'+str(sysdict_i['n_bit']-1)+'b'
         cell_name_aux=['sar_'+str(sysdict_i['n_bit'])+'b_IAFE0_ICAPM0']
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")
 

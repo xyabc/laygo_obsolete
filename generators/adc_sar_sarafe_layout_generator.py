@@ -46,7 +46,8 @@ def generate_sarafe(laygen, objectname_pfix, workinglib, placement_grid,
 
     tap_name='tap'
     cdrv_name='capdrv_array_'+str(num_bits-1)+'b'
-    cdac_name='capdac_'+str(num_bits-1)+'b'
+    #cdac_name='capdac_'+str(num_bits-1)+'b'
+    cdac_name='capdac'
     sa_name='salatch_pmos'
     space_1x_name='space_1x'
 
