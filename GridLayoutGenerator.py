@@ -22,7 +22,7 @@
 #
 ########################################################################################################################
 
-'''Grid based Layout Generator'''
+"""Grid based Layout Generator"""
 __author__ = "Jaeduk Han"
 __maintainer__ = "Jaeduk Han"
 __email__ = "jdhan@eecs.berkeley.edu"
@@ -613,6 +613,26 @@ class GridLayoutGenerator(BaseLayoutGenerator):
         return xy
         #return self.grids.get_absgrid_coord_xy(gridname, r.xy) #not always inside
 
+    def get_pin_xy(self, name, gridname, sort=False):
+        """
+            get xy of rect in abstract coordinate
+
+            Parameters
+            ----------
+            name : str
+                rect name
+            gridname : str
+                grid name
+
+            Returns
+            -------
+            np.array([int, int])
+        """
+        r = self.get_rect(name)
+        xy=self.grids.get_absgrid_coord_region(gridname, r.xy[0,:], r.xy[1,:])
+        if sort==True: xy=self.sort_rect_xy(xy)
+        return xy
+
     def get_template_pin_coord(self, name, pinname, gridname, libname=None):
         """
         get xy of an template pin in abstract coordinate
@@ -709,6 +729,10 @@ class GridLayoutGenerator(BaseLayoutGenerator):
             instance name
         """
         i = self.get_inst(instname)
+        if not i.libname in self.templates.templates.keys(): #library does not exist
+            return np.array([[0, 0], [0, 0]])  
+        if not i.cellname in self.templates.templates[i.libname].keys(): #cell does not exist
+            return np.array([[0, 0], [0, 0]]) 
         t = self.templates.get_template(i.cellname, i.libname)
         #print(i.xy, t.size, i.transform)
         if i.transform=='R0':
@@ -793,7 +817,7 @@ class GridLayoutGenerator(BaseLayoutGenerator):
 
             else: #normal template
                 #find the boundary
-                bnd=np.array(([0, 0],[0, 0]))
+                bnd=np.array(([0.0, 0.0],[0.0, 0.0]))
                 for r in s['rects'].values():
                     if r.layer==layer_boundary: #boundary layer
                         bx1, bx2 = sorted(r.xy[:,0].tolist()) #need to be changed..
@@ -841,8 +865,6 @@ class GridLayoutGenerator(BaseLayoutGenerator):
                     ur[0]=xy[i,:][0]
                 if xy[i,:][1] > ur[1]:
                     ur[1]=xy[i,:][1]
-            #if cellname=="mux2to1_2x":
-            #    print(instname, self.get_inst(instname).transform, str(xy.tolist()))#, ll, ur)
         bnd=np.vstack([ll,ur])
 
         #find pins

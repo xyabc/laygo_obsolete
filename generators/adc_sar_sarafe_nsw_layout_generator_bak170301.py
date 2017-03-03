@@ -30,13 +30,11 @@ import numpy as np
 from math import log
 import yaml
 import os
-import laygo.GridLayoutGeneratorHelper as laygenhelper #utility functions
 #import logging;logging.basicConfig(level=logging.DEBUG)
 
 
 def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
                     routing_grid_m2m3_thick, routing_grid_m3m4_thick,
-                    routing_grid_m4m5_thick, routing_grid_m5m6_thick,
                     routing_grid_m5m6, routing_grid_m6m7,
                     num_bits=8, num_bits_vertical=6, m_sa=8, origin=np.array([0, 0])):
     """generate sar analog frontend """
@@ -73,9 +71,6 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
                  - laygen.get_template_size(cdac_name, gridname=pg, libname=workinglib)*np.array([1, 0])
     icdacr = laygen.place(name="I" + objectname_pfix + 'CDACR0', templatename=cdac_name, gridname=pg,
                           xy=xy0, template_libname = workinglib)
-
-    # pin informations
-    pdict_m3m4_thick=laygen.get_inst_pin_coord(None, None, rg_m3m4_thick)
 
     # internal pins
     icdrvl_vo_xy = []
@@ -194,82 +189,140 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x0, xy0[1]]), xy1=xy0, gridname0=rg_m3m4, addvia1=True)
     laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x1, xy1[1]]), xy1=xy1, gridname0=rg_m3m4, addvia1=True)
 
-    #vdd/vss - route
-    #cdrv_left_m4
-    rvdd_cdrvl_m3=[]
-    rvss_cdrvl_m3=[]
-    for pn, p in pdict_m3m4_thick[icdrvl.name].items():
-        if pn.startswith('VDDR'):
-            rvdd_cdrvl_m3.append(p)
-        if pn.startswith('VSSR'):
-            rvss_cdrvl_m3.append(p)
-    input_rails_xy = [rvdd_cdrvl_m3, rvss_cdrvl_m3]
-    rvdd_cdrvl_m4, rvss_cdrvl_m4 = laygenhelper.generate_power_rails_from_rails_xy(laygen, routename_tag='_CDRVL_M4_', 
-                layer=laygen.layers['metal'][4], gridname=rg_m3m4_thick, netnames=['VDD', 'VSS'], direction='x', 
-                input_rails_xy=input_rails_xy, generate_pin=False, overwrite_start_coord=0, overwrite_end_coord=None,
-                offset_route_start=0, offset_route_end=0)
-    #cdrv_right_m4
+    #vdd/vss - capdrv
+    y0 = laygen.get_inst_xy(icdrvl.name, rg_m3m4_thick)[1] \
+         + laygen.get_template_size(icdrvl.cellname, rg_m3m4_thick, libname=workinglib)[1]\
+         - laygen.get_template_size('boundary_top', rg_m3m4_thick)[1] + 1
+    x0 = 0
+    x1 = laygen.get_inst_xy(icdrvr.name, rg_m3m4_thick)[0] \
+         + laygen.get_template_size(icdrvr.cellname, rg_m3m4_thick, libname=workinglib)[0]
+
+    rvdd0=laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x0, y0]), xy1=np.array([x1, y0]), gridname0=rg_m3m4_thick)
+    rvss0=laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x0, y0+1]), xy1=np.array([x1, y0+1]), gridname0=rg_m3m4_thick)
+    rvdd1=laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x0, y0+2]), xy1=np.array([x1, y0+2]), gridname0=rg_m3m4_thick)
+    rvss1=laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x0, y0+3]), xy1=np.array([x1, y0+3]), gridname0=rg_m3m4_thick)
+
+    rvss0_pin_xy = laygen.get_rect_xy(rvss0.name, rg_m3m4_thick)
+    rvss1_pin_xy = laygen.get_rect_xy(rvss1.name, rg_m3m4_thick)
+    rvdd0_pin_xy = laygen.get_rect_xy(rvdd0.name, rg_m3m4_thick)
+    rvdd1_pin_xy = laygen.get_rect_xy(rvdd1.name, rg_m3m4_thick)
+
+    #vdd horizontal pins
+    laygen.pin(name='VSS0', layer=laygen.layers['pin'][4], xy=rvss0_pin_xy, gridname=rg_m3m4_thick, netname='VSS')
+    laygen.pin(name='VSS1', layer=laygen.layers['pin'][4], xy=rvss1_pin_xy, gridname=rg_m3m4_thick, netname='VSS')
+    laygen.pin(name='VDD0', layer=laygen.layers['pin'][4], xy=rvdd0_pin_xy, gridname=rg_m3m4_thick, netname='VDD')
+    laygen.pin(name='VDD1', layer=laygen.layers['pin'][4], xy=rvdd1_pin_xy, gridname=rg_m3m4_thick, netname='VDD')
+
+
+    t = laygen.templates.get_template(icdrvl.cellname, libname=workinglib)
+    for pname, p in t.pins.items():
+        if p['netname']=='VDD':
+            rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                    laygen.get_inst_pin_coord(icdrvl.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                    [x1, y0], rg_m3m4_thick)
+            rv1, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                    laygen.get_inst_pin_coord(icdrvl.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                    [x1, y0+2], rg_m3m4_thick)
+            rv2, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                    laygen.get_inst_pin_coord(icdrvr.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                    [x1, y0], rg_m3m4_thick)
+            rv3, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                    laygen.get_inst_pin_coord(icdrvr.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                    [x1, y0+2], rg_m3m4_thick)
+        if p['netname']=='VSS':
+            rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                    laygen.get_inst_pin_coord(icdrvl.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                    [x1, y0+1], rg_m3m4_thick)
+            rv1, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                    laygen.get_inst_pin_coord(icdrvl.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                    [x1, y0+3], rg_m3m4_thick)
+            rv2, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                    laygen.get_inst_pin_coord(icdrvr.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                    [x1, y0+1], rg_m3m4_thick)
+            rv3, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                    laygen.get_inst_pin_coord(icdrvr.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                    [x1, y0+3], rg_m3m4_thick)
+    # vdd/vss - salatch
+    num_vert_pwr = 20
+    for i in range(num_vert_pwr):
+        pname = 'VVDD' + str(2 * i)
+        rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                laygen.get_inst_pin_coord(isa.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                [x1, y0], rg_m3m4_thick)
+        rv1, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                laygen.get_inst_pin_coord(isa.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                [x1, y0+2], rg_m3m4_thick)
+        pname = 'VVDD' + str(2 * i + 1)
+        rv2, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                laygen.get_inst_pin_coord(isa.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                [x1, y0], rg_m3m4_thick)
+        rv3, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                laygen.get_inst_pin_coord(isa.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                [x1, y0+2], rg_m3m4_thick)
+        pname = 'VVSS' + str(2 * i)
+        rv0, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                laygen.get_inst_pin_coord(isa.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                [x1, y0+1], rg_m3m4_thick)
+        rv1, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                laygen.get_inst_pin_coord(isa.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                [x1, y0+3], rg_m3m4_thick)
+        pname = 'VVSS' + str(2 * i + 1)
+        rv2, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                laygen.get_inst_pin_coord(isa.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                [x1, y0+1], rg_m3m4_thick)
+        rv3, rh0 = laygen.route_vh(laygen.layers['metal'][3], laygen.layers['metal'][4],
+                laygen.get_inst_pin_coord(isa.name, pname, rg_m3m4_thick, index=np.array([0, 0]), sort=True)[0],
+                [x1, y0+3], rg_m3m4_thick)
+
+    #more vdd/vss for better power integrity
+    #m4
+    rvdd_m4_l=[]
+    rvss_m4_l=[]
+    rvdd_m4_r=[]
+    rvss_m4_r=[]
+    #figuring out routing dimensions
+    t = laygen.templates.get_template(icdrvl.cellname, libname=workinglib)
+    x0b_list=[]
+    x1a_list=[]
+    for pname, p in t.pins.items():
+        if pname.startswith('VDDR') or pname.startswith('VSSR'):
+            xy0=laygen.get_template_pin_coord(t.name, pname, rg_m3m4_thick, libname=workinglib)
+            #x0b_list.append(max(xy0[:,0]))
+            x1a_list.append(min(xy0[:,0]))
+    x0b=laygen.get_template_size(name=icdrvl.cellname, gridname=rg_m3m4_thick, libname=workinglib)[0]-min(x1a_list)
+    x1a=min(x1a_list)+laygen.get_template_size(name=icdrvl.cellname, gridname=rg_m3m4_thick, libname=workinglib)[0]
+    x0 = laygen.get_inst_xy(name=icdrvl.name, gridname=rg_m3m4_thick)[0]\
+         -laygen.get_template_size(name=icdrvl.cellname, gridname=rg_m3m4_thick, libname=workinglib)[0]
+    y0 = laygen.get_inst_xy(name=icdrvl.name, gridname=rg_m3m4_thick)[1]+2
     x1 = laygen.get_inst_xy(name=icdrvr.name, gridname=rg_m3m4_thick)[0]\
-         +laygen.get_template_size(name=icdrvr.cellname, gridname=rg_m3m4_thick, libname=workinglib)[0]
-    rvdd_cdrvr_m3=[]
-    rvss_cdrvr_m3=[]
-    for pn, p in pdict_m3m4_thick[icdrvr.name].items():
-        if pn.startswith('VDDR'):
-            rvdd_cdrvr_m3.append(p)
-        if pn.startswith('VSSR'):
-            rvss_cdrvr_m3.append(p)
-    input_rails_xy = [rvdd_cdrvr_m3, rvss_cdrvr_m3]
-    rvdd_cdrvr_m4, rvss_cdrvr_m4 = laygenhelper.generate_power_rails_from_rails_xy(laygen, routename_tag='_CDRVR_M4_', 
-                layer=laygen.layers['metal'][4], gridname=rg_m3m4_thick, netnames=['VDD', 'VSS'], direction='x', 
-                input_rails_xy=input_rails_xy, generate_pin=False, overwrite_start_coord=None, overwrite_end_coord=x1, 
-                offset_route_start=0, offset_route_end=0)
-    #sa_left_m4_m5
-    rvdd_sal_m3=[]
-    rvss_sal_m3=[]
-    for pn, p in pdict_m3m4_thick[isa.name].items():
-        if pn.startswith('VDDL'):
-            rvdd_sal_m3.append(p)
-        if pn.startswith('VSSL'):
-            rvss_sal_m3.append(p)
-    input_rails_xy = [rvdd_sal_m3, rvss_sal_m3]
-    rvdd_sal_m4, rvss_sal_m4 = laygenhelper.generate_power_rails_from_rails_xy(laygen, routename_tag='_SAL_M4_', 
-                layer=laygen.layers['metal'][4], gridname=rg_m3m4_thick, netnames=['VDD', 'VSS'], direction='x', 
-                input_rails_xy=input_rails_xy, generate_pin=False, overwrite_start_coord=0, overwrite_end_coord=None,
-                offset_route_start=0, offset_route_end=0)
-    input_rails_rect = [rvdd_sal_m4+rvdd_cdrvl_m4, rvss_sal_m4+rvss_cdrvl_m4]
-    rvdd_sal_m5, rvss_sal_m5 = laygenhelper.generate_power_rails_from_rails_rect(laygen, routename_tag='_SAL_M5_', 
-                layer=laygen.layers['metal'][5], gridname=rg_m4m5_thick, netnames=['VDD', 'VSS'], direction='y', 
-                input_rails_rect=input_rails_rect, generate_pin=False, overwrite_start_coord=0, overwrite_end_coord=None,
-                offset_route_start=1, offset_route_end=-1)
-    #sa_right_m4_m5
-    x1 = laygen.get_inst_xy(name=isa.name, gridname=rg_m3m4_thick)[0]\
-         +laygen.get_template_size(name=isa.cellname, gridname=rg_m3m4_thick, libname=workinglib)[0]
-    rvdd_sar_m3=[]
-    rvss_sar_m3=[]
-    for pn, p in pdict_m3m4_thick[isa.name].items():
-        if pn.startswith('VDDR'):
-            rvdd_sar_m3.append(p)
-        if pn.startswith('VSSR'):
-            rvss_sar_m3.append(p)
-    input_rails_xy = [rvdd_sar_m3, rvss_sar_m3]
-    rvdd_sar_m4, rvss_sar_m4 = laygenhelper.generate_power_rails_from_rails_xy(laygen, routename_tag='_SAR_M4_', 
-                layer=laygen.layers['metal'][4], gridname=rg_m3m4_thick, netnames=['VDD', 'VSS'], direction='x', 
-                input_rails_xy=input_rails_xy, generate_pin=False, overwrite_start_coord=None, overwrite_end_coord=x1,
-                offset_route_start=0, offset_route_end=0)
-    input_rails_rect = [rvdd_sar_m4+rvdd_cdrvr_m4, rvss_sar_m4+rvss_cdrvr_m4]
-    rvdd_sar_m5, rvss_sar_m5 = laygenhelper.generate_power_rails_from_rails_rect(laygen, routename_tag='_SAR_M5_', 
-                layer=laygen.layers['metal'][5], gridname=rg_m4m5_thick, netnames=['VDD', 'VSS'], direction='y', 
-                input_rails_rect=input_rails_rect, generate_pin=False, overwrite_start_coord=0, overwrite_end_coord=None,
-                offset_route_start=1, offset_route_end=-1)
-    #sa_m6
-    x1 = laygen.get_inst_xy(name=isa.name, gridname=rg_m5m6_thick)[0]\
-         +laygen.get_template_size(name=isa.cellname, gridname=rg_m5m6_thick, libname=workinglib)[0]
-    y1 = laygen.get_inst_xy(name=isa.name, gridname=rg_m5m6_thick)[1]
-    input_rails_rect = [rvdd_sal_m5+rvdd_sar_m5, rvss_sal_m5+rvss_sar_m5]
-    rvdd_sa_m6, rvss_sa_m6 = laygenhelper.generate_power_rails_from_rails_rect(laygen, routename_tag='_M6_', 
-                layer=laygen.layers['pin'][6], gridname=rg_m5m6_thick, netnames=['VDD', 'VSS'], direction='x', 
-                input_rails_rect=input_rails_rect, generate_pin=True, overwrite_start_coord=0, overwrite_end_coord=x1,
-                offset_route_start=int(y1/2)+4, offset_route_end=-2+2)
+         +laygen.get_template_size(name=icdrvl.cellname, gridname=rg_m3m4_thick, libname=workinglib)[0]
+    y1 = laygen.get_inst_xy(name=icdrvr.name, gridname=rg_m3m4_thick)[1]-2\
+         +laygen.get_template_size(name=icdrvl.cellname, gridname=rg_m3m4_thick, libname=workinglib)[1]
+    for i in range(y1-y0):
+        r0l=laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x0, y0+i]), xy1=np.array([x0b, y0+i]), 
+                        gridname0=rg_m3m4_thick)
+        r0r=laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x1a, y0+i]), xy1=np.array([x1, y0+i]), 
+                        gridname0=rg_m3m4_thick)
+        if i%2==0: #VDD
+            rvdd_m4_l.append(r0l)
+            rvdd_m4_r.append(r0r)
+            for pname, p in t.pins.items():
+                if pname.startswith('VDDR'):
+                    xy0=laygen.get_template_pin_coord(t.name, pname, rg_m3m4_thick, libname=workinglib)
+                    xv0=laygen.get_template_size(name=icdrvl.cellname, gridname=rg_m3m4_thick, libname=workinglib)[0]-xy0[0][0]
+                    xv1=laygen.get_template_size(name=icdrvl.cellname, gridname=rg_m3m4_thick, libname=workinglib)[0]+xy0[0][0]
+                    laygen.via(None, np.array([xv0, y0+i]), gridname=rg_m3m4_thick)
+                    laygen.via(None, np.array([xv1, y0+i]), gridname=rg_m3m4_thick)
+        else: #VSS
+            rvss_m4_l.append(r0l)
+            rvss_m4_r.append(r0r)
+            for pname, p in t.pins.items():
+                if pname.startswith('VSSR'):
+                    xy0=laygen.get_template_pin_coord(t.name, pname, rg_m3m4_thick, libname=workinglib)
+                    xv0=laygen.get_template_size(name=icdrvl.cellname, gridname=rg_m3m4_thick, libname=workinglib)[0]-xy0[0][0]
+                    xv1=laygen.get_template_size(name=icdrvl.cellname, gridname=rg_m3m4_thick, libname=workinglib)[0]+xy0[0][0]
+                    laygen.via(None, np.array([xv0, y0+i]), gridname=rg_m3m4_thick)
+                    laygen.via(None, np.array([xv1, y0+i]), gridname=rg_m3m4_thick)
 
     #pins
     laygen.pin(name='VREF<0>', layer=laygen.layers['pin'][4], xy=laygen.get_rect_xy(rvref0.name, rg_m4m5), gridname=rg_m4m5)
@@ -347,9 +400,7 @@ if __name__ == '__main__':
     rg_m3m4 = 'route_M3_M4_basic'
     rg_m3m4_thick = 'route_M3_M4_thick'
     rg_m4m5 = 'route_M4_M5_basic'
-    rg_m4m5_thick = 'route_M4_M5_thick'
     rg_m5m6 = 'route_M5_M6_basic'
-    rg_m5m6_thick = 'route_M5_M6_thick'
     rg_m6m7 = 'route_M6_M7_basic'
     rg_m1m2_pin = 'route_M1_M2_basic'
     rg_m2m3_pin = 'route_M2_M3_basic'
@@ -371,7 +422,6 @@ if __name__ == '__main__':
     laygen.sel_cell(cellname)
     generate_sarafe_nsw(laygen, objectname_pfix='CA0', workinglib=workinglib,
                     placement_grid=pg, routing_grid_m2m3_thick=rg_m2m3_thick, routing_grid_m3m4_thick=rg_m3m4_thick,
-                    routing_grid_m4m5_thick=rg_m4m5_thick, routing_grid_m5m6_thick=rg_m5m6_thick,
                     routing_grid_m5m6=rg_m5m6, routing_grid_m6m7=rg_m6m7, num_bits=num_bits, m_sa=8,
                     origin=np.array([0, 0]))
     laygen.add_template_from_cell()
