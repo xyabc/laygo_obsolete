@@ -267,7 +267,6 @@ def export_BAG(db, libname, cellname, prj, array_delimiter=['[', ']'], via_tech=
     """
     #TODO: add library creation function (see below)
     #create_or_erase_library(lib_name tech_lib lib_path erase "tttg")
-
     dsn = db.design
     if isinstance(cellname, str): cellname = [cellname]  # convert to a list for iteration
     for sn in cellname:
