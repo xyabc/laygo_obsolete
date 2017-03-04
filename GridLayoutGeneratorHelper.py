@@ -32,6 +32,7 @@ __status__ = "Prototype"
 #import math
 #from math import *
 import numpy as np
+from copy import deepcopy
 
 def generate_power_rails(laygen, routename_tag, layer, gridname, netnames=['VDD', 'VSS'], direction='x', 
                          start_index=0, end_index=0, route_index=None, via_index=None, generate_pin=True): 
@@ -154,4 +155,16 @@ def generate_power_rails_from_rails_inst(laygen, routename_tag, layer, gridname,
                                               input_rails_xy=xy, generate_pin=generate_pin, 
                                               overwrite_start_coord=overwrite_start_coord, overwrite_end_coord=overwrite_end_coord,
                                               offset_route_start=offset_route_start, offset_route_end=offset_route_end)
+'''
+def generate_grids_from_xy(laygen, gridname_input, xy, gridname_output):
+    """generate route grids combining a pre-existing grid and xy-array
+    it will create a new array by copying the given grid and update part of entries from xy-lists
+    """
+    gi=laygen.get_grid(gridname_input)
+    bnd=deepcopy(gi.xy)
+    xgrid = deepcopy(gi.xgrid)
+    ygrid = deepcopy(gi.ygrid)
 
+    laygen.grids.add_route_grid(name=gridname_output, libname=None, xy=bnd, xgrid=xgrid, ygrid=ygrid, xwidth=xwidth,
+                       ywidth=ywidth, viamap=None)
+'''
