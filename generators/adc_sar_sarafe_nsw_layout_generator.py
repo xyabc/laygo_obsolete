@@ -51,7 +51,6 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     #cdac_name='capdac_'+str(num_bits)+'b'
     cdac_name='capdac'
     sa_name='salatch_pmos'
-    space_1x_name='space_1x'
 
     # placement
     xy0 = origin + (laygen.get_template_size(cdrv_name, gridname=pg, libname=workinglib)*np.array([1, 0]) )
@@ -157,33 +156,47 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
         renr2.append(laygen.route(None, laygen.layers['metal'][5], xy0=np.array([0, 0]), xy1=np.array([0, 0]),
                      refinstname0=icdrvr.name, refpinname0='EN'+str(i)+'<2>', gridname0=rg_m5m6, direction='y'))
     #inp/inm
-    num_bits_cdaco=2**(num_bits_vertical-1)-1
-    x0 = laygen.get_inst_xy(icdacl.name, rg_m5m6)[0] - 2
-    x1 = laygen.get_inst_xy(icdacr.name, rg_m5m6)[0] + 2
-    for i in range(num_bits_cdaco):
+    pdict_m5m6 = laygen.get_inst_pin_coord(None, None, rg_m5m6)
+    outcnt=0
+    for pn in pdict_m5m6[icdacl.name]:
+        if pn.startswith('O'): #out pin
+            outcnt+=1
+    x0 = laygen.get_inst_xy(icdacl.name, rg_m5m6)[0] - 4
+    x1 = laygen.get_inst_xy(icdacr.name, rg_m5m6)[0] + 4
+    nrin = 16  # number of M6 horizontal route stacks
+    rinp=[]
+    rinm=[]
+    for i in range(nrin):
+        xy0=laygen.get_inst_pin_coord(icdacl.name, "O"+str(outcnt-1-i), rg_m5m6, index=np.array([0, 0]), sort=True)[0]
+        r = laygen.route(None, laygen.layers['metal'][6], xy0=xy0, xy1=np.array([x0, xy0[1]]), gridname0=rg_m5m6)
+        rinp.append(r)
+        xy0=laygen.get_inst_pin_coord(icdacr.name, "O"+str(outcnt-1-i), rg_m5m6, index=np.array([0, 0]), sort=True)[1]
+        r = laygen.route(None, laygen.layers['metal'][6], xy0=xy0, xy1=np.array([x1, xy0[1]]), gridname0=rg_m5m6)
+        rinm.append(r)
+
+    nrin_sa = 4  # number of M6 horizontal route stacks for cdac to sa
+    for i in range(nrin_sa):
         xy0=laygen.get_inst_pin_coord(icdacl.name, "O"+str(i), rg_m5m6, index=np.array([0, 0]), sort=True)[0]
-        rinp = laygen.route(None, laygen.layers['metal'][6], xy0=xy0, xy1=np.array([x0, xy0[1]]), gridname0=rg_m5m6)
+        laygen.route(None, laygen.layers['metal'][6], xy0=xy0, xy1=np.array([x0, xy0[1]]), gridname0=rg_m5m6)
         for j in range(4):
             laygen.via(None, [x0-2*j, xy0[1]], rg_m5m6)
         xy0=laygen.get_inst_pin_coord(icdacr.name, "O"+str(i), rg_m5m6, index=np.array([0, 0]), sort=True)[1]
-        rinm = laygen.route(None, laygen.layers['metal'][6], xy0=xy0, xy1=np.array([x1, xy0[1]]), gridname0=rg_m5m6)
+        laygen.route(None, laygen.layers['metal'][6], xy0=xy0, xy1=np.array([x1, xy0[1]]), gridname0=rg_m5m6)
         for j in range(4):
             laygen.via(None, [x1+2*j, xy0[1]], rg_m5m6)
-    #xy0 = laygen.get_inst_pin_coord(icdacl.name, "O0", rg_m5m6, index=np.array([0, 0]), sort=True)[0]
     xy0 = laygen.get_inst_pin_coord(isa.name, "INP", rg_m3m4, index=np.array([0, 0]), sort=True)[0]
-    xy1 = laygen.get_inst_pin_coord(icdacl.name, "O"+str(num_bits_cdaco-1), rg_m5m6, index=np.array([0, 0]), sort=True)[0]
+    xy1 = laygen.get_inst_pin_coord(icdacl.name, "O"+str(nrin_sa-1), rg_m5m6, index=np.array([0, 0]), sort=True)[0]
     for j in range(4):
         laygen.route(None, laygen.layers['metal'][5], xy0=np.array([x0-2*j, xy0[1]]), xy1=np.array([x0-2*j, xy1[1]]), gridname0=rg_m5m6)
-    #xy0 = laygen.get_inst_pin_coord(icdacr.name, "O0", rg_m5m6, index=np.array([0, 0]), sort=True)[0]
     xy0 = laygen.get_inst_pin_coord(isa.name, "INM", rg_m4m5, index=np.array([0, 0]), sort=True)[0]
-    xy1 = laygen.get_inst_pin_coord(icdacr.name, "O"+str(num_bits_cdaco-1), rg_m5m6, index=np.array([0, 0]), sort=True)[0]
+    xy1 = laygen.get_inst_pin_coord(icdacr.name, "O"+str(nrin_sa-1), rg_m5m6, index=np.array([0, 0]), sort=True)[0]
     for j in range(4):
         laygen.route(None, laygen.layers['metal'][5], xy0=np.array([x1+2*j, xy0[1]]), xy1=np.array([x1+2*j, xy1[1]]), gridname0=rg_m5m6)
     #inp/inm - sa to capdac
     xy0 = laygen.get_inst_pin_coord(isa.name, "INP", rg_m4m5, index=np.array([0, 0]), sort=True)[0]
     xy1 = laygen.get_inst_pin_coord(isa.name, "INM", rg_m4m5, index=np.array([0, 0]), sort=True)[0]
-    laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x0-6, xy0[1]]), xy1=xy0, gridname0=rg_m4m5)
-    laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x1+6, xy1[1]]), xy1=xy1, gridname0=rg_m4m5)
+    laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x0-8, xy0[1]]), xy1=xy0, gridname0=rg_m4m5)
+    laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x1+8, xy1[1]]), xy1=xy1, gridname0=rg_m4m5)
     for j in range(4):
         laygen.via(None, [x0 - 2 * j, xy0[1]], rg_m4m5)
         laygen.via(None, [x1 + 2 * j, xy1[1]], rg_m4m5)
@@ -308,8 +321,10 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
         laygen.create_boundary_pin_form_rect(renr1[i], rg_m5m6, "ENR"+str(i)+"<1>", laygen.layers['pin'][5], size=4, direction='bottom')
         laygen.create_boundary_pin_form_rect(renr2[i], rg_m5m6, "ENR"+str(i)+"<2>", laygen.layers['pin'][5], size=4, direction='bottom')
 
-    laygen.create_boundary_pin_form_rect(rinp, rg_m5m6, "INP", laygen.layers['pin'][6], size=4, direction='right')
-    laygen.create_boundary_pin_form_rect(rinm, rg_m5m6, "INM", laygen.layers['pin'][6], size=4, direction='left')
+    for i, r in enumerate(rinp):
+        laygen.create_boundary_pin_form_rect(r, rg_m5m6, "INP"+str(i), laygen.layers['pin'][6], size=4, direction='right', netname="INP")
+    for i, r in enumerate(rinm):
+        laygen.create_boundary_pin_form_rect(r, rg_m5m6, "INM"+str(i), laygen.layers['pin'][6], size=4, direction='left', netname="INM")
 
 if __name__ == '__main__':
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")
