@@ -41,6 +41,7 @@ def generate_sar(laygen, objectname_pfix, workinglib, sarabe_name, sarafe_name,
     rg_m3m4 = routing_grid_m3m4
     rg_m4m5 = routing_grid_m4m5
     rg_m5m6 = routing_grid_m5m6
+    rg_m5m6_thick = routing_grid_m5m6_thick
 
     # placement
     #abe

@@ -155,16 +155,68 @@ def generate_power_rails_from_rails_inst(laygen, routename_tag, layer, gridname,
                                               input_rails_xy=xy, generate_pin=generate_pin, 
                                               overwrite_start_coord=overwrite_start_coord, overwrite_end_coord=overwrite_end_coord,
                                               offset_route_start=offset_route_start, offset_route_end=offset_route_end)
-'''
-def generate_grids_from_xy(laygen, gridname_input, xy, gridname_output):
+
+def generate_grids_from_xy(laygen, gridname_input, gridname_output, xy, xy_grid_type=None):
     """generate route grids combining a pre-existing grid and xy-array
     it will create a new array by copying the given grid and update part of entries from xy-lists
     """
+    #copy original database
     gi=laygen.get_grid(gridname_input)
     bnd=deepcopy(gi.xy)
-    xgrid = deepcopy(gi.xgrid)
-    ygrid = deepcopy(gi.ygrid)
-
+    xgrid = deepcopy(gi.get_xgrid())
+    ygrid = deepcopy(gi.get_ygrid())
+    xwidth = deepcopy(gi.get_xwidth())
+    ywidth = deepcopy(gi.get_ywidth())
+    _viamap = gi.get_viamap()
+    vianame = _viamap.keys()[0] #just using one via; should be fixed
+    #figure out routing direction
+    if xy_grid_type==None:
+        if abs(xy[0][0][0]-xy[0][1][0]) > abs(xy[0][0][1]-xy[0][1][1]): #aspect ratio
+            xy_grid_type = 'ygrid'
+        else:
+            xy_grid_type = 'xgrid'
+    #extract grid information from xy list
+    if xy_grid_type== 'xgrid':
+        xgrid=[]
+        xwidth=[]
+        for xy0 in xy:
+            xgrid.append(0.5 * (xy0[0][0] + xy0[1][0]))
+            xwidth.append(abs(xy0[0][0] - xy0[1][0]))
+        xgrid.sort()
+        xgrid = np.array(xgrid)
+        xwidth = np.array(xwidth)
+        bnd[1][0] = max(xgrid)
+    if xy_grid_type== 'ygrid':
+        ygrid=[]
+        ywidth=[]
+        for xy0 in xy:
+            ygrid.append(0.5 * (xy0[0][1] + xy0[1][1]))
+            ywidth.append(abs(xy0[0][1] - xy0[1][1]))
+        ygrid.sort()
+        ygrid=np.array(ygrid)
+        ywidth=np.array(ywidth)
+        bnd[1][1]=max(ygrid)
+    # viamap
+    viamap = {vianame: []}
+    for x in range(len(xgrid)):
+        for y in range(len(ygrid)):
+            viamap[vianame].append([x, y])
+    viamap[vianame] = np.array(viamap[vianame])
     laygen.grids.add_route_grid(name=gridname_output, libname=None, xy=bnd, xgrid=xgrid, ygrid=ygrid, xwidth=xwidth,
-                       ywidth=ywidth, viamap=None)
-'''
+                                ywidth=ywidth, viamap=viamap)
+    laygen.grids.display()
+
+def generate_grids_from_inst(laygen, gridname_input, gridname_output, instname, template_libname,
+                           inst_pin_prefix=['VDD', 'VSS'], xy_grid_type=None):
+    """generate route grids combining a pre-existing grid and inst pins
+        it will create a new array by copying the given grid and update part of entries from xy coordinates of pins
+    """
+    inst = laygen.get_inst(name=instname)
+    t = laygen.templates.get_template(inst.cellname, libname=template_libname)
+    xy0 = inst.xy
+    xy = []
+    for p in t.pins:
+        for pfix in inst_pin_prefix:
+            if p.startswith(pfix):
+                xy.append(xy0 + t.pins[p]['xy'])
+    generate_grids_from_xy(laygen, gridname_input, gridname_output, xy, xy_grid_type=xy_grid_type)

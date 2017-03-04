@@ -86,6 +86,12 @@ class GridObject():
     def add_ygrid(self, y):
         self._ygrid=self._add_grid(self._ygrid, y)
 
+    def get_xgrid(self):
+        return self._xgrid
+
+    def get_ygrid(self):
+        return self._ygrid
+
     def _get_absgrid_coord(self, v, grid, size):
         # notation
         #   physical grid: 0----grid0----grid1----grid2----...----gridN---size
@@ -185,6 +191,12 @@ class RouteGrid(GridObject):
         #if not isinstance(mod, int):
         #    print(v, _width, mod)
         return _width[mod]
+
+    def get_xwidth(self): return self._xwidth
+
+    def get_ywidth(self): return self._ywidth
+
+    def get_viamap(self): return self._viamap
 
     def get_route_width_xy(self, xy):
         """ get metal width vector"""

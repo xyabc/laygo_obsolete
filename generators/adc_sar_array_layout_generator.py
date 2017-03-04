@@ -34,7 +34,8 @@ import os
 
 def generate_sar_array(laygen, objectname_pfix, workinglib, sar_name, 
                        placement_grid,
-                       routing_grid_m3m4, routing_grid_m4m5, routing_grid_m5m6, routing_grid_m5m6_thick, routing_grid_m5m6_thick_basic,
+                       routing_grid_m3m4, routing_grid_m4m5, routing_grid_m5m6, routing_grid_m5m6_thick,
+                       routing_grid_m5m6_basic_thick,
                        num_bits=9, num_slices=8, origin=np.array([0, 0])):
     """generate sar array """
     pg = placement_grid
@@ -43,7 +44,7 @@ def generate_sar_array(laygen, objectname_pfix, workinglib, sar_name,
     rg_m4m5 = routing_grid_m4m5
     rg_m5m6 = routing_grid_m5m6
     rg_m5m6_thick = routing_grid_m5m6_thick
-    rg_m5m6_thick_basic = routing_grid_m5m6_thick_basic
+    rg_m5m6_basic_thick = routing_grid_m5m6_basic_thick
 
     # placement
     # sar
@@ -61,36 +62,36 @@ def generate_sar_array(laygen, objectname_pfix, workinglib, sar_name,
         pdict_m4m5.append(laygen.get_inst_pin_coord(None, None, rg_m4m5, index=np.array([i, 0])))
         pdict_m5m6.append(laygen.get_inst_pin_coord(None, None, rg_m5m6, index=np.array([i, 0])))
         pdict_m5m6_thick.append(laygen.get_inst_pin_coord(None, None, rg_m5m6_thick, index=np.array([i, 0])))
-        pdict_m5m6_thick_basic.append(laygen.get_inst_pin_coord(None, None, rg_m5m6_thick_basic, index=np.array([i, 0])))
+        pdict_m5m6_thick_basic.append(laygen.get_inst_pin_coord(None, None, rg_m5m6_basic_thick, index=np.array([i, 0])))
     #vref route
     for i in range(num_slices):
         rv, rh = laygen.route_vh(layerv=laygen.layers['metal'][5], layerh=laygen.layers['metal'][6], 
                                  xy0=pdict_m5m6_thick_basic[i][isar.name]['VREF_M5L<0>'][0], 
                                  xy1=np.array([0, pdict_m5m6_thick_basic[i][isar.name]['VREF_M5L<0>'][0][1]+i]), 
-                                 gridname=rg_m5m6_thick_basic)
-        laygen.create_boundary_pin_form_rect(rh, rg_m5m6_thick_basic, 'VREF' + str(i) + '<0>', laygen.layers['pin'][6], size=8, direction='left')
+                                 gridname=rg_m5m6_basic_thick)
+        laygen.create_boundary_pin_form_rect(rh, rg_m5m6_basic_thick, 'VREF' + str(i) + '<0>', laygen.layers['pin'][6], size=8, direction='left')
         rv, rh = laygen.route_vh(layerv=laygen.layers['metal'][5], layerh=laygen.layers['metal'][6], 
                                  xy0=pdict_m5m6_thick_basic[i][isar.name]['VREF_M5L<1>'][0], 
                                  xy1=np.array([0, pdict_m5m6_thick_basic[i][isar.name]['VREF_M5L<1>'][0][1]+i+num_slices]), 
-                                 gridname=rg_m5m6_thick_basic)
-        laygen.create_boundary_pin_form_rect(rh, rg_m5m6_thick_basic, 'VREF' + str(i) + '<1>', laygen.layers['pin'][6], size=8, direction='left')
+                                 gridname=rg_m5m6_basic_thick)
+        laygen.create_boundary_pin_form_rect(rh, rg_m5m6_basic_thick, 'VREF' + str(i) + '<1>', laygen.layers['pin'][6], size=8, direction='left')
         rv, rh = laygen.route_vh(layerv=laygen.layers['metal'][5], layerh=laygen.layers['metal'][6], 
                                  xy0=pdict_m5m6_thick_basic[i][isar.name]['VREF_M5L<2>'][0], 
                                  xy1=np.array([0, pdict_m5m6_thick_basic[i][isar.name]['VREF_M5L<2>'][0][1]+i+2*num_slices]), 
-                                 gridname=rg_m5m6_thick_basic)
-        laygen.create_boundary_pin_form_rect(rh, rg_m5m6_thick_basic, 'VREF' + str(i) + '<2>', laygen.layers['pin'][6], size=8, direction='left')
+                                 gridname=rg_m5m6_basic_thick)
+        laygen.create_boundary_pin_form_rect(rh, rg_m5m6_basic_thick, 'VREF' + str(i) + '<2>', laygen.layers['pin'][6], size=8, direction='left')
         rv, rh = laygen.route_vh(layerv=laygen.layers['metal'][5], layerh=laygen.layers['metal'][6], 
                                  xy0=pdict_m5m6_thick_basic[i][isar.name]['VREF_M5R<0>'][0], 
                                  xy1=np.array([0, pdict_m5m6_thick_basic[i][isar.name]['VREF_M5R<0>'][0][1]+i]), 
-                                 gridname=rg_m5m6_thick_basic)
+                                 gridname=rg_m5m6_basic_thick)
         rv, rh = laygen.route_vh(layerv=laygen.layers['metal'][5], layerh=laygen.layers['metal'][6], 
                                  xy0=pdict_m5m6_thick_basic[i][isar.name]['VREF_M5R<1>'][0], 
                                  xy1=np.array([0, pdict_m5m6_thick_basic[i][isar.name]['VREF_M5R<1>'][0][1]+i+num_slices]), 
-                                 gridname=rg_m5m6_thick_basic)
+                                 gridname=rg_m5m6_basic_thick)
         rv, rh = laygen.route_vh(layerv=laygen.layers['metal'][5], layerh=laygen.layers['metal'][6], 
                                  xy0=pdict_m5m6_thick_basic[i][isar.name]['VREF_M5R<2>'][0], 
                                  xy1=np.array([0, pdict_m5m6_thick_basic[i][isar.name]['VREF_M5R<2>'][0][1]+i+2*num_slices]), 
-                                 gridname=rg_m5m6_thick_basic)
+                                 gridname=rg_m5m6_basic_thick)
     #ofp/ofm route
     for i in range(num_slices):
         rv, rh = laygen.route_vh(layerv=laygen.layers['metal'][3], layerh=laygen.layers['metal'][4], 
@@ -108,11 +109,6 @@ def generate_sar_array(laygen, objectname_pfix, workinglib, sar_name,
         laygen.pin(name='INM' + str(i), layer=laygen.layers['pin'][6], xy=pdict_m4m5[i][isar.name]['INM'], gridname=rg_m4m5)
         laygen.pin(name='CLK' + str(i), layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['CLK'], gridname=rg_m5m6)
         laygen.pin(name='CLKOUT' + str(i), layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['CLKOUT'], gridname=rg_m5m6, netname='CLK' + str(i))
-        #laygen.pin(name='OSP' + str(i), layer=laygen.layers['pin'][3], xy=pdict_m3m4[i][isar.name]['OSP'], gridname=rg_m3m4)
-        #laygen.pin(name='OSM' + str(i), layer=laygen.layers['pin'][3], xy=pdict_m3m4[i][isar.name]['OSM'], gridname=rg_m3m4)
-        #laygen.pin(name='VREF' + str(i) + '<0>', layer=laygen.layers['pin'][4], xy=pdict_m4m5[i][isar.name]['VREF<0>'], gridname=rg_m4m5)
-        #laygen.pin(name='VREF' + str(i) + '<1>', layer=laygen.layers['pin'][4], xy=pdict_m4m5[i][isar.name]['VREF<1>'], gridname=rg_m4m5)
-        #laygen.pin(name='VREF' + str(i) + '<2>', layer=laygen.layers['pin'][4], xy=pdict_m4m5[i][isar.name]['VREF<2>'], gridname=rg_m4m5)
         laygen.pin(name='ASCLKD' + str(i) + '<0>', layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['CKDSEL0<0>'], gridname=rg_m5m6)
         laygen.pin(name='ASCLKD' + str(i) + '<1>', layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['CKDSEL0<1>'], gridname=rg_m5m6)
         laygen.pin(name='ASCLKD' + str(i) + '<2>', layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['CKDSEL1<0>'], gridname=rg_m5m6)
@@ -170,7 +166,7 @@ if __name__ == '__main__':
     rg_m4m5 = 'route_M4_M5_basic'
     rg_m5m6 = 'route_M5_M6_basic'
     rg_m5m6_thick = 'route_M5_M6_thick'
-    rg_m5m6_thick_basic = 'route_M5_M6_thick_basic'
+    rg_m5m6_basic_thick = 'route_M5_M6_basic_thick'
     rg_m1m2_pin = 'route_M1_M2_basic'
     rg_m2m3_pin = 'route_M2_M3_basic'
 
@@ -195,7 +191,7 @@ if __name__ == '__main__':
     laygen.sel_cell(cellname)
     generate_sar_array(laygen, objectname_pfix='SA0', workinglib=workinglib, sar_name=sar_name,
                  placement_grid=pg, routing_grid_m3m4=rg_m3m4, routing_grid_m4m5=rg_m4m5, routing_grid_m5m6=rg_m5m6,
-                 routing_grid_m5m6_thick=rg_m5m6_thick, routing_grid_m5m6_thick_basic=rg_m5m6_thick_basic,
+                 routing_grid_m5m6_thick=rg_m5m6_thick, routing_grid_m5m6_basic_thick=rg_m5m6_basic_thick,
                  num_bits=num_bits, num_slices=num_slices, origin=np.array([0, 0]))
     laygen.add_template_from_cell()
     

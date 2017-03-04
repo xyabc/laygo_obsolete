@@ -29,22 +29,18 @@ import numpy as np
 from math import log
 import yaml
 import os
+import laygo.GridLayoutGeneratorHelper as laygenhelper #utility functions
 #import logging;logging.basicConfig(level=logging.DEBUG)
 
 def generate_sar_wsamp(laygen, objectname_pfix, workinglib, samp_lib, sar_name, samp_name,
-                       placement_grid,
-                       routing_grid_m3m4, routing_grid_m4m5, routing_grid_m5m6, routing_grid_m5m6_thick2,
-                       routing_grid_m5m6_thick, routing_grid_m5m6_thick_basic,
+                       placement_grid, routing_grid_m5m6,
+                       routing_grid_m5m6_thick,
                        num_bits=9, origin=np.array([0, 0])):
     """generate sar with sampling frontend """
     pg = placement_grid
 
-    rg_m3m4 = routing_grid_m3m4
-    rg_m4m5 = routing_grid_m4m5
     rg_m5m6 = routing_grid_m5m6
     rg_m5m6_thick = routing_grid_m5m6_thick
-    rg_m5m6_thick2 = routing_grid_m5m6_thick2
-    rg_m5m6_thick_basic = routing_grid_m5m6_thick_basic
 
     # placement
     # sar
@@ -54,14 +50,9 @@ def generate_sar_wsamp(laygen, objectname_pfix, workinglib, samp_lib, sar_name, 
                           gridname=pg, refinstname=isar.name, direction='top', template_libname=samp_lib)
 
     #reference coordinates
-    pdict_m3m4=laygen.get_inst_pin_coord(None, None, rg_m3m4)
-    pdict_m4m5=laygen.get_inst_pin_coord(None, None, rg_m4m5)
     pdict_m5m6=laygen.get_inst_pin_coord(None, None, rg_m5m6)
     pdict_m5m6_thick=laygen.get_inst_pin_coord(None, None, rg_m5m6_thick)
-    pdict_m5m6_thick2 = laygen.get_inst_pin_coord(None, None, rg_m5m6_thick2)
-    pdict_m5m6_thick_basic=laygen.get_inst_pin_coord(None, None, rg_m5m6_thick_basic)
 
-    print(pdict_m5m6_thick2[isamp.name]['VDD'])
     #VDD/VSS pin
     vddcnt=0
     vsscnt=0
@@ -74,30 +65,23 @@ def generate_sar_wsamp(laygen, objectname_pfix, workinglib, samp_lib, sar_name, 
             xy0=pdict_m5m6_thick[isar.name][p]
             laygen.pin(name='VSS' + str(vsscnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick, netname='VSS')
             vsscnt+=1
+
+    rg_m5m6_thick_samp='route_M5_M6_thick_temp_samp'
+    laygenhelper.generate_grids_from_inst(laygen, gridname_input=rg_m5m6_thick, gridname_output=rg_m5m6_thick_samp,
+                                          instname=isamp.name, template_libname=samp_lib,
+                                          inst_pin_prefix=['VDD', 'VSS'], xy_grid_type='ygrid')
+    pdict_m5m6_thick2 = laygen.get_inst_pin_coord(None, None, rg_m5m6_thick_samp)
+
     for p in pdict_m5m6_thick2[isamp.name]:
         if p.startswith('VDD'):
             xy0=pdict_m5m6_thick2[isamp.name][p]
-            xy0[0][1]=int(0.5*(xy0[0][1]+xy0[1][1])) #averaging because overlapping grid is used for S/H integration
-            xy0[1][1]=xy0[0][1]
-            laygen.pin(name='VDD' + str(vddcnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick2, netname='VDD')
+            laygen.pin(name='VDD' + str(vddcnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick_samp, netname='VDD')
             vddcnt+=1
         if p.startswith('VSS'):
             xy0=pdict_m5m6_thick2[isamp.name][p]
-            xy0[0][1]=int(0.5*(xy0[0][1]+xy0[1][1])) #averaging because overlapping grid is used for S/H integration
-            xy0[1][1]=xy0[0][1]
-            laygen.pin(name='VSS' + str(vsscnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick2, netname='VSS')
+            laygen.pin(name='VSS' + str(vsscnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick_samp, netname='VSS')
             vsscnt+=1
-    '''
-    for p in pdict_m5m6_thick2[isamp.name]:
-        if p.startswith('VDD'):
-            xy0=np.vstack((pdict_m5m6_thick2[isar.name][p][0], pdict_m5m6_thick[isar2.name][p][1]))
-            laygen.pin(name='VDD' + str(vddcnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick, netname='VDD')
-            vddcnt+=1
-        if p.startswith('VSS'):
-            xy0=np.vstack((pdict_m5m6_thick2[isar.name][p][0], pdict_m5m6_thick[isar2.name][p][1]))
-            laygen.pin(name='VSS' + str(vsscnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick, netname='VSS')
-            vsscnt+=1
-    '''
+
 if __name__ == '__main__':
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")
 
@@ -137,8 +121,7 @@ if __name__ == '__main__':
     rg_m4m5 = 'route_M4_M5_basic'
     rg_m5m6 = 'route_M5_M6_basic'
     rg_m5m6_thick = 'route_M5_M6_thick'
-    rg_m5m6_thick2 = 'route_M5_M6_thick2'
-    rg_m5m6_thick_basic = 'route_M5_M6_thick_basic'
+    rg_m5m6_basic_thick = 'route_M5_M6_basic_thick'
     rg_m1m2_pin = 'route_M1_M2_basic'
     rg_m2m3_pin = 'route_M2_M3_basic'
 
@@ -159,10 +142,10 @@ if __name__ == '__main__':
     mycell_list.append(cellname)
     laygen.add_cell(cellname)
     laygen.sel_cell(cellname)
-    generate_sar_wsamp(laygen, objectname_pfix='SA0', workinglib=workinglib, samp_lib=samp_lib, sar_name=sar_name, samp_name=samp_name, 
-                 placement_grid=pg, routing_grid_m3m4=rg_m3m4, routing_grid_m4m5=rg_m4m5, routing_grid_m5m6=rg_m5m6,
-                 routing_grid_m5m6_thick=rg_m5m6_thick, routing_grid_m5m6_thick2=rg_m5m6_thick2, routing_grid_m5m6_thick_basic=rg_m5m6_thick_basic,
-                 num_bits=num_bits, origin=np.array([0, 0]))
+    generate_sar_wsamp(laygen, objectname_pfix='SA0', workinglib=workinglib, samp_lib=samp_lib, sar_name=sar_name, samp_name=samp_name,
+                       placement_grid=pg, routing_grid_m3m4=rg_m3m4, routing_grid_m4m5=rg_m4m5, routing_grid_m5m6=rg_m5m6,
+                       routing_grid_m5m6_thick=rg_m5m6_thick, routing_grid_m5m6_basic_thick=rg_m5m6_basic_thick,
+                       num_bits=num_bits, origin=np.array([0, 0]))
     laygen.add_template_from_cell()
     
 
