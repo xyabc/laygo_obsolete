@@ -261,11 +261,8 @@ def generate_sarfsm(laygen, objectname_pfix, templib_logic, placement_grid,
                                  np.array([xy[0][0]+6, 2]), rg_m4m5)
     laygen.create_boundary_pin_form_rect(rrst0, rg_m4m5, 'RST',
                                          laygen.layers['pin'][5], size=6, direction='bottom')
-    xy=laygen.get_rect_xy(rclk0.name, rg_m4m5, sort=True)
-    rv0, rclk0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5], xy[0],
-                                 np.array([x2, y2]), rg_m4m5)
     laygen.create_boundary_pin_form_rect(rclk0, rg_m4m5, 'CLK',
-                                         laygen.layers['pin'][5], size=6, direction='top')
+                                         laygen.layers['pin'][4], size=6, direction='right')
 
     # power pin
     pwr_dim=laygen.get_template_size(name=itapl[-1].cellname, gridname=rg_m2m3, libname=itapl[-1].libname)

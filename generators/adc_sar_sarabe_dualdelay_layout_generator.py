@@ -274,10 +274,43 @@ def generate_sarabe_dualdelay(laygen, objectname_pfix, workinglib, placement_gri
     xysl = laygen.get_inst_xy(name=isl.name, gridname=rg_m5m6)
     xyfsm = laygen.get_inst_xy(name=ifsm.name, gridname=rg_m5m6)
     xyret = laygen.get_inst_xy(name=iret.name, gridname=rg_m5m6)
-    # ckdly route
-    # rst
+
+    # rst signal route
+    # very important because it sets the timing margin
+    # ckd to sl
     rh0, rh0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
                                pdict_m4m5[ickd.name]['RST'][0], pdict_m4m5[isl.name]['RST'][0], rg_m4m5)
+    # fsm to sl
+    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
+                                       pdict_m5m6[ifsm.name]['RST'][0],
+                                       pdict_m5m6[isl.name]['RST'][0], 
+                                       xyfsm[1] - num_bits - 2, rg_m5m6)
+    # ckg to sl route
+    rh0, rrst0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
+                               pdict_m4m5[ickg.name]['RST'][0], pdict_m4m5[isl.name]['RST'][0], rg_m4m5)
+    # fsm to ret (rst)
+    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
+                                       pdict_m5m6[isl.name]['RST'][0],
+                                       pdict_m5m6[iret.name]['CLK'][0], xyfsm[1] - num_bits - 2, rg_m5m6)
+    # clk output to final retimer
+    #rrstout0 = laygen.route(None, laygen.layers['metal'][5],
+    #                        xy0=pdict_m5m6[ifsm.name]['RST'][0],
+    #                        xy1=np.array([pdict_m5m6[ifsm.name]['RST'][0][0], 0]), gridname0=rg_m5m6)
+    rrstout0 = laygen.route(None, laygen.layers['metal'][5],
+                            xy0=pdict_m5m6[isl.name]['RST'][0],
+                            xy1=np.array([pdict_m5m6[isl.name]['RST'][0][0], 0]), gridname0=rg_m5m6)
+    laygen.create_boundary_pin_form_rect(rrstout0, rg_m4m5, 'RSTOUT', laygen.layers['pin'][5], size=6, direction='bottom', netname='RST')
+    # clk input 
+    laygen.create_boundary_pin_form_rect(rrst0, rg_m5m6, 'RST', laygen.layers['pin'][5], size=6, direction='top')
+
+    # sarclk signal route
+    # ckgen to fsm
+    rh0, rv0, rh1 = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5],
+                                     pdict_m4m5[ickg.name]['CLKO'][0], pdict_m4m5[ifsm.name]['CLK'][0], 
+                                     pdict_m4m5[isl.name]['RETO<1>'][1][0]-1, rg_m4m5)
+
+    # datapath
+    # ckdly route
     # sb
     rh0, rh0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
                                pdict_m4m5[ickd.name]['SB'][0], pdict_m4m5[isl.name]['SB<4>'][0], rg_m4m5)
@@ -285,7 +318,7 @@ def generate_sarabe_dualdelay(laygen, objectname_pfix, workinglib, placement_gri
     [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5],
                                            pdict_m5m6[ickg.name]['DONE'][0],
                                            pdict_m5m6[ickd.name]['I'][0],
-                                           pdict_m5m6[ickd.name]['I'][0][0]+2, rg_m4m5)
+                                           pdict_m5m6[ickd.name]['I'][0][0], rg_m4m5)
     # up
     [rh0, rv0, rh1] = laygen.route_hvh(laygen.layers['metal'][4], laygen.layers['metal'][5],
                                            pdict_m5m6[ickg.name]['UP'][0],
@@ -301,52 +334,35 @@ def generate_sarabe_dualdelay(laygen, objectname_pfix, workinglib, placement_gri
                                            pdict_m5m6[ickg.name]['SAOMB'][0],
                                            pdict_m5m6[isl.name]['SAOMB'][0],
                                            pdict_m5m6[ickg.name]['SAOMB'][0][0]+2, rg_m4m5)
-    # ckgen to fsm route
-    # sarclk
-    rh0, rv0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
-                               pdict_m5m6[ickg.name]['CLKO'][0], pdict_m5m6[ifsm.name]['CLK'][0], rg_m4m5)
     # fsm to sl route
     # sb
     for i in range(num_bits):
         [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
                                            pdict_m5m6[ifsm.name]['SB<'+str(i)+'>'][0],
                                            pdict_m5m6[isl.name]['SB<'+str(i)+'>'][0], xysl[1]-i-1, rg_m5m6)
-    # rst 
-    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
-                                       pdict_m5m6[ifsm.name]['RST'][0],
-                                       pdict_m5m6[isl.name]['RST'][0], 
-                                       xyfsm[1] - num_bits - 2, rg_m5m6)
-                                       #pdict_m5m6[ifsm.name]['RST'][1][1], rg_m5m6)
-    # ckg to sl route
-    rh0, rrst0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
-                               pdict_m4m5[ickg.name]['RST'][0], pdict_m4m5[isl.name]['RST'][0], rg_m4m5)
-    #output
     # zp/zm/zmid
     for i in range(num_bits):
         rzp0 = laygen.route(None, laygen.layers['metal'][5],
                             xy0=pdict_m4m5[isl.name]['ZP<'+str(i)+'>'][0],
                             xy1=pdict_m4m5[isl.name]['ZP<'+str(i)+'>'][0]+np.array([0, 4]), gridname0=rg_m5m6)
-                            #xy1=np.array([pdict_m4m5[isl.name]['ZP<'+str(i)+'>'][0][0], y_top]), gridname0=rg_m5m6)
         laygen.create_boundary_pin_form_rect(rzp0, rg_m5m6, 'ZP<'+str(i)+'>', laygen.layers['pin'][5], size=6, direction='top')
         rzm0 = laygen.route(None, laygen.layers['metal'][5],
                             xy0=pdict_m4m5[isl.name]['ZM<'+str(i)+'>'][0],
                             xy1=pdict_m4m5[isl.name]['ZM<'+str(i)+'>'][0]+np.array([0, 4]), gridname0=rg_m5m6)
-                            #xy1=np.array([pdict_m4m5[isl.name]['ZM<'+str(i)+'>'][0][0], y_top]), gridname0=rg_m5m6)
         laygen.create_boundary_pin_form_rect(rzm0, rg_m5m6, 'ZM<'+str(i)+'>', laygen.layers['pin'][5], size=6, direction='top')
         rzmid0 = laygen.route(None, laygen.layers['metal'][5],
                             xy0=pdict_m4m5[isl.name]['ZMID<'+str(i)+'>'][0],
                             xy1=pdict_m4m5[isl.name]['ZMID<'+str(i)+'>'][0]+np.array([0, 4]), gridname0=rg_m5m6)
-                            #xy1=np.array([pdict_m4m5[isl.name]['ZMID<'+str(i)+'>'][0][0], y_top]), gridname0=rg_m5m6)
         laygen.create_boundary_pin_form_rect(rzmid0, rg_m5m6, 'ZMID<'+str(i)+'>', laygen.layers['pin'][5], size=6, direction='top')
     # ckdsel
     for i in range(2):
         rh0, rclkdsel0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
                                          pdict_m4m5[ickd.name]['SEL0<' + str(i) + '>'][0],
-                                         np.array([pdict_m4m5[isl.name]['RETO<7>'][1][0]+4+2*i, 0]), rg_m4m5)
+                                         np.array([pdict_m4m5[isl.name]['RETO<7>'][1][0]+1+i, 0]), rg_m4m5)
         laygen.create_boundary_pin_form_rect(rclkdsel0, rg_m4m5, 'CKDSEL0<' + str(i) + '>', laygen.layers['pin'][5], size=6,direction='bottom')
         rh0, rclkdsel0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
                                          pdict_m4m5[ickd.name]['SEL1<' + str(i) + '>'][0],
-                                         np.array([pdict_m4m5[isl.name]['RETO<7>'][1][0]+4+2*i+4, 0]), rg_m4m5)
+                                         np.array([pdict_m4m5[isl.name]['RETO<7>'][1][0]+1+i+2, 0]), rg_m4m5)
         laygen.create_boundary_pin_form_rect(rclkdsel0, rg_m4m5, 'CKDSEL1<' + str(i) + '>', laygen.layers['pin'][5], size=6,direction='bottom')
     # SAOPB/SAOMB
     laygen.create_boundary_pin_form_rect(rsaopb0, rg_m4m5, 'SAOPB', laygen.layers['pin'][5], size=6, direction='top')
@@ -360,15 +376,6 @@ def generate_sarabe_dualdelay(laygen, objectname_pfix, workinglib, placement_gri
                                     pdict_m4m5[ickg.name]['EXTSEL_CLK'][0],
                                     np.array([pdict_m4m5[ickg.name]['EXTSEL_CLK'][0][0]-4+16, 0]), rg_m4m5)
     laygen.create_boundary_pin_form_rect(rextsel_clk0, rg_m4m5, 'EXTSEL_CLK', laygen.layers['pin'][5], size=6, direction='bottom')
-    # fsm to ret (rst)
-    [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
-                                       pdict_m5m6[isl.name]['RST'][0],
-                                       pdict_m5m6[iret.name]['CLK'][0], xyfsm[1] - num_bits - 2, rg_m5m6)
-    # clk output to final retimer
-    rrstout0 = laygen.route(None, laygen.layers['metal'][5],
-                            xy0=pdict_m5m6[ifsm.name]['RST'][0],
-                            xy1=np.array([pdict_m5m6[ifsm.name]['RST'][0][0], 0]), gridname0=rg_m5m6)
-    laygen.create_boundary_pin_form_rect(rrstout0, rg_m4m5, 'RSTOUT', laygen.layers['pin'][5], size=6, direction='bottom', netname='RST')
     # fsm to ret (data)
     for i in range(num_bits):
         [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
@@ -380,14 +387,8 @@ def generate_sarabe_dualdelay(laygen, objectname_pfix, workinglib, placement_gri
                              xy0=pdict_m4m5[iret.name]['OUT<'+str(i)+'>'][0],
                              xy1=np.array([pdict_m4m5[iret.name]['OUT<'+str(i)+'>'][0][0], 0]), gridname0=rg_m5m6)
         laygen.create_boundary_pin_form_rect(radco0, rg_m4m5, 'ADCOUT<'+str(i)+'>', laygen.layers['pin'][5], size=6, direction='bottom')
-    # rst
-    laygen.create_boundary_pin_form_rect(rrst0, rg_m5m6, 'RST', laygen.layers['pin'][5], size=6, direction='top')
-    # clkprb
-    rh0, rclkprb0 = laygen.route_hv(laygen.layers['metal'][4], laygen.layers['metal'][5],
-                                    pdict_m4m5[ickg.name]['CLKPRB'][0],
-                                    np.array([pdict_m4m5[isl.name]['RETO<7>'][1][0]+2, 0]), rg_m4m5)
-    laygen.create_boundary_pin_form_rect(rclkprb0, rg_m4m5, 'CLKPRB', laygen.layers['pin'][5], size=6,direction='bottom')
     # probe outputs
+    laygen.pin(name='CLKPRB', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['CLKPRB'], gridname=rg_m4m5)
     laygen.pin(name='COMPOUT', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['COMPOUT'], gridname=rg_m4m5)
     laygen.pin(name='UP', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['UP'], gridname=rg_m4m5)
     laygen.pin(name='DONE', layer=laygen.layers['pin'][4], xy=pdict_m4m5[ickg.name]['DONE'], gridname=rg_m4m5)
@@ -427,14 +428,14 @@ def generate_sarabe_dualdelay(laygen, objectname_pfix, workinglib, placement_gri
     rvddl_m4, rvssl_m4 = laygenhelper.generate_power_rails_from_rails_rect(laygen, routename_tag='L_M4_', 
                 layer=laygen.layers['metal'][4], gridname=rg_m3m4_thick, netnames=['VDD', 'VSS'], direction='x', 
                 input_rails_rect=input_rails_rect, generate_pin=False, overwrite_start_coord=0, overwrite_end_coord=None,
-                offset_route_start=2, offset_route_end=-8)
+                offset_start_index=2, offset_end_index=-8)
     x1 = laygen.get_inst_xy(name=bnd_right[0].name, gridname=rg_m3m4_thick)[0]\
          +laygen.get_template_size(name=bnd_right[0].cellname, gridname=rg_m3m4_thick, libname=utemplib)[0]
     input_rails_rect = [rvddr_m3, rvssr_m3]
     rvddr_m4, rvssr_m4 = laygenhelper.generate_power_rails_from_rails_rect(laygen, routename_tag='R_M4_', 
                 layer=laygen.layers['metal'][4], gridname=rg_m3m4_thick, netnames=['VDD', 'VSS'], direction='x', 
                 input_rails_rect=input_rails_rect, generate_pin=False, overwrite_start_coord=None, overwrite_end_coord=x1,
-                offset_route_start=2, offset_route_end=-8) 
+                offset_start_index=2, offset_end_index=-8) 
     #additional m4 routes
     inst_exclude=[iret,ifsm,isl,ickd,ickg,isp[-1],isp[-2]]
     x0 = laygen.get_inst_xy(name=bnd_left[0].name, gridname=rg_m3m4_thick)[0]
@@ -466,25 +467,25 @@ def generate_sarabe_dualdelay(laygen, objectname_pfix, workinglib, placement_gri
     rvddl_m5, rvssl_m5 = laygenhelper.generate_power_rails_from_rails_rect(laygen, routename_tag='L_M5_', 
                 layer=laygen.layers['metal'][5], gridname=rg_m4m5_thick, netnames=['VDD', 'VSS'], direction='y', 
                 input_rails_rect=input_rails_rect, generate_pin=False, overwrite_start_coord=0, overwrite_end_coord=y1,
-                offset_route_start=1, offset_route_end=0) 
+                offset_start_index=1, offset_end_index=0) 
     input_rails_rect = [rvddr_m4, rvssr_m4]
     rvddr_m5, rvssr_m5 = laygenhelper.generate_power_rails_from_rails_rect(laygen, routename_tag='R_M5_', 
                 layer=laygen.layers['metal'][5], gridname=rg_m4m5_thick, netnames=['VDD', 'VSS'], direction='y', 
                 input_rails_rect=input_rails_rect, generate_pin=False, overwrite_start_coord=0, overwrite_end_coord=y1,
-                offset_route_start=0, offset_route_end=0)
+                offset_start_index=0, offset_end_index=0)
     #m6
     input_rails_rect = [rvddl_m5, rvssl_m5]
     rvddl_m6, rvssl_m6 = laygenhelper.generate_power_rails_from_rails_rect(laygen, routename_tag='L_M6_', 
                 layer=laygen.layers['metal'][6], gridname=rg_m5m6_thick, netnames=['VDD', 'VSS'], direction='x', 
                 input_rails_rect=input_rails_rect, generate_pin=False, overwrite_start_coord=0, overwrite_end_coord=None,
-                offset_route_start=1, offset_route_end=-1)
+                offset_start_index=1, offset_end_index=-1)
     x1 = laygen.get_inst_xy(name=bnd_right[0].name, gridname=rg_m5m6_thick)[0]\
          +laygen.get_template_size(name=bnd_right[0].cellname, gridname=rg_m5m6_thick, libname=utemplib)[0]
     input_rails_rect = [rvddr_m5, rvssr_m5]
     rvddr_m6, rvssr_m6 = laygenhelper.generate_power_rails_from_rails_rect(laygen, routename_tag='R_M6_', 
                 layer=laygen.layers['metal'][6], gridname=rg_m5m6_thick, netnames=['VDD', 'VSS'], direction='x', 
                 input_rails_rect=input_rails_rect, generate_pin=False, overwrite_start_coord=None, overwrite_end_coord=x1,
-                offset_route_start=1, offset_route_end=-1)
+                offset_start_index=1, offset_end_index=-1)
     #addtional m6 routes 
     rvdd_m6=[]
     rvss_m6=[]

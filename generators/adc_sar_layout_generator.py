@@ -112,6 +112,9 @@ def generate_sar(laygen, objectname_pfix, workinglib, sarabe_name, sarafe_name,
     [rv0, rh0, rv1] = laygen.route_vhv(laygen.layers['metal'][5], laygen.layers['metal'][6],
                                        pdict_m5m6[iabe.name]['SARCLKB'][0], pdict_m5m6[iafe.name]['CLKB'][0],
                                        y0 + 6*num_bits+6, rg_m5m6)
+    #clk
+    [rv0, rclk0] = laygen.route_vh(laygen.layers['metal'][5], laygen.layers['metal'][6],
+                                       pdict_m5m6[iabe.name]['RST'][0], np.array([pdict_m5m6[iafe.name]['CLKB'][0][0]-5, y0 + 6*num_bits+7]), rg_m5m6)
     #VDD/VSS pin
     i=0
     for p, pxy in pdict_m5m6_thick[iabe.name].items():
@@ -132,8 +135,11 @@ def generate_sar(laygen, objectname_pfix, workinglib, sarabe_name, sarafe_name,
             laygen.pin(name='VSS' + str(i), layer=laygen.layers['pin'][6], xy=pxy, gridname=rg_m5m6_thick, netname='VSS')
             i+=1
     #inp/inm
-    laygen.pin(name='INP', layer=laygen.layers['pin'][6], xy=pdict_m5m6[iafe.name]['INP'], gridname=rg_m5m6)
-    laygen.pin(name='INM', layer=laygen.layers['pin'][6], xy=pdict_m5m6[iafe.name]['INM'], gridname=rg_m5m6)
+    for p, pxy in pdict_m5m6[iafe.name].items():
+        if p.startswith('INP'):
+            laygen.pin(name=p, layer=laygen.layers['pin'][6], xy=pxy, gridname=rg_m5m6, netname='INP')
+        if p.startswith('INM'):
+            laygen.pin(name=p, layer=laygen.layers['pin'][6], xy=pxy, gridname=rg_m5m6, netname='INM')
     #osp/osm
     laygen.pin(name='OSP', layer=laygen.layers['pin'][3], xy=pdict_m3m4[iafe.name]['OSP'], gridname=rg_m3m4)
     laygen.pin(name='OSM', layer=laygen.layers['pin'][3], xy=pdict_m3m4[iafe.name]['OSM'], gridname=rg_m3m4)
@@ -155,10 +161,12 @@ def generate_sar(laygen, objectname_pfix, workinglib, sarabe_name, sarafe_name,
     for i in range(num_bits):
         laygen.pin(name='ADCOUT<'+str(i)+'>', layer=laygen.layers['pin'][5], xy=pdict_m5m6[iabe.name]['ADCOUT<'+str(i)+'>'], gridname=rg_m5m6)
     #clk
-    laygen.pin(name='CLK', layer=laygen.layers['pin'][5], xy=pdict_m5m6[iabe.name]['RST'], gridname=rg_m5m6)
+    #laygen.pin(name='CLK', layer=laygen.layers['pin'][5], xy=pdict_m5m6[iabe.name]['RST'], gridname=rg_m5m6)
+    #laygen.pin(name='CLK', layer=laygen.layers['pin'][5], xy=laygen.get_rect_xy(rclk0.name, gridname=rg_m5m6), gridname=rg_m5m6)
+    laygen.create_boundary_pin_form_rect(rclk0, rg_m5m6, 'CLK', laygen.layers['pin'][6], size=6, direction='right')
     laygen.pin(name='CLKOUT', layer=laygen.layers['pin'][5], xy=pdict_m5m6[iabe.name]['RSTOUT'], gridname=rg_m5m6, netname='CLK')
     #clkprb
-    laygen.pin(name='CLKPRB', layer=laygen.layers['pin'][5], xy=pdict_m5m6[iabe.name]['CLKPRB'], gridname=rg_m5m6)
+    laygen.pin(name='CLKPRB', layer=laygen.layers['pin'][4], xy=pdict_m5m6[iabe.name]['CLKPRB'], gridname=rg_m5m6)
     #extclk/extclksel
     laygen.pin(name='EXTCLK', layer=laygen.layers['pin'][5], xy=pdict_m4m5[iabe.name]['EXTCLK'], gridname=rg_m4m5)
     laygen.pin(name='EXTSEL_CLK', layer=laygen.layers['pin'][5], xy=pdict_m4m5[iabe.name]['EXTSEL_CLK'], gridname=rg_m4m5)

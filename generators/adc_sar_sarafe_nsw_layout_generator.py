@@ -161,8 +161,8 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     for pn in pdict_m5m6[icdacl.name]:
         if pn.startswith('O'): #out pin
             outcnt+=1
-    x0 = laygen.get_inst_xy(icdacl.name, rg_m5m6)[0] - 4
-    x1 = laygen.get_inst_xy(icdacr.name, rg_m5m6)[0] + 4
+    x0 = laygen.get_inst_xy(icdacl.name, rg_m5m6)[0] - 8
+    x1 = laygen.get_inst_xy(icdacr.name, rg_m5m6)[0] + 8
     nrin = 16  # number of M6 horizontal route stacks
     rinp=[]
     rinm=[]
@@ -220,7 +220,7 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     rvdd_cdrvl_m4, rvss_cdrvl_m4 = laygenhelper.generate_power_rails_from_rails_xy(laygen, routename_tag='_CDRVL_M4_', 
                 layer=laygen.layers['metal'][4], gridname=rg_m3m4_thick, netnames=['VDD', 'VSS'], direction='x', 
                 input_rails_xy=input_rails_xy, generate_pin=False, overwrite_start_coord=0, overwrite_end_coord=None,
-                offset_route_start=0, offset_route_end=0)
+                offset_start_index=0, offset_end_index=0)
     #cdrv_right_m4
     x1 = laygen.get_inst_xy(name=icdrvr.name, gridname=rg_m3m4_thick)[0]\
          +laygen.get_template_size(name=icdrvr.cellname, gridname=rg_m3m4_thick, libname=workinglib)[0]
@@ -235,7 +235,7 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     rvdd_cdrvr_m4, rvss_cdrvr_m4 = laygenhelper.generate_power_rails_from_rails_xy(laygen, routename_tag='_CDRVR_M4_', 
                 layer=laygen.layers['metal'][4], gridname=rg_m3m4_thick, netnames=['VDD', 'VSS'], direction='x', 
                 input_rails_xy=input_rails_xy, generate_pin=False, overwrite_start_coord=None, overwrite_end_coord=x1, 
-                offset_route_start=0, offset_route_end=0)
+                offset_start_index=0, offset_end_index=0)
     #sa_left_m4_m5
     rvdd_sal_m3=[]
     rvss_sal_m3=[]
@@ -248,12 +248,12 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     rvdd_sal_m4, rvss_sal_m4 = laygenhelper.generate_power_rails_from_rails_xy(laygen, routename_tag='_SAL_M4_', 
                 layer=laygen.layers['metal'][4], gridname=rg_m3m4_thick, netnames=['VDD', 'VSS'], direction='x', 
                 input_rails_xy=input_rails_xy, generate_pin=False, overwrite_start_coord=0, overwrite_end_coord=None,
-                offset_route_start=0, offset_route_end=0)
+                offset_start_index=0, offset_end_index=0)
     input_rails_rect = [rvdd_sal_m4+rvdd_cdrvl_m4, rvss_sal_m4+rvss_cdrvl_m4]
     rvdd_sal_m5, rvss_sal_m5 = laygenhelper.generate_power_rails_from_rails_rect(laygen, routename_tag='_SAL_M5_', 
                 layer=laygen.layers['metal'][5], gridname=rg_m4m5_thick, netnames=['VDD', 'VSS'], direction='y', 
                 input_rails_rect=input_rails_rect, generate_pin=False, overwrite_start_coord=0, overwrite_end_coord=None,
-                offset_route_start=1, offset_route_end=-1)
+                offset_start_index=1, offset_end_index=-5)
     #sa_right_m4_m5
     x1 = laygen.get_inst_xy(name=isa.name, gridname=rg_m3m4_thick)[0]\
          +laygen.get_template_size(name=isa.cellname, gridname=rg_m3m4_thick, libname=workinglib)[0]
@@ -268,12 +268,12 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     rvdd_sar_m4, rvss_sar_m4 = laygenhelper.generate_power_rails_from_rails_xy(laygen, routename_tag='_SAR_M4_', 
                 layer=laygen.layers['metal'][4], gridname=rg_m3m4_thick, netnames=['VDD', 'VSS'], direction='x', 
                 input_rails_xy=input_rails_xy, generate_pin=False, overwrite_start_coord=None, overwrite_end_coord=x1,
-                offset_route_start=0, offset_route_end=0)
+                offset_start_index=0, offset_end_index=0)
     input_rails_rect = [rvdd_sar_m4+rvdd_cdrvr_m4, rvss_sar_m4+rvss_cdrvr_m4]
     rvdd_sar_m5, rvss_sar_m5 = laygenhelper.generate_power_rails_from_rails_rect(laygen, routename_tag='_SAR_M5_', 
                 layer=laygen.layers['metal'][5], gridname=rg_m4m5_thick, netnames=['VDD', 'VSS'], direction='y', 
                 input_rails_rect=input_rails_rect, generate_pin=False, overwrite_start_coord=0, overwrite_end_coord=None,
-                offset_route_start=1, offset_route_end=-1)
+                offset_start_index=5, offset_end_index=0)
     #sa_m6
     x1 = laygen.get_inst_xy(name=isa.name, gridname=rg_m5m6_thick)[0]\
          +laygen.get_template_size(name=isa.cellname, gridname=rg_m5m6_thick, libname=workinglib)[0]
@@ -282,7 +282,7 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     rvdd_sa_m6, rvss_sa_m6 = laygenhelper.generate_power_rails_from_rails_rect(laygen, routename_tag='_M6_', 
                 layer=laygen.layers['pin'][6], gridname=rg_m5m6_thick, netnames=['VDD', 'VSS'], direction='x', 
                 input_rails_rect=input_rails_rect, generate_pin=True, overwrite_start_coord=0, overwrite_end_coord=x1,
-                offset_route_start=int(y1/2)+4, offset_route_end=-2+2)
+                offset_start_index=int(y1/2)+4, offset_end_index=-2+2)
 
     #pins
     laygen.pin(name='VREF<0>', layer=laygen.layers['pin'][4], xy=laygen.get_rect_xy(rvref0.name, rg_m4m5), gridname=rg_m4m5)
@@ -322,9 +322,9 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
         laygen.create_boundary_pin_form_rect(renr2[i], rg_m5m6, "ENR"+str(i)+"<2>", laygen.layers['pin'][5], size=4, direction='bottom')
 
     for i, r in enumerate(rinp):
-        laygen.create_boundary_pin_form_rect(r, rg_m5m6, "INP"+str(i), laygen.layers['pin'][6], size=4, direction='right', netname="INP")
+        laygen.create_boundary_pin_form_rect(r, rg_m5m6, "INP"+str(i), laygen.layers['pin'][6], size=8, direction='right', netname="INP")
     for i, r in enumerate(rinm):
-        laygen.create_boundary_pin_form_rect(r, rg_m5m6, "INM"+str(i), laygen.layers['pin'][6], size=4, direction='left', netname="INM")
+        laygen.create_boundary_pin_form_rect(r, rg_m5m6, "INM"+str(i), laygen.layers['pin'][6], size=8, direction='left', netname="INM")
 
 if __name__ == '__main__':
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")

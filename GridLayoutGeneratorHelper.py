@@ -35,14 +35,14 @@ import numpy as np
 from copy import deepcopy
 
 def generate_power_rails(laygen, routename_tag, layer, gridname, netnames=['VDD', 'VSS'], direction='x', 
-                         start_index=0, end_index=0, route_index=None, via_index=None, generate_pin=True): 
+                         start_coord=0, end_coord=0, route_index=None, via_index=None, generate_pin=True): 
     """generate power rails"""
     rail_list=[]
     for netidx, netname in enumerate(netnames):
         rail_sub_list=[]
         for rcnt, ridx in enumerate(route_index[netidx]):
-            if direction=='x': rxy0=np.array([[start_index, ridx], [end_index, ridx]])  
-            if direction=='y': rxy0=np.array([[ridx, start_index], [ridx, end_index]])  
+            if direction=='x': rxy0=np.array([[start_coord, ridx], [end_coord, ridx]])  
+            if direction=='y': rxy0=np.array([[ridx, start_coord], [ridx, end_coord]])  
             if generate_pin == True:
                 p=laygen.pin(name=netname + routename_tag + str(rcnt), layer=layer, xy=rxy0, gridname=gridname, netname=netname)
                 rail_sub_list.append(p)
@@ -60,7 +60,8 @@ def generate_power_rails(laygen, routename_tag, layer, gridname, netnames=['VDD'
 def generate_power_rails_from_rails_xy(laygen, routename_tag, layer, gridname, netnames=['VDD', 'VSS'], direction='x', 
                                        input_rails_xy=None, generate_pin=True, 
                                        overwrite_start_coord=None, overwrite_end_coord=None, 
-                                       offset_route_start=0, offset_route_end=0):
+                                       overwrite_num_routes=None,
+                                       offset_start_index=0, offset_end_index=0):
     """generate power rails from pre-existing power rails in upper/lower layer. 
        the pre-existing rail information is provided as xy array
     """
@@ -72,13 +73,13 @@ def generate_power_rails_from_rails_xy(laygen, routename_tag, layer, gridname, n
             if direction == 'x':
                 #boundary estimation
                 if netidx==0 and i==0: #initialize
-                    start_index=irxy[0][0]
-                    end_index=irxy[0][0]
+                    start_coord=irxy[0][0]
+                    end_coord=irxy[0][0]
                     route_index_start=min((irxy[0][1], irxy[1][1]))
                     route_index_end=max((irxy[0][1], irxy[1][1]))
                 else:
-                    if start_index > irxy[0][0]: start_index=irxy[0][0]
-                    if end_index < irxy[0][0]: end_index=irxy[0][0]
+                    if start_coord > irxy[0][0]: start_coord=irxy[0][0]
+                    if end_coord < irxy[0][0]: end_coord=irxy[0][0]
                     rist=min((irxy[0][1], irxy[1][1]))
                     ried=max((irxy[0][1], irxy[1][1]))
                     if route_index_start < rist: route_index_start = rist
@@ -87,40 +88,42 @@ def generate_power_rails_from_rails_xy(laygen, routename_tag, layer, gridname, n
             else:
                 #boundary estimation
                 if netidx==0 and i==0: #initialize
-                    start_index=irxy[0][1]
-                    end_index=irxy[0][1]
+                    start_coord=irxy[0][1]
+                    end_coord=irxy[0][1]
                     route_index_start=min((irxy[0][0], irxy[1][0]))
                     route_index_end=max((irxy[0][0], irxy[1][0]))
                 else:
-                    if start_index > irxy[0][1]: start_index=irxy[0][1]
-                    if end_index < irxy[0][1]: end_index=irxy[0][1]
+                    if start_coord > irxy[0][1]: start_coord=irxy[0][1]
+                    if end_coord < irxy[0][1]: end_coord=irxy[0][1]
                     rist=min((irxy[0][0], irxy[1][0]))
                     ried=max((irxy[0][0], irxy[1][0]))
                     if route_index_start < rist: route_index_start = rist
                     if route_index_end > ried: route_index_end = ried
                 sub_via_index.append(irxy[0][1])
         via_index.append(np.array(sub_via_index))
-    #offset 
-    route_index_start+=offset_route_start
-    route_index_end+=offset_route_end
+    #number of routes and offset 
+    route_index_start+=offset_start_index
+    if not overwrite_num_routes==None:
+        route_index_end=route_index_start + overwrite_num_routes
+    route_index_end+=offset_end_index
     #route index
     for netidx, netname in enumerate(netnames):
         sub_route_index=[]
         for ri in range(int((route_index_end - route_index_start + 1)/len(netnames))):
             sub_route_index += [route_index_start + netidx + len(netnames)*ri]
         route_index.append(np.array(sub_route_index))
-    #overwrite start/end index if necessary
+    #overwrite start/end coordinates if necessary
     if not overwrite_start_coord==None:
-        start_index=overwrite_start_coord 
+        start_coord=overwrite_start_coord 
     if not overwrite_end_coord==None:
-        end_index=overwrite_end_coord 
+        end_coord=overwrite_end_coord 
     return generate_power_rails(laygen, routename_tag=routename_tag, layer=layer, gridname=gridname, netnames=netnames, direction=direction, 
-                                start_index=start_index, end_index=end_index, route_index=route_index, via_index=via_index, generate_pin=generate_pin) 
+                                start_coord=start_coord, end_coord=end_coord, route_index=route_index, via_index=via_index, generate_pin=generate_pin) 
 
 def generate_power_rails_from_rails_rect(laygen, routename_tag, layer, gridname, netnames=['VDD', 'VSS'], direction='x', 
                                          input_rails_rect=None, generate_pin=True, 
-                                         overwrite_start_coord=None, overwrite_end_coord=None, 
-                                         offset_route_start=0, offset_route_end=0):
+                                         overwrite_start_coord=None, overwrite_end_coord=None, overwrite_num_routes=None,
+                                         offset_start_index=0, offset_end_index=0):
     """generate power rails from pre-existing power rails in upper/lower layer. 
        the pre-existing rail information is provided as rect
     """
@@ -133,12 +136,13 @@ def generate_power_rails_from_rails_rect(laygen, routename_tag, layer, gridname,
     return generate_power_rails_from_rails_xy(laygen, routename_tag, layer, gridname, netnames=netnames, direction=direction, 
                                               input_rails_xy=xy, generate_pin=generate_pin, 
                                               overwrite_start_coord=overwrite_start_coord, overwrite_end_coord=overwrite_end_coord,
-                                              offset_route_start=offset_route_start, offset_route_end=offset_route_end)
+                                              overwrite_num_routes=overwrite_num_routes,
+                                              offset_start_index=offset_start_index, offset_end_index=offset_end_index)
 
 def generate_power_rails_from_rails_inst(laygen, routename_tag, layer, gridname, netnames=['VDD', 'VSS'], direction='x', 
                                          input_rails_instname=None, input_rails_pin_prefix=['VDD', 'VSS'], generate_pin=True, 
-                                         overwrite_start_coord=None, overwrite_end_coord=None, 
-                                         offset_route_start=0, offset_route_end=0):
+                                         overwrite_start_coord=None, overwrite_end_coord=None, overwrite_num_routes=None,
+                                         offset_start_index=0, offset_end_index=0):
     """generate power rails from pre-existing power rails in upper/lower layer. 
        the pre-existing rail information is provided as inst / pin prefix
     """
@@ -154,7 +158,8 @@ def generate_power_rails_from_rails_inst(laygen, routename_tag, layer, gridname,
     return generate_power_rails_from_rails_xy(laygen, routename_tag, layer, gridname, netnames=netnames, direction=direction, 
                                               input_rails_xy=xy, generate_pin=generate_pin, 
                                               overwrite_start_coord=overwrite_start_coord, overwrite_end_coord=overwrite_end_coord,
-                                              offset_route_start=offset_route_start, offset_route_end=offset_route_end)
+                                              overwrite_num_routes=overwrite_num_routes,
+                                              offset_start_index=offset_start_index, offset_end_index=offset_end_index)
 
 def generate_grids_from_xy(laygen, gridname_input, gridname_output, xy, xy_grid_type=None):
     """generate route grids combining a pre-existing grid and xy-array
@@ -168,7 +173,7 @@ def generate_grids_from_xy(laygen, gridname_input, gridname_output, xy, xy_grid_
     xwidth = deepcopy(gi.get_xwidth())
     ywidth = deepcopy(gi.get_ywidth())
     _viamap = gi.get_viamap()
-    vianame = _viamap.keys()[0] #just using one via; should be fixed
+    vianame = list(_viamap.keys())[0] #just pickig one via; should be fixed
     #figure out routing direction
     if xy_grid_type==None:
         if abs(xy[0][0][0]-xy[0][1][0]) > abs(xy[0][0][1]-xy[0][1][1]): #aspect ratio
@@ -202,9 +207,10 @@ def generate_grids_from_xy(laygen, gridname_input, gridname_output, xy, xy_grid_
         for y in range(len(ygrid)):
             viamap[vianame].append([x, y])
     viamap[vianame] = np.array(viamap[vianame])
+    # add grid information
     laygen.grids.add_route_grid(name=gridname_output, libname=None, xy=bnd, xgrid=xgrid, ygrid=ygrid, xwidth=xwidth,
                                 ywidth=ywidth, viamap=viamap)
-    laygen.grids.display()
+    #laygen.grids.display()
 
 def generate_grids_from_inst(laygen, gridname_input, gridname_output, instname, template_libname,
                            inst_pin_prefix=['VDD', 'VSS'], xy_grid_type=None):
