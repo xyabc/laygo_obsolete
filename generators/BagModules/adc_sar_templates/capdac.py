@@ -62,6 +62,9 @@ class adc_sar_templates__capdac(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['num_bit'] = num_bit
+        self.parameters['c_m'] = c_m
+        self.parameters['rdx_array'] = rdx_array
         name_list=[]
         term_list=[]
         for i in range(num_bit):

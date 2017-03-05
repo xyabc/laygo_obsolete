@@ -57,6 +57,11 @@ class adc_sar_templates__sarclkdelayslice(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m'] = m
+        self.parameters['device_intent'] = device_intent
         self.instances['IND0'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
         self.instances['IND1'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
         self.instances['IINV00'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)

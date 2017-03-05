@@ -57,6 +57,11 @@ class logic_templates__dff(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m'] = m
+        self.parameters['device_intent'] = device_intent
         self.instances['I0'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
         self.instances['I1'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
         self.instances['I2'].design(lch=lch, pw=pw, nw=nw, m=1, device_intent=device_intent) #fb tinv

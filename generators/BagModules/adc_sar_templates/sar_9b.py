@@ -62,6 +62,18 @@ class adc_sar_templates__sar_9b(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m_sa'] = m_sa
+        self.parameters['m_drv_list'] = m_drv_list
+        self.parameters['m_ckgen'] = m_ckgen
+        self.parameters['m_ckdly'] = m_ckdly
+        self.parameters['m_logic'] = m_logic
+        self.parameters['m_fsm'] = m_fsm
+        self.parameters['m_ret'] = m_ret
+        self.parameters['fo_ret'] = fo_ret
+        self.parameters['device_intent'] = device_intent
         self.instances['IAFE0'].design(lch=lch, pw=pw, nw=nw, m_sa=m_sa, m_drv_list=m_drv_list, device_intent=device_intent)
         self.instances['IABE0'].design(lch=lch, pw=pw, nw=nw, m_ckgen=m_ckgen, m_ckdly=m_ckdly, m_logic=m_logic, m_fsm=m_fsm, 
                                        m_ret=m_ret, fo_ret=fo_ret, device_intent=device_intent)

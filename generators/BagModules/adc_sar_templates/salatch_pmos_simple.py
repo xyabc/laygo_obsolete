@@ -62,6 +62,11 @@ class adc_sar_templates__salatch_pmos_simple(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m'] = m
+        self.parameters['device_intent'] = device_intent
         m_sa=m
         m_in=int(m_sa/2)
         m_clkh=m_in

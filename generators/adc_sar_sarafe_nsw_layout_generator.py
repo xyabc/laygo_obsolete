@@ -195,8 +195,8 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
     #inp/inm - sa to capdac
     xy0 = laygen.get_inst_pin_coord(isa.name, "INP", rg_m4m5, index=np.array([0, 0]), sort=True)[0]
     xy1 = laygen.get_inst_pin_coord(isa.name, "INM", rg_m4m5, index=np.array([0, 0]), sort=True)[0]
-    laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x0-8, xy0[1]]), xy1=xy0, gridname0=rg_m4m5)
-    laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x1+8, xy1[1]]), xy1=xy1, gridname0=rg_m4m5)
+    rsainp=laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x0-8, xy0[1]]), xy1=xy0, gridname0=rg_m4m5)
+    rsainm=laygen.route(None, laygen.layers['metal'][4], xy0=np.array([x1+8, xy1[1]]), xy1=xy1, gridname0=rg_m4m5)
     for j in range(4):
         laygen.via(None, [x0 - 2 * j, xy0[1]], rg_m4m5)
         laygen.via(None, [x1 + 2 * j, xy1[1]], rg_m4m5)
@@ -321,6 +321,8 @@ def generate_sarafe_nsw(laygen, objectname_pfix, workinglib, placement_grid,
         laygen.create_boundary_pin_form_rect(renr1[i], rg_m5m6, "ENR"+str(i)+"<1>", laygen.layers['pin'][5], size=4, direction='bottom')
         laygen.create_boundary_pin_form_rect(renr2[i], rg_m5m6, "ENR"+str(i)+"<2>", laygen.layers['pin'][5], size=4, direction='bottom')
 
+    laygen.pin_from_rect(name='SAINP', layer=laygen.layers['pin'][4], rect=rsainp, gridname=rg_m4m5, netname='INP')
+    laygen.pin_from_rect(name='SAINM', layer=laygen.layers['pin'][4], rect=rsainm, gridname=rg_m4m5, netname='INM')
     for i, r in enumerate(rinp):
         laygen.create_boundary_pin_form_rect(r, rg_m5m6, "INP"+str(i), laygen.layers['pin'][6], size=8, direction='right', netname="INP")
     for i, r in enumerate(rinm):

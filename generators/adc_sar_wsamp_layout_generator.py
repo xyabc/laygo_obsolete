@@ -63,17 +63,92 @@ def generate_sar_wsamp(laygen, objectname_pfix, workinglib, samp_lib, sar_name, 
     sar_xy=isar.xy[0]
     samp_xy=isamp.xy[0]
 
-    #clk route
-    #just directly route from samp to sar, assuming all routes are drc clean
+    #signal route (clk/inp/inm)
+    #make virtual grids and route on the grids (assuming drc clearance of each block)
     rg_m5m6_thick_basic_temp_sig='route_M5_M6_thick_basic_temp_sig'
     laygenhelper.generate_grids_from_inst(laygen, gridname_input=rg_m5m6_thick_basic, gridname_output=rg_m5m6_thick_basic_temp_sig,
                                           instname=isamp.name, template_libname=samp_lib,
                                           inst_pin_prefix=['ckout', 'outp', 'outn'], xy_grid_type='xgrid')
     pdict_m5m6_thick_basic_temp_sig = laygen.get_inst_pin_coord(None, None, rg_m5m6_thick_basic_temp_sig)
+    #clock
     rclk0 = laygen.route(None, laygen.layers['metal'][5],
                          xy0=pdict_m5m6_thick_basic_temp_sig[isamp.name]['ckout'][0],
                          xy1=pdict_m5m6_thick_basic_temp_sig[isar.name]['CLK'][1]-np.array([0,1]), gridname0=rg_m5m6_thick_basic_temp_sig)
     laygen.via(None,pdict_m5m6_thick_basic_temp_sig[isar.name]['CLK'][1], rg_m5m6_thick_basic_temp_sig)
+
+    #frontend sig
+    inp_y_list=[]
+    inm_y_list=[]
+    for pn, p in pdict_m5m6_thick_basic_temp_sig[isar.name].items():
+        if pn.startswith('INP'):
+            inp_y_list.append(p[0][1])
+            laygen.via(None,p[0], rg_m5m6_thick_basic_temp_sig)
+        if pn.startswith('INM'):
+            inm_y_list.append(p[0][1])
+            laygen.via(None,p[0], rg_m5m6_thick_basic_temp_sig)
+    inp_y=min(inp_y_list)
+    inm_y=min(inm_y_list)
+    rinp0 = laygen.route(None, laygen.layers['metal'][5],
+                         xy0=pdict_m5m6_thick_basic_temp_sig[isamp.name]['outp'][0],
+                         xy1=np.array([pdict_m5m6_thick_basic_temp_sig[isar.name]['INP0'][0][0],inp_y-1]), 
+                         gridname0=rg_m5m6_thick_basic_temp_sig)
+    rinp0 = laygen.route(None, laygen.layers['metal'][5],
+                         xy0=pdict_m5m6_thick_basic_temp_sig[isamp.name]['outn'][0],
+                         xy1=np.array([pdict_m5m6_thick_basic_temp_sig[isar.name]['INM0'][0][0],inm_y-1]), 
+                         gridname0=rg_m5m6_thick_basic_temp_sig)
+
+    #input pins (just duplicate from lower hierarchy cells)
+    laygen.add_pin('CLK', 'CLK', samp_xy+samp_pins['ckin']['xy'], samp_pins['ckin']['layer'])
+    laygen.add_pin('INP', 'INP', samp_xy+samp_pins['inp']['xy'], samp_pins['ckin']['layer'])
+    laygen.add_pin('INM', 'INM', samp_xy+samp_pins['inn']['xy'], samp_pins['ckin']['layer'])
+
+    laygen.add_pin('OSP', 'OSP', sar_xy+sar_pins['OSP']['xy'], sar_pins['OSP']['layer'])
+    laygen.add_pin('OSM', 'OSM', sar_xy+sar_pins['OSM']['xy'], sar_pins['OSM']['layer'])
+    #laygen.add_pin('VREF<2>', 'VREF<2>', sar_xy+sar_pins['VREF<2>']['xy'], sar_pins['VREF<2>']['layer'])
+    #laygen.add_pin('VREF<1>', 'VREF<1>', sar_xy+sar_pins['VREF<1>']['xy'], sar_pins['VREF<1>']['layer'])
+    #laygen.add_pin('VREF<0>', 'VREF<0>', sar_xy+sar_pins['VREF<0>']['xy'], sar_pins['VREF<0>']['layer'])
+    laygen.add_pin('VREF_M5R<2>', 'VREF<2>', sar_xy+sar_pins['VREF_M5R<2>']['xy'], sar_pins['VREF_M5R<2>']['layer'])
+    laygen.add_pin('VREF_M5R<1>', 'VREF<1>', sar_xy+sar_pins['VREF_M5R<1>']['xy'], sar_pins['VREF_M5R<1>']['layer'])
+    laygen.add_pin('VREF_M5R<0>', 'VREF<0>', sar_xy+sar_pins['VREF_M5R<0>']['xy'], sar_pins['VREF_M5R<0>']['layer'])
+    laygen.add_pin('VREF_M5L<2>', 'VREF<2>', sar_xy+sar_pins['VREF_M5L<2>']['xy'], sar_pins['VREF_M5L<2>']['layer'])
+    laygen.add_pin('VREF_M5L<1>', 'VREF<1>', sar_xy+sar_pins['VREF_M5L<1>']['xy'], sar_pins['VREF_M5L<1>']['layer'])
+    laygen.add_pin('VREF_M5L<0>', 'VREF<0>', sar_xy+sar_pins['VREF_M5L<0>']['xy'], sar_pins['VREF_M5L<0>']['layer'])
+    laygen.add_pin('CKDSEL0<1>', 'CKDSEL0<1>', sar_xy+sar_pins['CKDSEL0<1>']['xy'], sar_pins['CKDSEL0<1>']['layer'])
+    laygen.add_pin('CKDSEL0<0>', 'CKDSEL0<0>', sar_xy+sar_pins['CKDSEL0<0>']['xy'], sar_pins['CKDSEL0<0>']['layer'])
+    laygen.add_pin('CKDSEL1<1>', 'CKDSEL1<1>', sar_xy+sar_pins['CKDSEL1<1>']['xy'], sar_pins['CKDSEL1<1>']['layer'])
+    laygen.add_pin('CKDSEL1<0>', 'CKDSEL1<0>', sar_xy+sar_pins['CKDSEL1<0>']['xy'], sar_pins['CKDSEL1<0>']['layer'])
+    laygen.add_pin('EXTCLK', 'EXTCLK', sar_xy+sar_pins['EXTCLK']['xy'], sar_pins['EXTCLK']['layer'])
+    laygen.add_pin('EXTSEL_CLK', 'EXTSEL_CLK', sar_xy+sar_pins['EXTSEL_CLK']['xy'], sar_pins['EXTSEL_CLK']['layer'])
+    #output pins (just duplicate from lower hierarchy cells)
+    for i in range(num_bits):
+        pn='ADCOUT'+'<'+str(i)+'>'
+        laygen.add_pin(pn, pn, sar_xy+sar_pins[pn]['xy'], sar_pins[pn]['layer'])
+    laygen.add_pin('CLKO', 'CLKO', sar_xy+sar_pins['CLKOUT']['xy'], sar_pins['CLKOUT']['layer'])
+    
+    #probe pins
+    laygen.add_pin('CLKPRB_SAMP', 'CLKPRB_SAMP', samp_xy+samp_pins['ckpg']['xy'], samp_pins['ckpg']['layer'])
+    laygen.add_pin('CLKPRB_SAR', 'CLKPRB_SAR', sar_xy+sar_pins['CLKPRB']['xy'], sar_pins['CLKPRB']['layer'])
+    laygen.add_pin('SAMPP', 'SAMPP', sar_xy+sar_pins['SAINP']['xy'], sar_pins['SAINP']['layer'])
+    laygen.add_pin('SAMPM', 'SAMPM', sar_xy+sar_pins['SAINM']['xy'], sar_pins['SAINM']['layer'])
+    laygen.add_pin('SARCLK', 'SARCLK', sar_xy+sar_pins['SARCLK']['xy'], sar_pins['SARCLK']['layer'])
+    laygen.add_pin('SARCLKB', 'SARCLKB', sar_xy+sar_pins['SARCLKB']['xy'], sar_pins['SARCLKB']['layer'])
+    laygen.add_pin('COMPOUT', 'COMPOUT', sar_xy+sar_pins['COMPOUT']['xy'], sar_pins['COMPOUT']['layer'])
+    laygen.add_pin('DONE', 'DONE', sar_xy+sar_pins['DONE']['xy'], sar_pins['DONE']['layer'])
+    laygen.add_pin('UP', 'UP', sar_xy+sar_pins['UP']['xy'], sar_pins['UP']['layer'])
+    for i in range(num_bits):
+        pn='ZP'+'<'+str(i)+'>'
+        laygen.add_pin(pn, pn, sar_xy+sar_pins[pn]['xy'], sar_pins[pn]['layer'])
+        pn='ZMID'+'<'+str(i)+'>'
+        laygen.add_pin(pn, pn, sar_xy+sar_pins[pn]['xy'], sar_pins[pn]['layer'])
+        pn='ZM'+'<'+str(i)+'>'
+        laygen.add_pin(pn, pn, sar_xy+sar_pins[pn]['xy'], sar_pins[pn]['layer'])
+        pn='SB'+'<'+str(i)+'>'
+        laygen.add_pin(pn, pn, sar_xy+sar_pins[pn]['xy'], sar_pins[pn]['layer'])
+    for i in range(num_bits-1):
+        pn='VOL'+'<'+str(i)+'>'
+        laygen.add_pin(pn, pn, sar_xy+sar_pins[pn]['xy'], sar_pins[pn]['layer'])
+        pn='VOR'+'<'+str(i)+'>'
+        laygen.add_pin(pn, pn, sar_xy+sar_pins[pn]['xy'], sar_pins[pn]['layer'])
 
     #VDD/VSS pin
     vddcnt=0
@@ -81,11 +156,11 @@ def generate_sar_wsamp(laygen, objectname_pfix, workinglib, samp_lib, sar_name, 
     for p in pdict_m5m6[isar.name]:
         if p.startswith('VDD'):
             xy0=pdict_m5m6_thick[isar.name][p]
-            laygen.pin(name='VDD' + str(vddcnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick, netname='VDD')
+            laygen.pin(name='VDDSAR' + str(vddcnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick, netname='VDD:')
             vddcnt+=1
         if p.startswith('VSS'):
             xy0=pdict_m5m6_thick[isar.name][p]
-            laygen.pin(name='VSS' + str(vsscnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick, netname='VSS')
+            laygen.pin(name='VSSSAR' + str(vsscnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick, netname='VSS:')
             vsscnt+=1
     #extract VDD/VSS grid from samp and make power pins
     rg_m5m6_thick_temp_samp='route_M5_M6_thick_temp_samp'
@@ -93,14 +168,16 @@ def generate_sar_wsamp(laygen, objectname_pfix, workinglib, samp_lib, sar_name, 
                                           instname=isamp.name, template_libname=samp_lib,
                                           inst_pin_prefix=['VDD', 'VSS'], xy_grid_type='ygrid')
     pdict_m5m6_thick_temp_samp = laygen.get_inst_pin_coord(None, None, rg_m5m6_thick_temp_samp)
+    vddcnt=0
+    vsscnt=0
     for p in pdict_m5m6_thick_temp_samp[isamp.name]:
         if p.startswith('VDD'):
             xy0=pdict_m5m6_thick_temp_samp[isamp.name][p]
-            laygen.pin(name='VDD' + str(vddcnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick_temp_samp, netname='VDD')
+            laygen.pin(name='VDDSAMP' + str(vddcnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick_temp_samp, netname='VDD:')
             vddcnt+=1
         if p.startswith('VSS'):
             xy0=pdict_m5m6_thick_temp_samp[isamp.name][p]
-            laygen.pin(name='VSS' + str(vsscnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick_temp_samp, netname='VSS')
+            laygen.pin(name='VSSSAMP' + str(vsscnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick_temp_samp, netname='VSS:')
             vsscnt+=1
 
 if __name__ == '__main__':

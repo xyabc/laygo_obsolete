@@ -62,6 +62,11 @@ class adc_sar_templates__capdrv_nsw_array_8b(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m_list'] = m_list
+        self.parameters['device_intent'] = device_intent
         for i in range(8):
             self.instances['ICDRV'+str(i)].design(lch=lch, pw=pw, nw=nw, m=m_list[i], device_intent=device_intent)
 

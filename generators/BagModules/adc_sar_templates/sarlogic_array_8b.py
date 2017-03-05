@@ -57,6 +57,11 @@ class adc_sar_templates__sarlogic_array_8b(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m'] = m
+        self.parameters['device_intent'] = device_intent
         #self.instances['I0<7:0>'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
         #self.instances['ISL'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
         self.instances['ISL7'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)

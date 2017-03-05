@@ -62,6 +62,15 @@ class adc_sar_templates__sarafe_nsw(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m_sa'] = m_sa
+        self.parameters['m_drv_list'] = m_drv_list
+        self.parameters['num_bit'] = num_bit
+        self.parameters['c_m'] = c_m
+        self.parameters['rdx_array'] = rdx_array
+        self.parameters['device_intent'] = device_intent
         self.instances['ISA0'].design(lch=lch, pw=pw, nw=nw, m=m_sa, device_intent=device_intent)
         self.instances['ICDRVP0'].design(lch=lch, pw=pw, nw=nw, m_list=m_drv_list, device_intent=device_intent)
         self.instances['ICDRVM0'].design(lch=lch, pw=pw, nw=nw, m_list=m_drv_list, device_intent=device_intent)

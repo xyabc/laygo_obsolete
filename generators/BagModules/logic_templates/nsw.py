@@ -62,6 +62,11 @@ class logic_templates__nsw(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['nw'] = nw
+        self.parameters['pw'] = pw
+        self.parameters['m'] = m
+        self.parameters['device_intent'] = device_intent
         self.instances['IN0'].design(w=nw, l=lch, nf=m, intent=device_intent)
 
     def get_layout_params(self, **kwargs):

@@ -57,6 +57,11 @@ class logic_templates__nand(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m'] = m
+        self.parameters['device_intent'] = device_intent
         self.instances['IP0'].design(w=pw, l=lch, nf=m, intent=device_intent)
         self.instances['IP1'].design(w=pw, l=lch, nf=m, intent=device_intent)
         self.instances['IN0'].design(w=nw, l=lch, nf=m, intent=device_intent)

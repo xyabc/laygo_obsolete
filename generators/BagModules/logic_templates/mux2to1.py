@@ -57,6 +57,11 @@ class logic_templates__mux2to1(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m'] = m
+        self.parameters['device_intent'] = device_intent
         self.instances['ITINV0'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
         self.instances['ITINV1'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
         self.instances['IINV0'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent) 

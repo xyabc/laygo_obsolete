@@ -135,6 +135,8 @@ def generate_sar(laygen, objectname_pfix, workinglib, sarabe_name, sarafe_name,
             laygen.pin(name='VSS' + str(i), layer=laygen.layers['pin'][6], xy=pxy, gridname=rg_m5m6_thick, netname='VSS')
             i+=1
     #inp/inm
+    laygen.pin(name='SAINP', layer=laygen.layers['pin'][4], xy=pdict_m4m5[iafe.name]['SAINP'], gridname=rg_m4m5, netname='INP')
+    laygen.pin(name='SAINM', layer=laygen.layers['pin'][4], xy=pdict_m4m5[iafe.name]['SAINM'], gridname=rg_m4m5, netname='INM')
     for p, pxy in pdict_m5m6[iafe.name].items():
         if p.startswith('INP'):
             laygen.pin(name=p, layer=laygen.layers['pin'][6], xy=pxy, gridname=rg_m5m6, netname='INP')
@@ -176,6 +178,28 @@ def generate_sar(laygen, objectname_pfix, workinglib, sarabe_name, sarafe_name,
                    xy=pdict_m4m5[iabe.name]['CKDSEL0<' + str(i) + '>'], gridname=rg_m4m5)
         laygen.pin(name='CKDSEL1<' + str(i) + '>', layer=laygen.layers['pin'][5],
                    xy=pdict_m4m5[iabe.name]['CKDSEL1<' + str(i) + '>'], gridname=rg_m4m5)
+    #probe pins
+    afe_template = laygen.templates.get_template(sarafe_name, workinglib)
+    abe_template = laygen.templates.get_template(sarabe_name, workinglib)
+    afe_pins=afe_template.pins
+    abe_pins=abe_template.pins
+    afe_xy=iafe.xy[0]
+    abe_xy=iabe.xy[0]
+    for i in range(num_bits):
+        pn='ZP'+'<'+str(i)+'>'
+        laygen.add_pin(pn, pn, abe_xy+abe_pins[pn]['xy'], abe_pins[pn]['layer'])
+        pn='ZMID'+'<'+str(i)+'>'
+        laygen.add_pin(pn, pn, abe_xy+abe_pins[pn]['xy'], abe_pins[pn]['layer'])
+        pn='ZM'+'<'+str(i)+'>'
+        laygen.add_pin(pn, pn, abe_xy+abe_pins[pn]['xy'], abe_pins[pn]['layer'])
+        pn='SB'+'<'+str(i)+'>'
+        laygen.add_pin(pn, pn, abe_xy+abe_pins[pn]['xy'], abe_pins[pn]['layer'])
+    laygen.add_pin('SARCLKB', 'SARCLKB', abe_xy+abe_pins['SARCLKB']['xy'], abe_pins['SARCLKB']['layer'])
+    laygen.add_pin('COMPOUT', 'COMPOUT', abe_xy+abe_pins['COMPOUT']['xy'], abe_pins['COMPOUT']['layer'])
+    laygen.add_pin('SARCLK', 'SARCLK', abe_xy+abe_pins['SARCLK']['xy'], abe_pins['SARCLK']['layer'])
+    laygen.add_pin('UP', 'UP', abe_xy+abe_pins['UP']['xy'], abe_pins['UP']['layer'])
+    laygen.add_pin('DONE', 'DONE', abe_xy+abe_pins['DONE']['xy'], abe_pins['DONE']['layer'])
+
 if __name__ == '__main__':
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")
 

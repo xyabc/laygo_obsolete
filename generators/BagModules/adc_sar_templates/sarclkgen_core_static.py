@@ -62,6 +62,11 @@ class adc_sar_templates__sarclkgen_core_static(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m'] = m
+        self.parameters['device_intent'] = device_intent
         self.instances['IN0'].design(l=lch, w=nw, nf=m, intent=device_intent)
         self.instances['IN1'].design(l=lch, w=nw, nf=m, intent=device_intent)
         self.instances['IN2'].design(l=lch, w=nw, nf=m, intent=device_intent)

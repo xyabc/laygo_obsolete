@@ -57,6 +57,11 @@ class adc_sar_templates__capdrv_array_7b(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m'] = m
+        self.parameters['device_intent'] = device_intent
         #self.replace_instance_master('ICDRV0', templib, 'capdrv_'+str(m)+'x') #resue template lib
         for i in range(7):
             self.instances['ICDRV'+str(i)].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)

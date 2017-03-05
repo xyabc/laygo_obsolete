@@ -62,6 +62,16 @@ class adc_sar_templates__sarabe_dualdelay_9b(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m_ckgen'] = m_ckgen
+        self.parameters['m_ckdly'] = m_ckdly
+        self.parameters['m_logic'] = m_logic
+        self.parameters['m_fsm'] = m_fsm
+        self.parameters['m_ret'] = m_ret
+        self.parameters['fo_ret'] = fo_ret
+        self.parameters['device_intent'] = device_intent
         self.instances['ICKGEN0'].design(lch=lch, pw=pw, nw=nw, m=m_ckgen, device_intent=device_intent)
         self.instances['ICKDLY0'].design(lch=lch, pw=pw, nw=nw, m=m_ckdly, device_intent=device_intent)
         self.instances['ISARLOGIC0'].design(lch=lch, pw=pw, nw=nw, m=m_logic, device_intent=device_intent)

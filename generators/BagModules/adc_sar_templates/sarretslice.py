@@ -62,6 +62,12 @@ class adc_sar_templates__sarretslice(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m'] = m
+        self.parameters['fo'] = fo
+        self.parameters['device_intent'] = device_intent
         self.instances['IINV0'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
         self.instances['ILATCH0'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)
         self.instances['IINV1'].design(lch=lch, pw=pw, nw=nw, m=m, device_intent=device_intent)

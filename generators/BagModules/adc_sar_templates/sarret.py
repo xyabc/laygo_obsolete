@@ -62,6 +62,13 @@ class adc_sar_templates__sarret(Module):
         restore_instance()
         array_instance()
         """
+        self.parameters['lch'] = lch
+        self.parameters['pw'] = pw
+        self.parameters['nw'] = nw
+        self.parameters['m'] = m
+        self.parameters['fo'] = fo
+        self.parameters['num_bit'] = num_bit
+        self.parameters['device_intent'] = device_intent
         name_list=[]
         term_list=[]
         for i in range(num_bit):
