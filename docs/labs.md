@@ -66,7 +66,10 @@ Installation procedure is explained here
     ~~~~
 
 5. Add `cds.lib` definition of laygo_{technology_name}/{technology_name}_microtemplates_dense
- This library contains primitive templates and grid cells.
+ This library contains primitive templates and grid cells. Example is as follows
+    ~~~~
+    `DEFINE {technology_name}_microtemplates_dense ./laygo_{technology_name}/{technology_name}_microtemplates_dense`
+    ~~~~
 
 6. (optional) copy those files from laygo_{technology_name} to bag working dir
 laygo_{technology_name}/{technology_name}_microtemplates_dense_templates.yaml
