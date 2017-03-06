@@ -45,7 +45,7 @@ Installation procedure is explained here
 3. Clone laygo_{technology_name} repo to your bag working directory. The repo contains technology specific
  information and not distributed in public domain.
 
-4. Copy `laygo_config.yaml` from laygo_{technology_name}. If you don't have one, you can create it by yourself. The syntax is as follows.
+4. Copy `laygo_config.yaml` from laygo_{technology_name} to your bag working directory. If you don't have one, you can create it by yourself. The syntax is as follows.
     ~~~~
     metal_layers:
     - [metal0_layer_name, metal0_layer_purpose]
