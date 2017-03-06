@@ -42,7 +42,7 @@ Installation procedure is explained here
 
 2. Copy or make symbolic links of lab scripts from labs/
 
-3. Set up laygo_{technology_name}. The repo contains technology specific
+3. Clone laygo_{technology_name} repo to your bag working directory. The repo contains technology specific
  information and not distributed in public domain.
 
 4. Copy `laygo_config.yaml` from laygo_{technology_name}. If you don't have one, you can create it by yourself. The syntax is as follows.
