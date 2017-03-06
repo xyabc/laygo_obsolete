@@ -95,7 +95,7 @@ Laygo does not generate libraries automatically. Users need to create working li
 5. You are ready to run the lab. Run bag and type
 
    ~~~~
-   run lab1_a_baselayoutgenerator_export.py
+   run laygo/labs/lab1_a_baselayoutgenerator_export.py
    ~~~~
 
    It should create 2 cells in laygo_working. _generate_example_1 should look like this.
