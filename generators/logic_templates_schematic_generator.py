@@ -37,6 +37,7 @@ impl_lib = tech_lib+'_logic_templates'
 params = dict(lch=16e-9, pw=4, nw=4, device_intent='fast', m=1)
 
 cell_name_dict={'tie':[2],
+                'dcap':[2,4,8],
                 'inv':[1,2,4,8],
                 'tgate':[2,4,8],
                 'nsw':[2,4,8],

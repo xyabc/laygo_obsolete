@@ -32,11 +32,10 @@ import os
 import laygo.GridLayoutGeneratorHelper as laygenhelper #utility functions
 #import logging;logging.basicConfig(level=logging.DEBUG)
 
-def generate_tisaradc_body(laygen, objectname_pfix, workinglib, ret_libname, sar_libname, sh_libname, ret_name, sar_name, sh_name,
+def generate_tisaradc_body(laygen, objectname_pfix, libname, tisar_core_name, tisar_space_name, 
                            placement_grid,
                            routing_grid_m3m4, routing_grid_m4m5, routing_grid_m5m6, routing_grid_m5m6_thick, 
-                           routing_grid_m5m6_thick_basic, routing_grid_m5m6_thick2_thick, 
-                           routing_grid_m6m7_thick, routing_grid_m6m7_thick2_thick,
+                           routing_grid_m5m6_thick_basic, routing_grid_m6m7_thick, 
                            num_bits=9, num_slices=8, origin=np.array([0, 0])):
     """generate sar array """
     pg = placement_grid
@@ -46,32 +45,62 @@ def generate_tisaradc_body(laygen, objectname_pfix, workinglib, ret_libname, sar
     rg_m5m6 = routing_grid_m5m6
     rg_m5m6_thick = routing_grid_m5m6_thick
     rg_m5m6_thick_basic = routing_grid_m5m6_thick_basic
-    rg_m5m6_thick2_thick= routing_grid_m5m6_thick2_thick
     rg_m6m7_thick = routing_grid_m6m7_thick
 
     # placement
-    # ret/sar/sh
-    iret=laygen.place(name="I" + objectname_pfix + 'RET0', templatename=ret_name,
-                      gridname=pg, xy=origin, template_libname=ret_libname)
-    isar = laygen.relplace(name="I" + objectname_pfix + 'SAR0', templatename=sar_name,
-                          gridname=pg, refinstname=iret.name, direction='top', template_libname=workinglib)
-    pdict_m3m4=laygen.get_inst_pin_coord(None, None, rg_m3m4)
-    pdict_m4m5=laygen.get_inst_pin_coord(None, None, rg_m4m5)
-    pdict_m5m6=laygen.get_inst_pin_coord(None, None, rg_m5m6)
-    pdict_m5m6_thick=laygen.get_inst_pin_coord(None, None, rg_m5m6_thick)
-    pdict_m5m6_thick_basic=laygen.get_inst_pin_coord(None, None, rg_m5m6_thick_basic)
-    pdict_m5m6_thick2_thick=laygen.get_inst_pin_coord(None, None, rg_m5m6_thick2_thick)
-    #sar_array VDD/VSS pin
-    laygenhelper.generate_power_rails_from_rails_inst(laygen, routename_tag='_M7_SAR_', layer=laygen.layers['pin'][7], gridname=rg_m6m7_thick, 
-                                                      netnames=['VDD', 'VSS'], direction='y', input_rails_instname=isar.name, 
-                                                      input_rails_pin_prefix=['VDD', 'VSS'], generate_pin=True,
-                                                      overwrite_start_coord=0, overwrite_end_coord=None, 
-                                                      offset_route_start=2, offset_route_end=-2)
-    laygenhelper.generate_power_rails_from_rails_inst(laygen, routename_tag='_M7_RET_', layer=laygen.layers['metal'][7], gridname=rg_m6m7_thick2_thick, 
-                                                      netnames=['VDD', 'VSS'], direction='y', input_rails_instname=iret.name, 
-                                                      input_rails_pin_prefix=['VDD', 'VSS'], generate_pin=False,
-                                                      overwrite_start_coord=None, overwrite_end_coord=None, 
-                                                      offset_route_start=2, offset_route_end=-2)
+    ispace0 = laygen.place(name="I" + objectname_pfix + 'SP0', templatename=tisar_space_name,
+                      gridname=pg, xy=origin, template_libname=libname)
+    space_template = laygen.templates.get_template(tisar_space_name, libname)
+    space_pins=space_template.pins
+    space0_xy=ispace0.xy[0]
+    sar_origin = laygen.get_template_size(ispace0.cellname, gridname=pg, libname=workinglib)*np.array([1, 0])
+    isar = laygen.place(name="I" + objectname_pfix + 'SAR0', templatename=tisar_core_name,
+                      gridname=pg, xy=sar_origin, template_libname=libname)
+    sar_template = laygen.templates.get_template(tisar_core_name, libname)
+    sar_pins=sar_template.pins
+    sar_xy=isar.xy[0]
+    space_origin = sar_origin + laygen.get_template_size(isar.cellname, gridname=pg, libname=workinglib)*np.array([1, 0])
+    #ispace0 = laygen.relplace(name="I" + objectname_pfix + 'SP0', templatename=tisar_space_name,
+    #                  gridname=pg, refinstname=isar.name, template_libname=libname)
+    ispace1 = laygen.place(name="I" + objectname_pfix + 'SP1', templatename=tisar_space_name,
+                      gridname=pg, xy=space_origin, template_libname=libname)
+    space1_xy=ispace1.xy[0]
+
+    #prboundary
+    sar_size = laygen.templates.get_template(tisar_core_name, libname=libname).size
+    space_size = laygen.templates.get_template(tisar_space_name, libname=libname).size
+
+    #VDD/VSS pins (just duplicate from lower hierarchy cells)
+    vddcnt=0
+    vsscnt=0
+    for pn, p in space_pins.items():
+        if pn.startswith('VDD'):
+            #pxy=np.array([space0_xy+space_pins[pn]['xy'][0], space1_xy+space_pins[pn]['xy'][1]])
+            pxy=np.array([[0, space0_xy[1]+space_pins[pn]['xy'][0][1]], 
+                          [space_size[0]*2+sar_size[0], space1_xy[1]+space_pins[pn]['xy'][1][1]]])
+            laygen.add_pin('VDD' + str(vddcnt), 'VDD', pxy, laygen.layers['pin'][6])
+            laygen.add_rect(None, pxy, laygen.layers['metal'][6])
+            vddcnt+=1
+        if pn.startswith('VSS'):
+            #pxy=np.array([space0_xy+space_pins[pn]['xy'][0], space1_xy+space_pins[pn]['xy'][1]])
+            pxy=np.array([[0, space0_xy[1]+space_pins[pn]['xy'][0][1]], 
+                          [space_size[0]*2+sar_size[0], space1_xy[1]+space_pins[pn]['xy'][1][1]]])
+            laygen.add_pin('VSS' + str(vsscnt), 'VSS', pxy, laygen.layers['pin'][6])
+            laygen.add_rect(None, pxy, laygen.layers['metal'][6])
+            vsscnt+=1
+    
+    #other pins - duplicate
+    pin_prefix_list=['INP', 'INM', 'OSP', 'OSM', 'VREF', 'ASCLKD', 'EXTCLK', 'EXTSEL_CLK', 'ADCOUT']
+    for pn, p in sar_pins.items():
+        for pfix in pin_prefix_list:
+            if pn.startswith(pfix):
+                laygen.add_pin(pn, sar_pins[pn]['netname'], sar_xy+sar_pins[pn]['xy'], sar_pins[pn]['layer'])
+    '''
+    #input pins
+    for i in range(num_input_track):
+        rinp.append(laygen.route(None, laygen.layers['metal'][6], xy0=np.array([in_x0, in_y1+2*i]), xy1=np.array([in_x1, in_y1+2*i]), gridname0=rg_m5m6_thick_temp_sig))
+        rinm.append(laygen.route(None, laygen.layers['metal'][6], xy0=np.array([in_x0, in_y1+2*i+1]), xy1=np.array([in_x1, in_y1+2*i+1]), gridname0=rg_m5m6_thick_temp_sig))
+
     #retimer output pins
     for i in range(num_slices):
         for j in range(num_bits):
@@ -103,7 +132,7 @@ def generate_tisaradc_body(laygen, objectname_pfix, workinglib, ret_libname, sar
             pn='ASCLKD'+str(i)+'<'+str(j)+'>'
             pn_out='ASCLKD'+str(i)+'<'+str(j)+'>'
             xy=pdict_m5m6[isar.name][pn]
-            xy[0][1]=0
+            xy[0][1]=0 
             r=laygen.route(None, layer=laygen.layers['metal'][5], xy0=xy[0], xy1=xy[1], gridname0=rg_m5m6)
             laygen.create_boundary_pin_form_rect(r, rg_m5m6, pn_out, laygen.layers['pin'][5], size=4, direction='bottom')
     #osp/osm pins
@@ -115,58 +144,31 @@ def generate_tisaradc_body(laygen, objectname_pfix, workinglib, ret_libname, sar
         laygen.pin(name='VREF' + str(i) + '<0>', layer=laygen.layers['pin'][6], xy=pdict_m5m6_thick_basic[isar.name]['VREF' + str(i) + '<0>'], gridname=rg_m5m6_thick_basic)
         laygen.pin(name='VREF' + str(i) + '<1>', layer=laygen.layers['pin'][6], xy=pdict_m5m6_thick_basic[isar.name]['VREF' + str(i) + '<1>'], gridname=rg_m5m6_thick_basic)
         laygen.pin(name='VREF' + str(i) + '<2>', layer=laygen.layers['pin'][6], xy=pdict_m5m6_thick_basic[isar.name]['VREF' + str(i) + '<2>'], gridname=rg_m5m6_thick_basic)
-    '''
-    #sar-retimer routes (clk)
-    clk_ret_phase=[1,3,5,7]
-    for i in clk_ret_phase:
-        laygen.route_vh(layerv=laygen.layers['metal'][5], layerh=laygen.layers['metal'][4], 
-                        xy0=pdict_m4m5[isar.name]['CLKOUT'+str(i)][0], xy1=pdict_m4m5[iret.name]['clk'+str(i)][0], gridname=rg_m4m5)
-    '''
-    '''
-    #reference coordinates
-    pdict_m3m4 = [] 
-    pdict_m4m5 = []
-    pdict_m5m6 = []
-    pdict_m5m6_thick = []
-    pdict_m5m6_thick_basic = []
+    #sar-retimer routes (data)
     for i in range(num_slices):
-        pdict_m3m4.append(laygen.get_inst_pin_coord(None, None, rg_m3m4, index=np.array([i, 0])))
-        pdict_m4m5.append(laygen.get_inst_pin_coord(None, None, rg_m4m5, index=np.array([i, 0])))
-        pdict_m5m6.append(laygen.get_inst_pin_coord(None, None, rg_m5m6, index=np.array([i, 0])))
-        pdict_m5m6_thick.append(laygen.get_inst_pin_coord(None, None, rg_m5m6_thick, index=np.array([i, 0])))
-        pdict_m5m6_thick_basic.append(laygen.get_inst_pin_coord(None, None, rg_m5m6_thick_basic, index=np.array([i, 0])))
-
-    for i in range(num_slices):
-        laygen.pin(name='INP' + str(i), layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['INP'], gridname=rg_m5m6)
-        laygen.pin(name='INM' + str(i), layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['INM'], gridname=rg_m5m6)
-        laygen.pin(name='CLK' + str(i), layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['CLK'], gridname=rg_m5m6)
-        laygen.pin(name='OSP' + str(i), layer=laygen.layers['pin'][3], xy=pdict_m3m4[i][isar.name]['OSP'], gridname=rg_m3m4)
-        laygen.pin(name='OSM' + str(i), layer=laygen.layers['pin'][3], xy=pdict_m3m4[i][isar.name]['OSM'], gridname=rg_m3m4)
-        laygen.pin(name='VREF' + str(i) + '<0>', layer=laygen.layers['pin'][4], xy=pdict_m5m6[i][isar.name]['VREF<0>'], gridname=rg_m4m5)
-        laygen.pin(name='VREF' + str(i) + '<1>', layer=laygen.layers['pin'][4], xy=pdict_m5m6[i][isar.name]['VREF<1>'], gridname=rg_m4m5)
-        laygen.pin(name='VREF' + str(i) + '<2>', layer=laygen.layers['pin'][4], xy=pdict_m5m6[i][isar.name]['VREF<2>'], gridname=rg_m4m5)
-        laygen.pin(name='ASCLKD' + str(i) + '<0>', layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['CKDSEL0<0>'], gridname=rg_m5m6)
-        laygen.pin(name='ASCLKD' + str(i) + '<1>', layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['CKDSEL0<1>'], gridname=rg_m5m6)
-        laygen.pin(name='ASCLKD' + str(i) + '<2>', layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['CKDSEL1<0>'], gridname=rg_m5m6)
-        laygen.pin(name='ASCLKD' + str(i) + '<3>', layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['CKDSEL1<1>'], gridname=rg_m5m6)
-        laygen.pin(name='EXTCLK' + str(i), layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['EXTCLK'], gridname=rg_m5m6)
-        laygen.pin(name='EXTSEL_CLK' + str(i), layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['EXTSEL_CLK'], gridname=rg_m5m6)
         for j in range(num_bits):
-            laygen.pin(name='ADCOUT' + str(i) + '<'+str(j)+'>', layer=laygen.layers['pin'][5], xy=pdict_m5m6[i][isar.name]['ADCOUT<'+str(j)+'>'], gridname=rg_m5m6)
-    #VDD/VSS pin
-    vddcnt=0
-    vsscnt=0
-    for p in pdict_m5m6[0][isar.name]:
-        if p.startswith('VDD'):
-            xy0=np.vstack((pdict_m5m6_thick[0][isar.name][p][0], pdict_m5m6_thick[-1][isar.name][p][1]))
-            laygen.pin(name='VDD' + str(vddcnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick, netname='VDD')
-            vddcnt+=1
-        if p.startswith('VSS'):
-            xy0=np.vstack((pdict_m5m6_thick[0][isar.name][p][0], pdict_m5m6_thick[-1][isar.name][p][1]))
-            laygen.pin(name='VSS' + str(vsscnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick, netname='VSS')
-            vsscnt+=1
+            laygen.route_vhv(layerv0=laygen.layers['metal'][5], layerh=laygen.layers['metal'][4], 
+                            xy0=pdict_m4m5[isar.name]['ADCOUT'+str(i)+'<'+str(j)+'>'][0], 
+                            xy1=pdict_m3m4[iret.name]['in_'+str(i)+'<'+str(j)+'>'][0], 
+                            track_y=pdict_m4m5[isar.name]['ADCOUT'+str(i)+'<'+str(j)+'>'][0][1]+j*2+2, 
+                            gridname=rg_m4m5, layerv1=laygen.layers['metal'][3], gridname1=rg_m3m4, extendl=0, extendr=0)
+    #sar-retimer routes (clock)
+    rg_m3m4_temp_clk='route_M3_M4_basic_temp_clk'
+    laygenhelper.generate_grids_from_inst(laygen, gridname_input=rg_m3m4, gridname_output=rg_m3m4_temp_clk,
+                                          instname=iret.name, template_libname=ret_libname,
+                                          inst_pin_prefix=['clk'+str(2*i+1) for i in range(int(num_slices/2))], xy_grid_type='xgrid')
+    pdict_m3m4_temp_clk = laygen.get_inst_pin_coord(None, None, rg_m3m4_temp_clk)
+    for i in range(int(num_slices/2)):
+        for j in range(4):
+            laygen.route_vhv(layerv0=laygen.layers['metal'][5], layerh=laygen.layers['metal'][4], 
+                            xy0=pdict_m4m5[isar.name]['CLKO'+str(2*i+1)][0], 
+                            xy1=pdict_m3m4_temp_clk[iret.name]['clk'+str(2*i+1)][0], 
+                            track_y=pdict_m4m5[isar.name]['CLKO0'][0][1]+num_bits*2+2+2*j, 
+                            gridname=rg_m4m5, layerv1=laygen.layers['metal'][3], gridname1=rg_m3m4_temp_clk, extendl=0, extendr=0)
+        r=laygen.route(None, layer=laygen.layers['metal'][3], xy0=pdict_m3m4_temp_clk[iret.name]['clk'+str(2*i+1)][0], 
+                        xy1=np.array([pdict_m3m4_temp_clk[iret.name]['clk'+str(2*i+1)][0][0], 
+                                      pdict_m4m5[isar.name]['CLKO0'][0][1]+num_bits*2+2+2*4+1]), gridname0=rg_m3m4_temp_clk)
     '''
-
 if __name__ == '__main__':
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")
 
@@ -181,7 +183,6 @@ if __name__ == '__main__':
     utemplib = tech+'_microtemplates_dense'
     logictemplib = tech+'_logic_templates'
     ret_libname = 'adc_retimer_ec'
-    sh_libname = 'adc_sampler_ec'
     laygen.load_template(filename=tech+'_microtemplates_dense_templates.yaml', libname=utemplib)
     laygen.load_grid(filename=tech+'_microtemplates_dense_grids.yaml', libname=utemplib)
     laygen.load_template(filename=logictemplib+'.yaml', libname=logictemplib)
@@ -203,7 +204,9 @@ if __name__ == '__main__':
     rg_m1m2_thick = 'route_M1_M2_thick'
     rg_m2m3 = 'route_M2_M3_cmos'
     rg_m3m4 = 'route_M3_M4_basic'
+    rg_m3m4_thick = 'route_M3_M4_thick'
     rg_m4m5 = 'route_M4_M5_basic'
+    rg_m4m5_thick = 'route_M4_M5_thick'
     rg_m5m6 = 'route_M5_M6_basic'
     rg_m5m6_thick = 'route_M5_M6_thick'
     rg_m5m6_thick_basic = 'route_M5_M6_thick_basic'
@@ -224,30 +227,22 @@ if __name__ == '__main__':
             sysdict_i = yaml.load(stream)
         num_bits=sysdict_i['n_bit']
         num_slices=sysdict_i['n_interleave']
-    #sar generation
-    cellname = 'tisaradc_body_'+str(num_bits)+'b_array_'+str(num_slices)+'slice'
-    sar_name = 'sar_'+str(num_bits)+'b_array_'+str(num_slices)+'slice'
-    ret_name = 'adc_retimer'
-    sh_name = 'adc_frontend_sampler_array'
 
+    cellname = 'tisaradc_body_'+str(num_bits)+'b_array_'+str(num_slices)+'slice'
+    tisar_core_name = 'tisaradc_body_'+str(num_bits)+'b_array_'+str(num_slices)+'slice_core'
+    tisar_space_name = 'tisaradc_body_space'
+
+    #sar generation
     print(cellname+" generating")
     mycell_list.append(cellname)
     laygen.add_cell(cellname)
     laygen.sel_cell(cellname)
-    generate_tisaradc_body(laygen, objectname_pfix='TISA0', workinglib=workinglib,
-                 ret_libname=ret_libname,
-                 sar_libname=workinglib,
-                 sh_libname=sh_libname,
-                 ret_name=ret_name,
-                 sar_name=sar_name,
-                 sh_name=sh_name,
-                 placement_grid=pg, routing_grid_m3m4=rg_m3m4, routing_grid_m4m5=rg_m4m5, routing_grid_m5m6=rg_m5m6,
-                 routing_grid_m5m6_thick=rg_m5m6_thick, 
-                 routing_grid_m5m6_thick_basic=rg_m5m6_thick_basic, routing_grid_m5m6_thick2_thick=rg_m5m6_thick2_thick,
-                 routing_grid_m6m7_thick=rg_m6m7_thick, routing_grid_m6m7_thick2_thick=rg_m6m7_thick2_thick,
-                 num_bits=num_bits, num_slices=num_slices, origin=np.array([0, 0]))
+    generate_tisaradc_body(laygen, objectname_pfix='TISA0', 
+                           libname=workinglib, tisar_core_name=tisar_core_name, tisar_space_name=tisar_space_name,
+                           placement_grid=pg, routing_grid_m3m4=rg_m3m4, routing_grid_m4m5=rg_m4m5, routing_grid_m5m6=rg_m5m6,
+                           routing_grid_m5m6_thick=rg_m5m6_thick, routing_grid_m5m6_thick_basic=rg_m5m6_thick_basic, 
+                           routing_grid_m6m7_thick=rg_m6m7_thick, num_bits=num_bits, num_slices=num_slices, origin=np.array([0, 0]))
     laygen.add_template_from_cell()
-    
 
     laygen.save_template(filename=workinglib+'.yaml', libname=workinglib)
     #bag export, if bag does not exist, gds export

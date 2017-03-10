@@ -46,7 +46,7 @@ class adc_sar_templates__sar_wsamp_9b_array_8slice(Module):
     def __init__(self, bag_config, parent=None, prj=None, **kwargs):
         Module.__init__(self, bag_config, yaml_file, parent=parent, prj=prj, **kwargs)
 
-    def design(self):
+    def design(self, sar_lch, sar_pw, sar_nw, sar_m_sa, sar_m_drv_list, sar_m_ckgen, sar_m_ckdly, sar_m_logic, sar_m_fsm, sar_m_ret, sar_fo_ret, sar_device_intent, samp_lch, samp_wp, samp_wn, samp_fgn, samp_fg_inbuf_list, samp_fg_outbuf_list, samp_nduml, samp_ndumr, samp_nsep, samp_intent):
         """To be overridden by subclasses to design this module.
 
         This method should fill in values for all parameters in
@@ -62,7 +62,37 @@ class adc_sar_templates__sar_wsamp_9b_array_8slice(Module):
         restore_instance()
         array_instance()
         """
-        pass
+        self.parameters['sar_lch'] = sar_lch
+        self.parameters['sar_pw'] = sar_pw
+        self.parameters['sar_nw'] = sar_nw
+        self.parameters['sar_m_sa'] = sar_m_sa
+        self.parameters['sar_m_drv_list'] = sar_m_drv_list
+        self.parameters['sar_m_ckgen'] = sar_m_ckgen
+        self.parameters['sar_m_ckdly'] = sar_m_ckdly
+        self.parameters['sar_m_logic'] = sar_m_logic
+        self.parameters['sar_m_fsm'] = sar_m_fsm
+        self.parameters['sar_m_ret'] = sar_m_ret
+        self.parameters['sar_fo_ret'] = sar_fo_ret
+        self.parameters['sar_device_intent'] = sar_device_intent
+        self.parameters['samp_lch'] = samp_lch
+        self.parameters['samp_wp'] = samp_wp
+        self.parameters['samp_wn'] = samp_wn
+        self.parameters['samp_fgn'] = samp_fgn
+        self.parameters['samp_fg_inbuf_list'] = samp_fg_inbuf_list
+        self.parameters['samp_fg_outbuf_list'] = samp_fg_outbuf_list
+        self.parameters['samp_nduml'] = samp_nduml
+        self.parameters['samp_ndumr'] = samp_ndumr
+        self.parameters['samp_nsep'] = samp_nsep
+        self.parameters['samp_intent'] = samp_intent
+        for i in range(8):
+            iname='ISLICE'+str(i)
+            self.instances[iname].design(sar_lch=sar_lch, sar_pw=sar_pw, sar_nw=sar_nw, 
+                    sar_m_sa=sar_m_sa, sar_m_drv_list=sar_m_drv_list, sar_m_ckgen=sar_m_ckgen, 
+                    sar_m_ckdly=sar_m_ckdly, sar_m_logic=sar_m_logic, sar_m_fsm=sar_m_fsm, 
+                    sar_m_ret=sar_m_ret, sar_fo_ret=sar_fo_ret, sar_device_intent=sar_device_intent,
+                    samp_lch=samp_lch, samp_wp=samp_wp, samp_wn=samp_wn, samp_fgn=samp_fgn, 
+                    samp_fg_inbuf_list=samp_fg_inbuf_list, samp_fg_outbuf_list=samp_fg_outbuf_list, 
+                    samp_nduml=samp_nduml, samp_ndumr=samp_ndumr, samp_nsep=samp_nsep, samp_intent=samp_intent)
 
     def get_layout_params(self, **kwargs):
         """Returns a dictionary with layout parameters.

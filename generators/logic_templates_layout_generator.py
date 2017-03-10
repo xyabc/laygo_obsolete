@@ -307,6 +307,57 @@ def generate_tie(laygen, objectname_pfix,
         laygen.pin(name='VDD', layer=laygen.layers['pin'][2], xy=rvdd_pin_xy, gridname=rg_m1m2)
         laygen.pin(name='VSS', layer=laygen.layers['pin'][2], xy=rvss_pin_xy, gridname=rg_m1m2)
 
+def generate_dcap(laygen, objectname_pfix,
+                  placement_grid, routing_grid_m1m2,
+                  devname_nmos_boundary, devname_nmos_body, devname_pmos_boundary, devname_pmos_space,
+                  m=2, origin=np.array([0,0]), create_pin=False):
+    pg = placement_grid
+    rg_m1m2 = routing_grid_m1m2
+
+    m = max(1, int(m / 2))  # using nf=2 devices
+
+    # placement
+    in0 = laygen.place("I"+objectname_pfix+'N0', devname_nmos_boundary, pg, xy=origin)
+    in1 = laygen.relplace("I"+objectname_pfix+'N1', devname_nmos_body, pg, in0.name, shape=np.array([m, 1]))
+    in2 = laygen.relplace("I"+objectname_pfix+'N2', devname_nmos_boundary, pg, in1.name)
+    ip0 = laygen.relplace("I"+objectname_pfix+'P0', devname_pmos_boundary, pg, in0.name, direction='top', transform='MX')
+    ip1 = laygen.relplace("I"+objectname_pfix+'P1', devname_pmos_space, pg, ip0.name, transform='MX', shape=np.array([m, 1]))
+    ip2 = laygen.relplace("I"+objectname_pfix+'P3', devname_pmos_boundary, pg, ip1.name, transform='MX')
+
+    # route
+    #pdict = [laygen.get_inst_pin_coord(None, None, rg_m1m2, index=np.array([i, 0])) for i in range(m)]
+    xy_g0 = laygen.get_template_pin_coord(in1.cellname, 'G0', rg_m1m2)[0, :]
+    xy_d0 = laygen.get_template_pin_coord(in1.cellname, 'D0', rg_m1m2)[0, :]
+    xy_s0 = laygen.get_template_pin_coord(in1.cellname, 'S0', rg_m1m2)[0, :]
+    xy_s1 = laygen.get_template_pin_coord(in1.cellname, 'S1', rg_m1m2)[0, :]
+    for i in range(m):
+        laygen.route(None, laygen.layers['metal'][1], xy0=xy_s0*np.array([1, 0]), xy1=xy_s0, gridname0=rg_m1m2,
+                     refinstname0=in1.name, refinstindex0=np.array([i, 0]), addvia0=True,
+                     refinstname1=in1.name, refinstindex1=np.array([i, 0]))
+        laygen.route(None, laygen.layers['metal'][1], xy0=xy_g0*np.array([1, 0]), xy1=xy_g0, gridname0=rg_m1m2,
+                     refinstname0=ip1.name, refinstindex0=np.array([i, 0]), addvia0=True,
+                     refinstname1=in1.name, refinstindex1=np.array([i, 0]))
+        laygen.route(None, laygen.layers['metal'][1], xy0=xy_s1*np.array([1, 0]), xy1=xy_s1, gridname0=rg_m1m2,
+                     refinstname0=in1.name, refinstindex0=np.array([i, 0]), addvia0=True,
+                     refinstname1=in1.name, refinstindex1=np.array([i, 0]))
+    if m > 1:
+        laygen.route(None, laygen.layers['metal'][2], xy0=xy_d0, xy1=xy_d0, gridname0=rg_m1m2,
+                     refinstname0=in1.name, refinstindex0=np.array([0, 0]),
+                     refinstname1=in1.name, refinstindex1=np.array([m-1, 0]))
+        for i in range(m):
+            laygen.via(None, xy_d0, refinstname=in1.name, refinstindex=np.array([i, 0]), gridname=rg_m1m2)
+
+    # power and groud rail
+    xy = laygen.get_template_size(in2.cellname, rg_m1m2) * np.array([1, 0])
+    rvdd=laygen.route("R"+objectname_pfix+"VDD0", laygen.layers['metal'][2], xy0=np.array([0, 0]), xy1=xy, gridname0=rg_m1m2,
+                 refinstname0=ip0.name, refinstname1=ip2.name)
+    rvss=laygen.route("R"+objectname_pfix+"VSS0", laygen.layers['metal'][2], xy0=np.array([0, 0]), xy1=xy, gridname0=rg_m1m2,
+                 refinstname0=in0.name, refinstname1=in2.name)
+
+    # pin
+    if create_pin == True:
+        create_power_pin(laygen, layer=laygen.layers['pin'][2], gridname=rg_m1m2, rect_vdd=rvdd, rect_vss=rvss)
+
 def generate_inv(laygen, objectname_pfix,
                  placement_grid, routing_grid_m1m2, routing_grid_m2m3, routing_grid_m1m2_pin, routing_grid_m2m3_pin,
                  devname_nmos_boundary, devname_nmos_body, devname_pmos_boundary, devname_pmos_body,
@@ -2247,6 +2298,36 @@ if __name__ == '__main__':
                  )
     laygen.add_template_from_cell()
 
+    laygen.add_cell('dcap_2x')
+    laygen.sel_cell('dcap_2x')
+    generate_dcap(laygen, objectname_pfix='DCAP0', placement_grid=pg, routing_grid_m1m2=rg_m1m2,
+                  devname_nmos_boundary='nmos4_fast_boundary',
+                  devname_nmos_body='nmos4_fast_center_nf2',
+                  devname_pmos_boundary='pmos4_fast_boundary',
+                  devname_pmos_space='pmos4_fast_space_nf2',
+                  m=2, origin=np.array([0,0]), create_pin=True)
+    laygen.add_template_from_cell()
+
+    laygen.add_cell('dcap_4x')
+    laygen.sel_cell('dcap_4x')
+    generate_dcap(laygen, objectname_pfix='DCAP0', placement_grid=pg, routing_grid_m1m2=rg_m1m2,
+                  devname_nmos_boundary='nmos4_fast_boundary',
+                  devname_nmos_body='nmos4_fast_center_nf2',
+                  devname_pmos_boundary='pmos4_fast_boundary',
+                  devname_pmos_space='pmos4_fast_space_nf2',
+                  m=4, origin=np.array([0,0]), create_pin=True)
+    laygen.add_template_from_cell()
+
+    laygen.add_cell('dcap_8x')
+    laygen.sel_cell('dcap_8x')
+    generate_dcap(laygen, objectname_pfix='DCAP0', placement_grid=pg, routing_grid_m1m2=rg_m1m2,
+                  devname_nmos_boundary='nmos4_fast_boundary',
+                  devname_nmos_body='nmos4_fast_center_nf2',
+                  devname_pmos_boundary='pmos4_fast_boundary',
+                  devname_pmos_space='pmos4_fast_space_nf2',
+                  m=8, origin=np.array([0,0]), create_pin=True)
+    laygen.add_template_from_cell()
+
     laygen.add_cell('tie_2x')
     laygen.sel_cell('tie_2x')
     generate_tie(laygen, objectname_pfix='TIE0',
@@ -2708,7 +2789,8 @@ if __name__ == '__main__':
 
     #bag export, if bag does not exist, gds export
     mycell_list=['space_1x', 'space_2x', 'space_4x',
-                 'tap', 'tie_2x',
+                 'tap', 'tie_2x', 
+                 'dcap_2x', 'dcap_4x', 'dcap_8x',
                  'inv_1x', 'inv_2x', 'inv_4x', 'inv_8x',
                  'tgate_2x', 'tgate_4x', 'tgate_8x',
                  'nsw_2x', 'nsw_4x', 'nsw_8x',

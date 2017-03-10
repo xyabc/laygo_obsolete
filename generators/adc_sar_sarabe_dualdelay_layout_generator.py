@@ -115,9 +115,22 @@ def generate_sarabe_dualdelay(laygen, objectname_pfix, workinglib, placement_gri
     devname_bnd_right = []
     transform_bnd_left = []
     transform_bnd_right = []
+    #additional space for routing area
+    isp.append(laygen.place(name="I" + objectname_pfix + 'SP' + str(len(isp)), templatename=space_name,
+                               gridname=pg, xy=core_origin, transform='R0',
+                               template_libname=workinglib))
+    refi = isp[-1].name
+    isp.append(laygen.relplace(name="I" + objectname_pfix + 'SP' + str(len(isp)), templatename=space_name,
+                               gridname=pg, refinstname=refi, direction='top', transform='MX',
+                               template_libname=workinglib))
+    refi = isp[-1].name
+    devname_bnd_left += ['nmos4_fast_left', 'pmos4_fast_left', 'pmos4_fast_left', 'nmos4_fast_left']
+    devname_bnd_right += ['nmos4_fast_right', 'pmos4_fast_right', 'pmos4_fast_right', 'nmos4_fast_right']
+    transform_bnd_left += ['R0', 'MX', 'R0', 'MX']
+    transform_bnd_right += ['R0', 'MX', 'R0', 'MX']
     #ret
-    iret=laygen.place(name="I" + objectname_pfix + 'RET0', templatename=sarret_name,
-                         gridname=pg, xy=core_origin, template_libname=workinglib)
+    iret=laygen.relplace(name="I" + objectname_pfix + 'RET0', templatename=sarret_name,
+                         gridname=pg, refinstname=refi, direction='top', template_libname=workinglib)
     refi = iret.name
     yret = int(laygen.get_template_size(name=sarret_name, gridname=pg, libname=workinglib)[1] / ysp)
     for i in range(yret): #boundary cells
@@ -437,7 +450,7 @@ def generate_sarabe_dualdelay(laygen, objectname_pfix, workinglib, placement_gri
                 input_rails_rect=input_rails_rect, generate_pin=False, overwrite_start_coord=None, overwrite_end_coord=x1,
                 offset_start_index=2, offset_end_index=-8) 
     #additional m4 routes
-    inst_exclude=[iret,ifsm,isl,ickd,ickg,isp[-1],isp[-2]]
+    inst_exclude=[isp[0], isp[1], iret,ifsm,isl,ickd,ickg,isp[-1],isp[-2]]
     x0 = laygen.get_inst_xy(name=bnd_left[0].name, gridname=rg_m3m4_thick)[0]
     y0 = laygen.get_inst_xy(name=bnd_left[0].name, gridname=rg_m3m4_thick)[1]
     x1 = laygen.get_inst_xy(name=bnd_right[0].name, gridname=rg_m3m4_thick)[0]\
@@ -489,7 +502,7 @@ def generate_sarabe_dualdelay(laygen, objectname_pfix, workinglib, placement_gri
     #addtional m6 routes 
     rvdd_m6=[]
     rvss_m6=[]
-    inst_reference=[iret,ifsm,isl]
+    inst_reference=[isp[0], isp[1], iret,ifsm,isl]
     #num_route=[10,10]
     num_route=[]
     for i, inst in enumerate(inst_reference):

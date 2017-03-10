@@ -34,6 +34,58 @@ __status__ = "Prototype"
 import numpy as np
 from copy import deepcopy
 
+def generate_boundary(laygen, objectname_pfix, placement_grid,
+                      devname_bottom, devname_top, devname_left, devname_right,
+                      shape_bottom=None, shape_top=None, shape_left=None, shape_right=None,
+                      transform_bottom=None, transform_top=None, transform_left=None, transform_right=None,
+                      origin=np.array([0, 0])):
+    """generate a boundary structure to resolve boundary design rules"""
+    pg = placement_grid
+    #parameters
+    if shape_bottom == None:
+        shape_bottom = [np.array([1, 1]) for d in devname_bottom]
+    if shape_top == None:
+        shape_top = [np.array([1, 1]) for d in devname_top]
+    if shape_left == None:
+        shape_left = [np.array([1, 1]) for d in devname_left]
+    if shape_right == None:
+        shape_right = [np.array([1, 1]) for d in devname_right]
+    if transform_bottom == None:
+        transform_bottom = ['R0' for d in devname_bottom]
+    if transform_top == None:
+        transform_top = ['R0' for d in devname_top]
+    if transform_left == None:
+        transform_left = ['R0' for d in devname_left]
+    if transform_right == None:
+        transform_right = ['R0' for d in devname_right]
+
+    #bottom
+    dev_bottom=[]
+    dev_bottom.append(laygen.place("I" + objectname_pfix + 'BNDBTM0', devname_bottom[0], pg, xy=origin,
+                      shape=shape_bottom[0], transform=transform_bottom[0]))
+    for i, d in enumerate(devname_bottom[1:]):
+        dev_bottom.append(laygen.relplace("I" + objectname_pfix + 'BNDBTM'+str(i+1), d, pg, dev_bottom[-1].name,
+                                          shape=shape_bottom[i+1], transform=transform_bottom[i+1]))
+    dev_left=[]
+    dev_left.append(laygen.relplace("I" + objectname_pfix + 'BNDLFT0', devname_left[0], pg, dev_bottom[0].name, direction='top',
+                                    shape=shape_left[0], transform=transform_left[0]))
+    for i, d in enumerate(devname_left[1:]):
+        dev_left.append(laygen.relplace("I" + objectname_pfix + 'BNDLFT'+str(i+1), d, pg, dev_left[-1].name, direction='top',
+                                        shape=shape_left[i+1], transform=transform_left[i+1]))
+    dev_right=[]
+    dev_right.append(laygen.relplace("I" + objectname_pfix + 'BNDRHT0', devname_right[0], pg, dev_bottom[-1].name, direction='top',
+                                     shape=shape_right[0], transform=transform_right[0]))
+    for i, d in enumerate(devname_right[1:]):
+        dev_right.append(laygen.relplace("I" + objectname_pfix + 'BNDRHT'+str(i+1), d, pg, dev_right[-1].name, direction='top',
+                                         shape=shape_right[i+1], transform=transform_right[i+1]))
+    dev_top=[]
+    dev_top.append(laygen.relplace("I" + objectname_pfix + 'BNDTOP0', devname_top[0], pg, dev_left[-1].name, direction='top',
+                                   shape=shape_top[0], transform=transform_top[0]))
+    for i, d in enumerate(devname_top[1:]):
+        dev_top.append(laygen.relplace("I" + objectname_pfix + 'BNDTOP'+str(i+1), d, pg, dev_top[-1].name,
+                                       shape=shape_top[i+1], transform=transform_top[i+1]))
+    return [dev_bottom, dev_top, dev_left, dev_right]
+
 def generate_power_rails(laygen, routename_tag, layer, gridname, netnames=['VDD', 'VSS'], direction='x', 
                          start_coord=0, end_coord=0, route_index=None, via_index=None, generate_pin=True): 
     """generate power rails"""
@@ -187,20 +239,24 @@ def generate_grids_from_xy(laygen, gridname_input, gridname_output, xy, xy_grid_
         for xy0 in xy:
             xgrid.append(0.5 * (xy0[0][0] + xy0[1][0]))
             xwidth.append(abs(xy0[0][0] - xy0[1][0]))
+        #sort
+        xwidth = [x for (y, x) in sorted(zip(xgrid, xwidth))]
         xgrid.sort()
         xgrid = np.array(xgrid)
         xwidth = np.array(xwidth)
-        bnd[1][0] = max(xgrid)
+        bnd[1][0] = max(xgrid)+min(ygrid)
     if xy_grid_type== 'ygrid':
         ygrid=[]
         ywidth=[]
         for xy0 in xy:
             ygrid.append(0.5 * (xy0[0][1] + xy0[1][1]))
             ywidth.append(abs(xy0[0][1] - xy0[1][1]))
+        #sort
+        ywidth = [x for (y, x) in sorted(zip(ygrid, ywidth))]
         ygrid.sort()
         ygrid=np.array(ygrid)
         ywidth=np.array(ywidth)
-        bnd[1][1]=max(ygrid)
+        bnd[1][1]=max(ygrid)+min(ygrid)
     # viamap
     viamap = {vianame: []}
     for x in range(len(xgrid)):
@@ -225,4 +281,17 @@ def generate_grids_from_inst(laygen, gridname_input, gridname_output, instname, 
         for pfix in inst_pin_prefix:
             if p.startswith(pfix):
                 xy.append(xy0 + t.pins[p]['xy'])
+    generate_grids_from_xy(laygen, gridname_input, gridname_output, xy, xy_grid_type=xy_grid_type)
+
+def generate_grids_from_template(laygen, gridname_input, gridname_output, template_name, template_libname,
+                                 template_pin_prefix=['VDD', 'VSS'], xy_grid_type=None, offset=np.array([0, 0])):
+    """generate route grids combining a pre-existing grid and template pins
+        it will create a new array by copying the given grid and update part of entries from xy coordinates of pins
+    """
+    t = laygen.templates.get_template(template_name, libname=template_libname)
+    xy = []
+    for p in t.pins:
+        for pfix in template_pin_prefix:
+            if p.startswith(pfix):
+                xy.append(offset+t.pins[p]['xy'])
     generate_grids_from_xy(laygen, gridname_input, gridname_output, xy, xy_grid_type=xy_grid_type)

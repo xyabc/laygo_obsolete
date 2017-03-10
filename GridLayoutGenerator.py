@@ -480,7 +480,13 @@ class GridLayoutGenerator(BaseLayoutGenerator):
             xy0_0 = xy0[0] + extendr
             xy1_0 = xy1[0] - extendl
 
-        rh0=self.route(None, layerh, xy0=np.array([xy0_0, track_y]), xy1=np.array([xy1_0, track_y]), gridname0=gridname)
+        #resolve grid mismatch and do horizontal route
+        xy1_grid0=self.grids.get_phygrid_coord_xy(gridname, xy1)[0]
+        xy1_grid1=self.grids.get_phygrid_coord_xy(gridname1, xy1)[0]
+        if not xy1_grid0[0]==xy1_grid1[0]: #xy1[0] mismatch
+            rh0=self.route(None, layerh, xy0=np.array([xy0_0, track_y]), xy1=np.array([xy1_0, track_y]), gridname0=gridname, offset1=np.array([xy1_grid1[0]-xy1_grid0[0], 0]))
+        else:
+            rh0=self.route(None, layerh, xy0=np.array([xy0_0, track_y]), xy1=np.array([xy1_0, track_y]), gridname0=gridname)
         rv0=None;rv1=None
         if not track_y == xy0[1]:
             rv0=self.route(None, layerv0, xy0=np.array([xy0[0], track_y]), xy1=xy0, gridname0=gridname, addvia0=True)

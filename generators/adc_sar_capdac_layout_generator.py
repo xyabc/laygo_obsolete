@@ -108,7 +108,7 @@ def generate_capdac(laygen, objectname_pfix, placement_grid, routing_grid_m6m7,
         refin=ihdac[i].name
         if m_horizontal[i]<m*2**num_bits_vertical:
             idmy=laygen.relplace(name="I" + objectname_pfix + 'HDACDMY' + str(i), templatename=devname_cap_dmy,
-                                     gridname=pg, refinstname=refin, shape=np.array([2**i, m*(m*2**num_bits_vertical-m_horizontal[i])]), direction='top')
+                                     gridname=pg, refinstname=refin, shape=np.array([2**i, m*(2**num_bits_vertical-m_horizontal[i])]), direction='top')
             refin=idmy.name
         ibndt.append(laygen.relplace(name="I" + objectname_pfix + 'BNDT' + str(i+1), templatename=devname_cap_boundary,
                                      gridname=pg, refinstname=refin, shape=np.array([2**i, num_space_top]), direction='top'))
@@ -223,10 +223,10 @@ if __name__ == '__main__':
 
     mycell_list = []
     #cap dac generation
-    m_unit=1
+    m_unit=2
     num_bits_vertical=6
     num_bits_horizontal=2
-    num_space_top = 4
+    num_space_top = 4-1
     num_space_bottom = 4
     num_space_left = 1
     num_space_right = 2

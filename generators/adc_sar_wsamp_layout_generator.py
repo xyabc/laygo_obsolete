@@ -58,6 +58,7 @@ def generate_sar_wsamp(laygen, objectname_pfix, workinglib, samp_lib, sar_name, 
     #reference coordinates
     pdict_m5m6=laygen.get_inst_pin_coord(None, None, rg_m5m6)
     pdict_m5m6_thick=laygen.get_inst_pin_coord(None, None, rg_m5m6_thick)
+    pdict_m5m6_thick_basic=laygen.get_inst_pin_coord(None, None, rg_m5m6_thick_basic)
     sar_pins=sar_template.pins
     samp_pins=samp_template.pins
     sar_xy=isar.xy[0]
@@ -75,6 +76,10 @@ def generate_sar_wsamp(laygen, objectname_pfix, workinglib, samp_lib, sar_name, 
                          xy0=pdict_m5m6_thick_basic_temp_sig[isamp.name]['ckout'][0],
                          xy1=pdict_m5m6_thick_basic_temp_sig[isar.name]['CLK'][1]-np.array([0,1]), gridname0=rg_m5m6_thick_basic_temp_sig)
     laygen.via(None,pdict_m5m6_thick_basic_temp_sig[isar.name]['CLK'][1], rg_m5m6_thick_basic_temp_sig)
+    #rclk0 = laygen.route(None, laygen.layers['metal'][5],
+    #                     xy0=pdict_m5m6_thick_basic[isamp.name]['ckout'][0],
+    #                     xy1=pdict_m5m6_thick_basic[isar.name]['CLK'][1]-np.array([0,1]), gridname0=rg_m5m6_thick_basic)
+    #laygen.via(None,pdict_m5m6_thick_basic[isar.name]['CLK'][1], rg_m5m6_thick_basic)
 
     #frontend sig
     inp_y_list=[]
@@ -156,7 +161,7 @@ def generate_sar_wsamp(laygen, objectname_pfix, workinglib, samp_lib, sar_name, 
     for p in pdict_m5m6[isar.name]:
         if p.startswith('VDD'):
             xy0=pdict_m5m6_thick[isar.name][p]
-            laygen.pin(name='VDDSAR' + str(vddcnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick, netname='VDD:')
+            laygen.pin(name='VDDSAR' + str(vddcnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick, netname='VDDSAR')
             vddcnt+=1
         if p.startswith('VSS'):
             xy0=pdict_m5m6_thick[isar.name][p]
@@ -173,7 +178,7 @@ def generate_sar_wsamp(laygen, objectname_pfix, workinglib, samp_lib, sar_name, 
     for p in pdict_m5m6_thick_temp_samp[isamp.name]:
         if p.startswith('VDD'):
             xy0=pdict_m5m6_thick_temp_samp[isamp.name][p]
-            laygen.pin(name='VDDSAMP' + str(vddcnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick_temp_samp, netname='VDD:')
+            laygen.pin(name='VDDSAMP' + str(vddcnt), layer=laygen.layers['pin'][6], xy=xy0, gridname=rg_m5m6_thick_temp_samp, netname='VDDSAMP')
             vddcnt+=1
         if p.startswith('VSS'):
             xy0=pdict_m5m6_thick_temp_samp[isamp.name][p]
