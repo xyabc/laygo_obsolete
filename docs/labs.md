@@ -42,10 +42,10 @@ Installation procedure is explained here
 
 2. Copy or make symbolic links of lab scripts from labs/
 
-3. Set up laygo_{technology_name}. The repo contains technology specific
+3. Clone laygo_{technology_name} repo to your bag working directory. The repo contains technology specific
  information and not distributed in public domain.
 
-4. Copy `laygo_config.yaml` from laygo_{technology_name}. If you don't have one, you can create it by yourself. The syntax is as follows.
+4. Copy `laygo_config.yaml` from laygo_{technology_name} to your bag working directory. If you don't have one, you can create it by yourself. The syntax is as follows.
     ~~~~
     metal_layers:
     - [metal0_layer_name, metal0_layer_purpose]
@@ -66,7 +66,10 @@ Installation procedure is explained here
     ~~~~
 
 5. Add `cds.lib` definition of laygo_{technology_name}/{technology_name}_microtemplates_dense
- This library contains primitive templates and grid cells.
+ This library contains primitive templates and grid cells. Example is as follows
+    ~~~~
+    `DEFINE {technology_name}_microtemplates_dense ./laygo_{technology_name}/{technology_name}_microtemplates_dense`
+    ~~~~
 
 6. (optional) copy those files from laygo_{technology_name} to bag working dir
 laygo_{technology_name}/{technology_name}_microtemplates_dense_templates.yaml
@@ -92,7 +95,7 @@ Laygo does not generate libraries automatically. Users need to create working li
 5. You are ready to run the lab. Run bag and type
 
    ~~~~
-   run lab1_a_baselayoutgenerator_export.py
+   run laygo/labs/lab1_a_baselayoutgenerator_export.py
    ~~~~
 
    It should create 2 cells in laygo_working. _generate_example_1 should look like this.
