@@ -13,9 +13,6 @@ from adc_sar.sampler import NPassGateWClk
 
 impl_lib = 'adc_sar_generated'
 
-
-
-
 if __name__ == '__main__':
     prj = bag.BagProject()
     lib_name = 'adc_ec_templates'

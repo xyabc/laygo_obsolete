@@ -175,16 +175,9 @@ def generate_capdac(laygen, objectname_pfix, placement_grid, routing_grid_m6m7,
 
 if __name__ == '__main__':
     """testbench - generating a capdac array"""
-    #cell_name='capdac_8b'
     cell_name='capdac'
-    cell_name_aux=['sar_9b_IAFE0_ICAPM0']
+    #cell_name_aux=['sar_9b_IAFE0_ICAPM0']
     load_from_file=True
-    yamlfile_system_input="adc_sar_dsn_system_input.yaml"
-    if load_from_file==True:
-        with open(yamlfile_system_input, 'r') as stream:
-            sysdict_i = yaml.load(stream)
-        #cell_name='capdac_'+str(sysdict_i['n_bit']-1)+'b'
-        cell_name_aux=['sar_'+str(sysdict_i['n_bit'])+'b_IAFE0_ICAPM0']
     laygen = laygo.GridLayoutGenerator(config_file="laygo_config.yaml")
 
     import imp
@@ -224,12 +217,32 @@ if __name__ == '__main__':
     mycell_list = []
     #cap dac generation
     m_unit=2
+    m_vertical=np.array([1,2,4,8,16,28])
+    m_horizontal=np.array([53, 50])
     num_bits_vertical=6
     num_bits_horizontal=2
     num_space_top = 4-1
     num_space_bottom = 4
     num_space_left = 1
     num_space_right = 2
+
+    yamlfile_spec="adc_sar_spec.yaml"
+    yamlfile_size="adc_sar_size.yaml"
+    if load_from_file==True:
+        with open(yamlfile_spec, 'r') as stream:
+            specdict = yaml.load(stream)
+        with open(yamlfile_size, 'r') as stream:
+            sizedict = yaml.load(stream)
+        num_bits_vertical=specdict['n_bit']-1-2
+        num_bits_horizontal=2
+        m_unit=sizedict['c_m']
+        m_vertical=specdict['rdx_array'][:-2]
+        m_horizontal[0]=specdict['rdx_array'][-2]
+        m_horizontal[1]=int(specdict['rdx_array'][-1]/2)
+        print(m_vertical, m_horizontal)
+        #cell_name_aux=['sar_'+str(specdict['n_bit'])+'b_IAFE0_ICAPM0']
+
+
     print(cell_name+" generating")
     mycell_list.append(cell_name)
     laygen.add_cell(cell_name)
@@ -250,6 +263,7 @@ if __name__ == '__main__':
                     origin=np.array([0, 0]))
     laygen.add_template_from_cell()
     laygen.save_template(filename=workinglib+'.yaml', libname=workinglib)
+    '''
     #aux cells for top level use
     for c in cell_name_aux:
         mycell_list.append(c)
@@ -268,6 +282,7 @@ if __name__ == '__main__':
                         num_space_top=num_space_top,
                         num_space_bottom=num_space_bottom,
                         origin=np.array([0, 0]))
+    '''
 
     #bag export, if bag does not exist, gds export
     import imp

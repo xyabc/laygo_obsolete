@@ -10,7 +10,8 @@ import yaml
 import matplotlib.pyplot as plt
 
 lib_name = 'adc_sar_templates'
-cell_name = 'capdac_8b'
+#cell_name = 'capdac_8b'
+cell_name = 'capdac'
 impl_lib = 'adc_sar_generated'
 tb_lib = 'adc_sar_testbenches'
 tb_cell = 'capdac_8b_tb_tran'
@@ -22,8 +23,22 @@ vcm=0.15
 per=1e-9
 
 verify_lvs = False
-extracted = True
+extracted = False
 verify_tran = True
+
+load_from_file=True
+yamlfile_spec="adc_sar_spec.yaml"
+yamlfile_size="adc_sar_size.yaml"
+
+if load_from_file==True:
+    with open(yamlfile_spec, 'r') as stream:
+        specdict = yaml.load(stream)
+    with open(yamlfile_size, 'r') as stream:
+        sizedict = yaml.load(stream)
+    tb_cell = 'capdac_'+str(specdict['n_bit']-1)+'b_tb_tran'
+    vh=specdict['v_in']
+    vl=0.0
+    vcm=specdict['v_in']/2
 
 print('creating BAG project')
 prj = bag.BagProject()

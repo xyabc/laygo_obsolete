@@ -16,17 +16,17 @@ params = dict(
     rdx_array = [1, 2, 4, 8, 16, 32, 64, 128],
     )
 load_from_file=True
-
-load_from_file=True
-yamlfile_system_input="adc_sar_dsn_system_input.yaml"
+yamlfile_spec="adc_sar_spec.yaml"
+yamlfile_size="adc_sar_size.yaml"
 
 if load_from_file==True:
-    with open(yamlfile_system_input, 'r') as stream:
-        sysdict_i = yaml.load(stream)
-    params['num_bit']=sysdict_i['n_bit']-1
-    params['c_m']=sysdict_i['c_m']
-    params['rdx_array']=sysdict_i['rdx_array']
-    #cell_name='capdac_'+str(sysdict_i['n_bit']-1)+'b'
+    with open(yamlfile_spec, 'r') as stream:
+        specdict = yaml.load(stream)
+    with open(yamlfile_size, 'r') as stream:
+        sizedict = yaml.load(stream)
+    params['num_bit']=specdict['n_bit']-1
+    params['c_m']=sizedict['c_m']
+    params['rdx_array']=specdict['rdx_array']
 
 print('creating BAG project')
 prj = bag.BagProject()

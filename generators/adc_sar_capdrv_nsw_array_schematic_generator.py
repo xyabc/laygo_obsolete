@@ -21,15 +21,25 @@ params = dict(
     )
 load_from_file=True
 
-yamlfile_system_input="adc_sar_dsn_system_input.yaml"
-yamlfile_size="adc_sar_capdrv_nsw_array_output.yaml"
+yamlfile_spec="adc_sar_spec.yaml"
+yamlfile_size="adc_sar_size.yaml"
+#yamlfile_system_input="adc_sar_dsn_system_input.yaml"
+#yamlfile_size="adc_sar_capdrv_nsw_array_output.yaml"
+#if load_from_file==True:
+#    with open(yamlfile_system_input, 'r') as stream:
+#        sysdict_i = yaml.load(stream)
+#    cell_name='capdrv_nsw_array_'+str(sysdict_i['n_bit']-1)+'b'
+#    with open(yamlfile_size, 'r') as stream:
+#        sizedict = yaml.load(stream)
+#    params['m_list']=sizedict['m_list']
+
 if load_from_file==True:
-    with open(yamlfile_system_input, 'r') as stream:
-        sysdict_i = yaml.load(stream)
-    cell_name='capdrv_nsw_array_'+str(sysdict_i['n_bit']-1)+'b'
+    with open(yamlfile_spec, 'r') as stream:
+        specdict = yaml.load(stream)
     with open(yamlfile_size, 'r') as stream:
         sizedict = yaml.load(stream)
-    params['m_list']=sizedict['m_list']
+    cell_name='capdrv_nsw_array_'+str(specdict['n_bit']-1)+'b'
+    params['m_list']=sizedict['capdrv_m_list'] 
 
 print('creating BAG project')
 prj = bag.BagProject()
